@@ -1,9 +1,15 @@
+{# The default project templates assumes a _base.html template to be extended. #}
+
 {% extends '_base.html' %}
 
-{% block content %}
-<h1>Replace with your content.</h1>
+{% block css %}
+<link rel="stylesheet" type="text/css" src="/{{ project_name }}/style.css" />
+{% endblock %}
 
-<p>Great work, you can start writing now!</p>
+{% block content %}
+<h1>Welcome to your new project <code>{{ project_name }}</code></h1>
+
+<p>Great work, you can start authoring now!</p>
 
 <p><a href="/docs">See the documentation</a> for more details.</p>
 {% endblock %}

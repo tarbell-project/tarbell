@@ -11,7 +11,6 @@ import sys
 import shutil
 import codecs
 
-
 class TarbellSite:
     def __init__(self, projects_path):
         self.app = Flask(__name__)
