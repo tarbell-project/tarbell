@@ -9,9 +9,9 @@ GOOGLE_DOC = {
 }
 {% else %}
 # GOOGLE_DOC = {
-    # 'key': "<spreadsheet key>",
-    # 'account': "<gmail address>",
-    # 'password': "<password>",
+#     'key': "<spreadsheet key>",
+#     'account': "<gmail address>",
+#     'password': "<password>",
 # }
 {% endif %}
 
