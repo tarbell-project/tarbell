@@ -1,11 +1,19 @@
 """
 Google doc configuration. If not provided, no Google doc will be used.
 """
+{% if spreadsheet_key %}
+GOOGLE_DOC = {
+    'key': "{{ spreadsheet_key }}",
+    'account': "<gmail address>",
+    'password': "<password>",
+}
+{% else %}
 # GOOGLE_DOC = {
-#     'key': "<google doc spreadsheet key>",
-#     'account': "<gmail address>",
-#     'password': "<password>",
+    # 'key': "<spreadsheet key>",
+    # 'account': "<gmail address>",
+    # 'password': "<password>",
 # }
+{% endif %}
 
 
 """
@@ -20,7 +28,7 @@ Set default context. These variables will be globally available to the template.
 """
 Root URL project will appear at (e.g. http://mydomain.tld/{{ url_root }})
 """
-# URL_ROOT = '{{ name }}'
+# URL_ROOT = '{{ project_name }}'
 
 
 """
@@ -33,7 +41,7 @@ Uncomment the following lines to provide this configuration file as a Flask
 blueprint.
 """
 # from flask import Blueprint
-# blueprint = Blueprint('{{ name }}', __name__)
+# blueprint = Blueprint('{{ project_name }}', __name__)
 
 """
 Example use of flask blueprint to add a template filter.
