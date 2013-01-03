@@ -3,33 +3,31 @@ Google doc configuration. If not provided, no Google doc will be used.
 """
 {% if spreadsheet_key %}
 GOOGLE_DOC = {
-    'key': "{{ spreadsheet_key }}",
-    'account': "<gmail address>",
-    'password': "<password>",
+    'key': '{{ spreadsheet_key }}',
+    'account': '<gmail address>',
+    'password': '<password>',
 }
 {% else %}
 # GOOGLE_DOC = {
-#     'key': "<spreadsheet key>",
-#     'account': "<gmail address>",
-#     'password': "<password>",
+#     'key': '<spreadsheet key>',
+#     'account': '<gmail address>',
+#     'password': '<password>',
 # }
 {% endif %}
-
 
 """
 Set default context. These variables will be globally available to the template.
 """
-# DEFAULT_CONTEXT = {
-#     'ad_path': '',
-#     'analytics_path': '',
-# }
-
+DEFAULT_CONTEXT = {
+    'title': '{{ long_name }}',
+    'ad_path': '',
+    'analytics_path': '',
+}
 
 """
 Root URL project will appear at (e.g. http://mydomain.tld/{{ url_root }})
 """
 # URL_ROOT = '{{ project_name }}'
-
 
 """
 Don't render to static HTML.
