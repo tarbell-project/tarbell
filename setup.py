@@ -3,14 +3,14 @@ from setuptools import find_packages
 
 setup(
     name='tarbell',
-    version='0.2',
+    version='0.8',
     author=u'David Eads',
     author_email='davideads@gmail.com',
     packages=find_packages(),
     url='http://github.com/newsapps/tarbell',
-    license='MIT, see LICENSE',
+    license='MIT, see LICENSE.md',
     description= 'A very simple web authoring tool.',
-    long_description=open('README').read(),
+    long_description=open('README.md').read(),
     zip_safe=False,
     include_package_data=True,
     install_requires=[
