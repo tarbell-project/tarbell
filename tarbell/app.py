@@ -10,14 +10,15 @@ import imp
 import sys
 import shutil
 import codecs
+from scrubber import Scrubber
 
 class TarbellSite:
     def __init__(self, projects_path):
         self.app = Flask(__name__)
         self.app.debug = True
         self.projects_path = projects_path
-        self.projects = self.load_projects()
         self.app.add_url_rule('/<path:template>', view_func=self.preview)
+        self.projects = self.load_projects()
         self.app.add_template_filter(self.process_text, 'process_text')
 
     def load_projects(self):
