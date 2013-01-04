@@ -64,7 +64,9 @@ class TarbellSite:
 
         return projects
 
-    def process_text(self, text):
+    def process_text(self, text, scrub=True):
+        if scrub:
+            text = Scrubber().scrub(text)
         return Markup(text)
 
     def preview(self, template,key_mode=False):
