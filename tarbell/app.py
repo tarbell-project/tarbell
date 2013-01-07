@@ -50,7 +50,10 @@ class TarbellSite:
 
                 # Register as flask blueprint
                 try:
-                    self.app.register_blueprint(project.blueprint, url_prefix='/' + path)
+                    url_prefix=None
+                    if path:
+                        url_prefix = '/' + path
+                    self.app.register_blueprint(project.blueprint, url_prefix=url_prefix)
                 except AttributeError: pass
 
                 # Get template dirs
