@@ -4,8 +4,8 @@ Google doc configuration. If not provided, no Google doc will be used.
 {% if spreadsheet_key %}
 GOOGLE_DOC = {
     'key': '{{ spreadsheet_key }}',
-    'account': '<gmail address>',
-    'password': '<password>',
+    #'account': '<gmail address>',
+    #'password': '<password>',
 }
 {% else %}
 # GOOGLE_DOC = {
