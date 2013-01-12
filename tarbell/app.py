@@ -223,7 +223,7 @@ class TarbellSite:
                     tpath = "%s/%s" % (project.URL_ROOT, fn)
                     with self.app.test_request_context('%s' % tpath):
                         try:
-                            content = self.preview(tpath)
+                            content = self.preview(tpath, preview_mode=0)
                             codecs.open(os.path.join(output_dir, fn),"w", encoding='utf-8').write(content)
                             print "-- Created page %s" % os.path.join(output_dir, fn)
                         except Exception, e:
