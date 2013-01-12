@@ -73,13 +73,9 @@ class TarbellSite:
             text = Scrubber().scrub(text)
         return Markup(text)
 
-    def preview(self, template, preview_mode=0, key_mode=False):
+    def preview(self, template, preview_mode=1, key_mode=False):
         """ Preview a template/path """
         path_parts = template.split('/')
-
-        # Convert to boolean for Javascript
-        if preview_mode:
-            preview_mode = 1
 
         if path_parts[0] in self.projects.keys():
             project = self.projects[path_parts[0]]
