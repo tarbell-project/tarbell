@@ -73,9 +73,13 @@ class TarbellSite:
             text = Scrubber().scrub(text)
         return Markup(text)
 
-    def preview(self, template,key_mode=False):
+    def preview(self, template, preview_mode=0, key_mode=False):
         """ Preview a template/path """
         path_parts = template.split('/')
+
+        # Convert to boolean for Javascript
+        if preview_mode:
+            preview_mode = 1
 
         if path_parts[0] in self.projects.keys():
             project = self.projects[path_parts[0]]
@@ -114,10 +118,12 @@ class TarbellSite:
                 key_mode = request.values.has_key('keys')
 
             context = {
+                "pageroot": project.URL_ROOT,
                 "cache_buster": time.time(),
                 "filename": template,
                 "pagename": pagename,
                 "project": project.__name__,
+                "preview_mode": preview_mode,
             }
 
             ## Get context from config
