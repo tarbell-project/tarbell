@@ -145,20 +145,25 @@ class TarbellSite:
         else:
             return 'error!', 404
 
-    def get_context_from_gdoc(self, key, account, password, key_mode=False, global_values=True):
+    def get_context_from_gdoc(self, key, account=None, password=None, key_mode=False, global_values=True):
         """ Turn a google doc into a Flask template context. The 'values' worksheet
         name is reserved for """
         client = SpreadsheetsService()
-        client.email = account
-        client.password = password 
-        client.ProgrammaticLogin()
 
-        feed = client.GetWorksheetsFeed(key, projection='values')
+        if account or password:
+            client.email = account
+            client.password = password 
+            client.ProgrammaticLogin()
+            visibility = "private"
+        else:
+            visibility = "public"
+
+        feed = client.GetWorksheetsFeed(key, visibility=visibility, projection='values')
         context = {}
         for entry in feed.entry:
             worksheet_id = entry.id.text.rsplit('/',1)[1]
 
-            data_feed = client.GetListFeed(key, worksheet_id, projection="values")
+            data_feed = client.GetListFeed(key, worksheet_id, visibility=visibility, projection="values")
 
             if global_values is True and entry.title.text == 'values':
                 for row in data_feed.entry:
