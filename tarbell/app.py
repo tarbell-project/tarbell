@@ -12,13 +12,22 @@ import shutil
 import codecs
 from scrubber import Scrubber
 
+def silent_none(value):
+     if value is None:
+         return ''
+     return value
+
 class TarbellSite:
     def __init__(self, projects_path):
         self.app = Flask(__name__)
-        self.app.debug = True
+
+        self.app.jinja_env.finalize = silent_none # Don't print "None"
+        self.app.debug = True # Always debug
+
         self.projects_path = projects_path
-        self.app.add_url_rule('/<path:template>', view_func=self.preview)
         self.projects = self.load_projects()
+
+        self.app.add_url_rule('/<path:template>', view_func=self.preview)
         self.app.add_template_filter(self.process_text, 'process_text')
 
     def load_projects(self):
