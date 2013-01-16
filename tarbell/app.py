@@ -82,7 +82,7 @@ class TarbellSite:
             text = Scrubber().scrub(text)
         return Markup(text)
 
-    def preview(self, template, preview_mode=1, key_mode=False):
+    def preview(self, template, context=None, preview_mode=1, key_mode=False):
         """ Preview a template/path """
         path_parts = template.split('/')
 
@@ -105,8 +105,9 @@ class TarbellSite:
             ## Serve JSON
             if len(path_parts) > 2 and path_parts[-2] == 'json' and template.endswith('.json'):
                 try:
-                    context = self.get_context_from_gdoc(key_mode=key_mode,
-                        global_values=False,**project.GOOGLE_DOC)
+                    if not context:
+                        context = self.get_context_from_gdoc(key_mode=key_mode,
+                            global_values=False,**project.GOOGLE_DOC)
                     worksheet = path_parts[-1][:-5]
                     return Response(json.dumps(context[worksheet]), mimetype="application/json")
                 except:
@@ -122,7 +123,7 @@ class TarbellSite:
             if not key_mode:
                 key_mode = request.values.has_key('keys')
 
-            context = {
+            template_context = {
                 "pageroot": project.URL_ROOT,
                 "cache_buster": time.time(),
                 "filename": template,
@@ -133,15 +134,17 @@ class TarbellSite:
 
             ## Get context from config
             try:
-                context.update(project.DEFAULT_CONTEXT)
+                template_context.update(project.DEFAULT_CONTEXT)
             except AttributeError: pass
 
             ## Get context from google doc
             try:
-                context.update(self.get_context_from_gdoc(key_mode=key_mode, **project.GOOGLE_DOC))
+                if not context:
+                    context = self.get_context_from_gdoc(key_mode=key_mode, **project.GOOGLE_DOC)
+                template_context.update(context)
             except AttributeError: pass
 
-            return render_template("%s" % template,**context)
+            return render_template("%s" % template,**template_context)
         else:
             return 'error!', 404
 
@@ -231,13 +234,17 @@ class TarbellSite:
     def copy_pages(self, project, output_dir):
         cache_buster = time.time()
         templates_dir = os.path.join(self.projects_path, project.__name__, 'templates')
+        try:
+            context = self.get_context_from_gdoc(**project.GOOGLE_DOC)
+        except AttributeError:
+            context = {}
         for path,dirnames,filenames in os.walk(templates_dir):
             for fn in filenames:
                 if fn[0] != '_' and fn[0] != '.':
                     tpath = "%s/%s" % (project.URL_ROOT, fn)
                     with self.app.test_request_context('%s' % tpath):
                         try:
-                            content = self.preview(tpath, preview_mode=0)
+                            content = self.preview(tpath, context, preview_mode=0)
                             codecs.open(os.path.join(output_dir, fn),"w", encoding='utf-8').write(content)
                             print "-- Created page %s" % os.path.join(output_dir, fn)
                         except Exception, e:
