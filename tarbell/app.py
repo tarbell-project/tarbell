@@ -189,7 +189,9 @@ class TarbellSite:
                 for i, row in enumerate(data_feed.entry):
                     row_dict = OrderedDict()
                     for header in headers:
-                        row_dict[header] = row.custom[slughifi(header)].text
+                        try:
+                            row_dict[header] = row.custom[slughifi(header)].text
+                        except KeyError: pass
                     if is_dict:
                         context[entry.title.text][row.custom['key'].text] = row_dict
                     else:
