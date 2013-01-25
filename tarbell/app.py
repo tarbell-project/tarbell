@@ -5,12 +5,14 @@ from jinja2 import Markup,PrefixLoader,FileSystemLoader,ChoiceLoader
 from datetime import datetime
 from ordereddict import OrderedDict
 from gdata.spreadsheet.service import SpreadsheetsService
+from gdata.spreadsheet.service import CellQuery
 import json
 import imp
 import sys
 import shutil
 import codecs
 from scrubber import Scrubber
+from slughifi import slughifi
 
 def silent_none(value):
      if value is None:
@@ -29,6 +31,7 @@ class TarbellSite:
 
         self.app.add_url_rule('/<path:template>', view_func=self.preview)
         self.app.add_template_filter(self.process_text, 'process_text')
+        self.app.add_template_filter(slughifi, 'slugify')
 
     def load_projects(self):
         projects = {}
@@ -175,8 +178,7 @@ class TarbellSite:
                         text = Markup('<code class="debug-key">%s</code> %s' % (row.custom['key'].text, text))
                     context[row.custom['key'].text] = text
             elif len(data_feed.entry):
-                headers = data_feed.entry[0].custom.keys()
-
+                headers = self._get_headers_from_worksheet(client, key, worksheet_id, visibility)
                 if 'key' in headers:
                     context[entry.title.text] = OrderedDict()
                     is_dict = True
@@ -185,15 +187,26 @@ class TarbellSite:
                     context[entry.title.text] = []
 
                 for i, row in enumerate(data_feed.entry):
-                    row_dict = {}
+                    row_dict = OrderedDict()
                     for header in headers:
-                        row_dict[header] = row.custom[header].text
+                        row_dict[header] = row.custom[slughifi(header)].text
                     if is_dict:
                         context[entry.title.text][row.custom['key'].text] = row_dict
                     else:
                         context[entry.title.text].append(row_dict)
-
+        #import ipdb; ipdb.set_trace();
         return context
+
+    def _get_headers_from_worksheet(self, client, key, worksheet_id, visibility):
+        """Get headers in correct order."""
+        headers = []
+        query = CellQuery()
+        query.max_row = '1'
+        query.min_row = '1'
+        cell_feed = client.GetCellsFeed(key, worksheet_id, query=query, visibility=visibility, projection='values')
+        for cell in cell_feed.entry:
+            headers.append(cell.cell.text)
+        return headers
 
     def render_templates(self, output_root, project_name=None):
         shutil.rmtree(output_root, ignore_errors=True)
