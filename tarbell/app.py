@@ -19,6 +19,11 @@ def silent_none(value):
          return ''
      return value
 
+class TarbellScrubber(Scrubber):
+        disallowed_tags_save_content = set((
+            'blink', 'body', 'html', 'runtime:topic'
+        ))
+
 class TarbellSite:
     def __init__(self, projects_path):
         self.app = Flask(__name__)
@@ -82,7 +87,7 @@ class TarbellSite:
 
     def process_text(self, text, scrub=True):
         if scrub:
-            text = Scrubber().scrub(text)
+            text = TarbellScrubber().scrub(text)
         return Markup(text)
 
     def preview(self, template, context=None, preview_mode=1, key_mode=False):
