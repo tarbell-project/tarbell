@@ -86,9 +86,12 @@ class TarbellSite:
         return projects
 
     def process_text(self, text, scrub=True):
-        if scrub:
-            text = TarbellScrubber().scrub(text)
-        return Markup(text)
+        try:
+            if scrub:
+                text = TarbellScrubber().scrub(text)
+            return Markup(text)
+        except TypeError:
+            return ""
 
     def preview(self, template, context=None, preview_mode=1, key_mode=False):
         """ Preview a template/path """
