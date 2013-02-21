@@ -181,7 +181,7 @@ class TarbellSite:
 
             if global_values is True and entry.title.text == 'values':
                 for row in data_feed.entry:
-                    text = row.custom['value'].text
+                    text = self.parse_text_for_numbers(row.custom['value'].text)
                     if key_mode:
                         text = Markup('<code class="debug-key">%s</code> %s' % (row.custom['key'].text, text))
                     context[row.custom['key'].text] = text
@@ -198,14 +198,27 @@ class TarbellSite:
                     row_dict = OrderedDict()
                     for header in headers:
                         try:
-                            row_dict[header] = row.custom[slughifi(header)].text
+                            row_dict[header] = self.parse_text_for_numbers(row.custom[slughifi(header)].text)
                         except KeyError: pass
                     if is_dict:
                         context[entry.title.text][row.custom['key'].text] = row_dict
                     else:
                         context[entry.title.text].append(row_dict)
-        #import ipdb; ipdb.set_trace();
         return context
+
+    def parse_text_for_numbers(self, value):
+        if value is not None:
+            try:
+                value = int(value)
+                return value
+            except ValueError: pass
+            
+            try:
+                value = float(value)
+                return value
+            except ValueError: pass
+
+        return value
 
     def _get_headers_from_worksheet(self, client, key, worksheet_id, visibility):
         """Get headers in correct order."""
