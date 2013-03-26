@@ -62,6 +62,11 @@ class TarbellSite:
                 except AttributeError:
                     project.DONT_PUBLISH = False
 
+                try:
+                    project.CREATE_JSON
+                except AttributeError:
+                    project.CREATE_JSON = True
+
                 # Register with microcopy
                 projects[path] = project
 
@@ -114,7 +119,7 @@ class TarbellSite:
                 pagename='index'
 
             ## Serve JSON
-            if len(path_parts) > 2 and path_parts[-2] == 'json' and template.endswith('.json'):
+            if project.CREATE_JSON and len(path_parts) > 2 and path_parts[-2] == 'json' and template.endswith('.json'):
                 try:
                     if not context:
                         context = self.get_context_from_gdoc(key_mode=key_mode,
@@ -250,7 +255,8 @@ class TarbellSite:
                 print "Generating project '%s' in %s" % (project.__name__, output_dir)
                 if not self.copy_static(project, output_dir):
                     os.mkdir(output_dir)
-                self.copy_json(project, output_dir)
+                if project.CREATE_JSON is True:
+                    self.copy_json(project, output_dir)
                 self.copy_pages(project, output_dir)
                 print
             else:

@@ -35,6 +35,11 @@ Don't render to static HTML.
 # DONT_PUBLISH = False
 
 """
+Don't create JSON for project (default: true)
+"""
+# CREATE_JSON = False
+
+"""
 Uncomment the following lines to provide this configuration file as a Flask
 blueprint.
 """
