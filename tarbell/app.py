@@ -178,7 +178,7 @@ class TarbellSite:
             visibility = "public"
 
         feed = client.GetWorksheetsFeed(key, visibility=visibility, projection='values')
-        context = {}
+        context = { 'last_updated': feed.updated.text }
         for entry in feed.entry:
             worksheet_id = entry.id.text.rsplit('/',1)[1]
 
