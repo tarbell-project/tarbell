@@ -45,7 +45,8 @@ class TarbellSite:
         loaders = []
 
         for root, dirs, files in os.walk(self.projects_path):
-            if 'config.py' in files:
+            root_dir = dirs.pop()
+            if not root_dir.startswith('.') and not root_dir.startswith('_') and 'config.py' in files:
                 # Load configuration
                 name = root.split('/')[-1]
                 filename, pathname, description = imp.find_module('config', [root])
