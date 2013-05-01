@@ -39,14 +39,20 @@ class TarbellSite:
         self.app.add_template_filter(self.process_text, 'process_text')
         self.app.add_template_filter(slughifi, 'slugify')
 
+    def walk_projects(self):
+        for dirpath, dirnames, filenames in os.walk(self.projects_path):
+            dirnames[:] = [
+                dn for dn in dirnames
+                if not dn.startswith('.') and not dn.startswith('_')]
+            yield dirpath, dirnames, filenames
+
     def load_projects(self):
         projects = {}
         prefix_loaders = []
         loaders = []
 
-        for root, dirs, files in os.walk(self.projects_path):
-            root_dir = dirs.pop()
-            if not root_dir.startswith('.') and not root_dir.startswith('_') and 'config.py' in files:
+        for root, dirs, files in self.walk_projects():
+            if 'config.py' in files:
                 # Load configuration
                 name = root.split('/')[-1]
                 filename, pathname, description = imp.find_module('config', [root])
