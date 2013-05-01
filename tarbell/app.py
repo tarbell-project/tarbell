@@ -20,9 +20,9 @@ def silent_none(value):
 
 
 class TarbellScrubber(Scrubber):
-        disallowed_tags_save_content = set((
-            'blink', 'body', 'html', 'runtime:topic'
-        ))
+    disallowed_tags_save_content = set((
+        'blink', 'body', 'html', 'runtime:topic'
+    ))
 
 
 class TarbellSite:
