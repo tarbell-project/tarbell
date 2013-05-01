@@ -1,35 +1,36 @@
 from flask import Flask, render_template, request, send_from_directory, Response
 import time
 import os
-from jinja2 import Markup,PrefixLoader,FileSystemLoader,ChoiceLoader
-from datetime import datetime
+from jinja2 import Markup, PrefixLoader, FileSystemLoader, ChoiceLoader
 from ordereddict import OrderedDict
 from gdata.spreadsheet.service import SpreadsheetsService
 from gdata.spreadsheet.service import CellQuery
 import json
 import imp
-import sys
 import shutil
 import codecs
 from scrubber import Scrubber
 from slughifi import slughifi
 
+
 def silent_none(value):
-     if value is None:
-         return ''
-     return value
+    if value is None:
+        return ''
+    return value
+
 
 class TarbellScrubber(Scrubber):
         disallowed_tags_save_content = set((
             'blink', 'body', 'html', 'runtime:topic'
         ))
 
+
 class TarbellSite:
     def __init__(self, projects_path):
         self.app = Flask(__name__)
 
-        self.app.jinja_env.finalize = silent_none # Don't print "None"
-        self.app.debug = True # Always debug
+        self.app.jinja_env.finalize = silent_none  # Don't print "None"
+        self.app.debug = True  # Always debug
 
         self.projects_path = projects_path
         self.projects = self.load_projects()
@@ -50,7 +51,7 @@ class TarbellSite:
                 filename, pathname, description = imp.find_module('config', [root])
                 project = imp.load_module(name, filename, pathname, description)
 
-                # Get root path or just use pathname 
+                # Get root path or just use pathname
                 try:
                     path = project.URL_ROOT
                 except AttributeError:
@@ -72,20 +73,25 @@ class TarbellSite:
 
                 # Register as flask blueprint
                 try:
-                    url_prefix=None
+                    url_prefix = None
                     if path:
                         url_prefix = '/' + path
-                    self.app.register_blueprint(project.blueprint, url_prefix=url_prefix)
-                except AttributeError: pass
+                    self.app.register_blueprint(project.blueprint,
+                                                url_prefix=url_prefix)
+                except AttributeError:
+                    pass
 
                 # Get template dirs
                 if path == '' and 'templates' in dirs:
-                    loaders.append(FileSystemLoader(os.path.join(root,'templates')))
+                    loader = FileSystemLoader(os.path.join(root, 'templates'))
+                    loaders.append(loader)
                 if 'templates' in dirs:
-                    prefix_loaders.append((path,FileSystemLoader(os.path.join(root,'templates'))))
+                    loader = FileSystemLoader(os.path.join(root, 'templates'))
+                    prefix_loaders.append((path, loader))
 
         if len(prefix_loaders):
             loaders.append(PrefixLoader(dict(prefix_loaders)))
+
         self.app.jinja_loader = ChoiceLoader(loaders)
 
         return projects
@@ -110,13 +116,13 @@ class TarbellSite:
             root = ''
 
         if project:
-            pagename =path_parts[-1][:-5]
+            pagename = path_parts[-1][:-5]
             if template.endswith('/'):
                 template += 'index.html'
-                pagename='index'
+                pagename = 'index'
             if template in self.projects.keys():
                 template += '/index.html'
-                pagename='index'
+                pagename = 'index'
 
             ## Serve JSON
             if project.CREATE_JSON and len(path_parts) > 2 and path_parts[-2] == 'json' and template.endswith('.json'):
@@ -125,7 +131,8 @@ class TarbellSite:
                         context = self.get_context_from_gdoc(key_mode=key_mode,
                             global_values=False,**project.GOOGLE_DOC)
                     worksheet = path_parts[-1][:-5]
-                    return Response(json.dumps(context[worksheet]), mimetype="application/json")
+                    return Response(json.dumps(context[worksheet]),
+                                    mimetype="application/json")
                 except:
                     return 'error!', 404
 
@@ -151,47 +158,60 @@ class TarbellSite:
             ## Get context from config
             try:
                 template_context.update(project.DEFAULT_CONTEXT)
-            except AttributeError: pass
+            except AttributeError:
+                pass
 
             ## Get context from google doc
             try:
                 if not context:
-                    context = self.get_context_from_gdoc(key_mode=key_mode, **project.GOOGLE_DOC)
+                    context = self.get_context_from_gdoc(key_mode=key_mode,
+                                                         **project.GOOGLE_DOC)
                 template_context.update(context)
-            except AttributeError: pass
+            except AttributeError: 
+                pass
 
-            return render_template("%s" % template,**template_context)
+            return render_template("%s" % template, **template_context)
         else:
             return 'error!', 404
 
-    def get_context_from_gdoc(self, key, account=None, password=None, key_mode=False, global_values=True):
-        """ Turn a google doc into a Flask template context. The 'values' worksheet
-        name is reserved for """
+    def get_context_from_gdoc(self, key, account=None, password=None,
+                              key_mode=False, global_values=True):
+        """
+        Turn a google doc into a Flask template context. The 'values' worksheet
+        name is reserved for top-level of context namespace.
+        """
         client = SpreadsheetsService()
 
         if account or password:
             client.email = account
-            client.password = password 
+            client.password = password
             client.ProgrammaticLogin()
             visibility = "private"
         else:
             visibility = "public"
 
-        feed = client.GetWorksheetsFeed(key, visibility=visibility, projection='values')
-        context = { 'last_updated': feed.updated.text }
+        feed = client.GetWorksheetsFeed(key,
+                                        visibility=visibility,
+                                        projection='values')
+        context = {'last_updated': feed.updated.text}
         for entry in feed.entry:
             worksheet_id = entry.id.text.rsplit('/',1)[1]
 
-            data_feed = client.GetListFeed(key, worksheet_id, visibility=visibility, projection="values")
+            data_feed = client.GetListFeed(key, worksheet_id,
+                                           visibility=visibility,
+                                           projection="values")
 
             if global_values is True and entry.title.text == 'values':
                 for row in data_feed.entry:
                     text = self.parse_text_for_numbers(row.custom['value'].text)
                     if key_mode:
-                        text = Markup('<code class="debug-key">%s</code> %s' % (row.custom['key'].text, text))
+                        text = Markup('<code class="debug-key">%s</code> %s' %
+                                      (row.custom['key'].text, text))
                     context[row.custom['key'].text] = text
             elif len(data_feed.entry):
-                headers = self._get_headers_from_worksheet(client, key, worksheet_id, visibility)
+                headers = self._get_headers_from_worksheet(client, key, 
+                                                           worksheet_id,
+                                                           visibility)
                 if 'key' in headers:
                     context[entry.title.text] = OrderedDict()
                     is_dict = True
@@ -203,10 +223,13 @@ class TarbellSite:
                     row_dict = OrderedDict()
                     for header in headers:
                         try:
-                            row_dict[header] = self.parse_text_for_numbers(row.custom[slughifi(header)].text)
-                        except KeyError: pass
+                            value = row.custom[slughifi(header)].text
+                            row_dict[header] = self.parse_text_for_numbers(value)
+                        except KeyError:
+                            pass
                     if is_dict:
-                        context[entry.title.text][row.custom['key'].text] = row_dict
+                        key = row.custom['key'].text
+                        context[entry.title.text][key] = row_dict
                     else:
                         context[entry.title.text].append(row_dict)
         return context
@@ -216,22 +239,27 @@ class TarbellSite:
             try:
                 value = int(value)
                 return value
-            except ValueError: pass
-            
+            except ValueError:
+                pass
+
             try:
                 value = float(value)
                 return value
-            except ValueError: pass
+            except ValueError:
+                pass
 
         return value
 
-    def _get_headers_from_worksheet(self, client, key, worksheet_id, visibility):
+    def _get_headers_from_worksheet(self, client, key, worksheet_id,
+                                    visibility):
         """Get headers in correct order."""
         headers = []
         query = CellQuery()
         query.max_row = '1'
         query.min_row = '1'
-        cell_feed = client.GetCellsFeed(key, worksheet_id, query=query, visibility=visibility, projection='values')
+        cell_feed = client.GetCellsFeed(key, worksheet_id, query=query,
+                                        visibility=visibility,
+                                        projection='values')
         for cell in cell_feed.entry:
             headers.append(cell.cell.text)
         return headers
@@ -242,7 +270,7 @@ class TarbellSite:
         print
 
         if project_name:
-            projects = [ self.projects[project_name] ]
+            projects = [self.projects[project_name]]
             if '' in self.projects.keys():
                 projects.insert(0, self.projects.get(''))
         else:
@@ -274,32 +302,34 @@ class TarbellSite:
             print '-- Static dir copied to %s.' % os.path.join(output_dir, 'static')
 
     def copy_pages(self, project, output_dir):
-        cache_buster = time.time()
         templates_dir = os.path.join(self.projects_path, project.__name__, 'templates')
         try:
             context = self.get_context_from_gdoc(**project.GOOGLE_DOC)
         except AttributeError:
             context = {}
-        for path,dirnames,filenames in os.walk(templates_dir):
+        for path, dirnames, filenames in os.walk(templates_dir):
             for fn in filenames:
                 if fn[0] != '_' and fn[0] != '.':
                     tpath = "%s/%s" % (project.URL_ROOT, fn)
                     with self.app.test_request_context('%s' % tpath):
                         try:
-                            content = self.preview(tpath, context, preview_mode=0)
-                            codecs.open(os.path.join(output_dir, fn),"w", encoding='utf-8').write(content)
+                            content = self.preview(tpath, context,
+                                                   preview_mode=0)
+                            codecs.open(os.path.join(output_dir, fn), "w",
+                                        encoding='utf-8').write(content)
                             print "-- Created page %s" % os.path.join(output_dir, fn)
                         except Exception, e:
-                            print "Exception (%s) for %s" % (e,tpath)
+                            print "Exception (%s) for %s" % (e, tpath)
 
     def copy_json(self, project, output_dir):
         ## Get context from google doc
         try:
-            context = self.get_context_from_gdoc(global_values=False, **project.GOOGLE_DOC)
+            context = self.get_context_from_gdoc(global_values=False,
+                                                 **project.GOOGLE_DOC)
             os.makedirs(os.path.join(output_dir, 'json'))
-            for k,v in context.items():
-                codecs.open(os.path.join(output_dir, "json/%s.json" % k), "w", encoding='utf-8').write(json.dumps(v))
+            for k, v in context.items():
+                codecs.open(os.path.join(output_dir, "json/%s.json" % k),
+                            "w", encoding='utf-8').write(json.dumps(v))
                 print "-- Created JSON %s" % os.path.join(output_dir, "json/%s.json" % k)
-        except AttributeError: 
+        except AttributeError:
             print "-- No Google doc configured for %s." % project.__name__
-
