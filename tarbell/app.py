@@ -232,8 +232,8 @@ class TarbellSite:
                         except KeyError:
                             pass
                     if is_dict:
-                        key = row.custom['key'].text
-                        context[entry.title.text][key] = row_dict
+                        k = row.custom['key'].text
+                        context[entry.title.text][k] = row_dict
                     else:
                         context[entry.title.text].append(row_dict)
         return context
