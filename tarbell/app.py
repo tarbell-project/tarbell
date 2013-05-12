@@ -160,6 +160,7 @@ class TarbellSite:
                 "pagename": pagename,
                 "project": project.__name__,
                 "preview_mode": preview_mode,
+                "TARBELL_PROJECTS": self.projects,
             }
 
             ## Get context from config
