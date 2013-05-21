@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{% block title %}{{ title|striptags }}{% endblock title %}</title>
+    <link rel="shortcut icon" href="/img/favicon{% if preview_mode %}-preview{% endif %}.ico" />
+
+    {% block css %}
+    <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.1/css/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.1/css/bootstrap-responsive.min.css" />
+    <link rel="stylesheet" type="text/css" href="{{ static_url('base', '/css/style.css') }}" />
+    {% endblock css %}
+
+    {% block opengraph %} 
+    <meta property="og:url" content="{{ page_url("%s.html" % pagename) }}" />
+    <meta property="og:title" content="{{ title }}" />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="{{ og_image }}" />
+    <meta property="og:description" content="{{ og_description }}" />
+    {% endblock opengraph %}
+
+    {% block shim %}
+    <!--[if lt IE 9]>
+    <script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    {% endblock %}
+
+    {% block meta %}
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% endblock meta %}
+</head>
+<body{% block bodyattrs %} class="has-nav {{ pagename }}"{% endblock bodyattrs %}>
+
+{# Override the `container` block to disable default layout. #}
+{% block container %}
+    <div id="header">
+        {% block header %}{% endblock header %}
+    </div>
+    <div id="content">
+        {% block content %}{% endblock content %}
+    </div>
+    <div id="footer">
+        {% block footer %}{% endblock footer %}
+    </div>
+{% endblock container %}
+
+{% block scripts %}
+{#
+    Scripts are the most complex section of the template. The default configuration
+    uses RequireJS to initialize the app's default Backbone app. To dispense with
+    this madness, simply override the block.
+
+    If you like this frontend app structure, you can add a RequireJS configuration 
+    to your project adding a `requirejs` worksheet to your spreadsheet or setting
+    the `requirejs` key in config.py. Each row needs a `name` and `url` and optionally
+    supports `exports` and `deps` shim configuration variables.
+#}
+<script type="text/javascript">
+var require = {
+    baseUrl: '/',
+    paths: {
+        {# Handy base libraries #}
+        backbone: '//cdnjs.cloudflare.com/ajax/libs/backbone.js/1.0.0/backbone',
+        bootstrap: '//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.1/js/bootstrap.min',
+        jquery: '//cdnjs.cloudflare.com/ajax/libs/jquery/1.9.1/jquery',
+        text: '//cdnjs.cloudflare.com/ajax/libs/require-text/2.0.5/text',
+        underscore: '//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.4.4/underscore',
+
+        {# Construct aliases to each project's JS directory #}
+        {% for project_name in TARBELL_PROJECTS %}
+            {% if project_name == '' %}
+                {% set project = 'base' %}
+            {% else %}
+                {% set project = project_name %}
+                {% set project_name = '/' + project_name %}
+            {% endif %}
+            '{{ project }}': '{{ project_name }}/js',
+        {% endfor %}
+    },
+    shim: {
+        backbone: {
+            deps: ["underscore", "jquery"],
+            exports: "Backbone"
+        },
+        bootstrap: {
+            deps: ["jquery"]
+        },
+        highlight: {
+            exports: 'hljs'
+        },
+        underscore: {
+            exports: '_'
+        },
+    }
+};
+</script>
+
+<script type="text/javascript" data-main="{{ project }}/app" src="http://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.4/require.js"></script>
+{% endblock scripts %}
+
+</body>
+</html>
