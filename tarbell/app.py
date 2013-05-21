@@ -235,7 +235,7 @@ class TarbellSite:
                         except KeyError:
                             pass
                     if is_dict:
-                        k = row.custom['key'].text
+                        k = slughifi(row.custom['key'].text)
                         context[worksheet_key][k] = row_dict
                     else:
                         context[worksheet_key].append(row_dict)
