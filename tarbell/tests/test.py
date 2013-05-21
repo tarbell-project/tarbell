@@ -11,9 +11,6 @@ class TarbellTestCase(unittest.TestCase):
         self.site = TarbellSite(test_dir)
         default_spreadsheet = self.site.projects['project'].GOOGLE_DOC
         self.test_context = self.site.get_context_from_gdoc(**default_spreadsheet)
-        import pprint
-        pprint.pprint(self.test_context)
-        import ipdb; ipdb.set_trace();
 
     def test_worksheet_name_slugify(self):
         assert self.test_context.get('worksheet_with_spaces')
