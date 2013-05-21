@@ -9,11 +9,15 @@ class TarbellTestCase(unittest.TestCase):
         test_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                                 'example')
         self.site = TarbellSite(test_dir)
-        self.test_context = self.site.get_context_from_gdoc(**self.site.projects['project'].GOOGLE_DOC)
+        default_spreadsheet = self.site.projects['project'].GOOGLE_DOC
+        self.test_context = self.site.get_context_from_gdoc(**default_spreadsheet)
+        import pprint
+        pprint.pprint(self.test_context)
+        import ipdb; ipdb.set_trace();
 
-
-    def tearDown(self):
-        pass
+    def test_worksheet_name_slugify(self):
+        assert self.test_context.get('worksheet_with_spaces')
+        assert not self.test_context.get('worksheet with spaces')
 
     def test_string_value(self):
         assert isinstance(self.test_context['string_value'], str)
@@ -23,9 +27,6 @@ class TarbellTestCase(unittest.TestCase):
 
     def test_float_value(self):
         assert isinstance(self.test_context['float_value'], float)
-
-    def test_spreadsheet_slugify(self):
-        assert True
 
 
 if __name__ == '__main__':
