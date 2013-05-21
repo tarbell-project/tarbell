@@ -217,26 +217,28 @@ class TarbellSite:
                 headers = self._get_headers_from_worksheet(client, key,
                                                            worksheet_id,
                                                            visibility)
+                worksheet_key = slughifi(entry.title.text)
                 if 'key' in headers:
-                    context[entry.title.text] = OrderedDict()
+                    context[worksheet_key] = OrderedDict()
                     is_dict = True
                 else:
                     is_dict = False
-                    context[entry.title.text] = []
+                    context[worksheet_key] = []
 
                 for i, row in enumerate(data_feed.entry):
                     row_dict = OrderedDict()
                     for header in headers:
                         try:
-                            value = row.custom[slughifi(header)].text
-                            row_dict[header] = self.parse_text_for_numbers(value)
+                            header_key = slughifi(header)
+                            value = row.custom[header_key.replace('_', '')].text
+                            row_dict[header_key] = self.parse_text_for_numbers(value)
                         except KeyError:
                             pass
                     if is_dict:
                         k = row.custom['key'].text
-                        context[entry.title.text][k] = row_dict
+                        context[worksheet_key][k] = row_dict
                     else:
-                        context[entry.title.text].append(row_dict)
+                        context[worksheet_key].append(row_dict)
         return context
 
     def parse_text_for_numbers(self, value):
