@@ -212,8 +212,8 @@ class TarbellSite:
 
             if global_values is True and entry.title.text == 'values':
                 for row in data_feed.entry:
-                    text = self.parse_text_for_numbers(row.custom['value'].text)
-                    context[row.custom['key'].text] = text
+                    _key = slughifi(row.custom['key'].text)
+                    context[_key] = self.parse_text_for_numbers(row.custom['value'].text)
             elif len(data_feed.entry):
                 headers = self._get_headers_from_worksheet(client, key,
                                                            worksheet_id,
