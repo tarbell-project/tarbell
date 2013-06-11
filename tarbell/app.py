@@ -171,6 +171,7 @@ class TarbellSite:
 
             ## Get context from google doc
             try:
+                template_context['spreadsheet_key'] = project.GOOGLE_DOC['key']
                 if not context:
                     context = self.get_context_from_gdoc(key_mode=key_mode,
                                                          **project.GOOGLE_DOC)
