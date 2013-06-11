@@ -269,7 +269,8 @@ class TarbellSite:
                                         visibility=visibility,
                                         projection='values')
         for cell in cell_feed.entry:
-            headers.append(cell.cell.text)
+            if not cell.cell.text.startswith('_'):
+                headers.append(cell.cell.text)
         return headers
 
     def render_templates(self, output_root, project_name=None):
