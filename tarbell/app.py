@@ -11,7 +11,7 @@ import shutil
 import codecs
 from scrubber import Scrubber
 from slughifi import slughifi
-
+import mimetypes
 
 def silent_none(value):
     if value is None:
@@ -35,69 +35,52 @@ class TarbellSite:
         self.projects_path = projects_path
         self.projects = self.load_projects()
 
-        self.app.add_url_rule('/<path:template>', view_func=self.preview)
+        self.app.add_url_rule('/', view_func=self.preview)
+        self.app.add_url_rule('/<path:path>', view_func=self.preview)
         self.app.add_template_filter(self.process_text, 'process_text')
         self.app.add_template_filter(slughifi, 'slugify')
 
-    def walk_projects(self):
+    def filter_projects(self):
         for dirpath, dirnames, filenames in os.walk(self.projects_path):
             dirnames[:] = [
                 dn for dn in dirnames
-                if not dn.startswith('.') and not dn.startswith('_')]
+                if not dn.startswith('.') and not dn.startswith('_') 
+                ]
             yield dirpath, dirnames, filenames
 
-    def load_projects(self):
-        projects = {}
-        prefix_loaders = []
-        loaders = []
+    def sort_modules(self, x, y):
+        if x[0] == "base": return 1
+        return -1
 
-        for root, dirs, files in self.walk_projects():
+    def load_projects(self):
+        projects = []
+        for root, dirs, files in self.filter_projects():
             if 'config.py' in files:
-                # Load configuration
                 name = root.split('/')[-1]
                 filename, pathname, description = imp.find_module('config', [root])
                 project = imp.load_module(name, filename, pathname, description)
+                projects.append((name, project, root))
 
-                # Get root path or just use pathname
-                try:
-                    path = project.URL_ROOT
-                except AttributeError:
-                    project.URL_ROOT = name
-                    path = name
+        # Sort modules
+        projects = sorted(projects, cmp=self.sort_modules)
 
-                try:
-                    project.DONT_PUBLISH
-                except AttributeError:
-                    project.DONT_PUBLISH = False
+        loaders = []
+        for name, project, root in projects:
 
-                try:
-                    project.CREATE_JSON
-                except AttributeError:
-                    project.CREATE_JSON = True
+            #try:
+                #project.CREATE_JSON
+            #except AttributeError:
+                #project.CREATE_JSON = True
 
-                # Register with microcopy
-                projects[path] = project
+            ## Register as flask blueprint
+            try:
+                self.app.register_blueprint(project.blueprint)
+            except AttributeError:
+                pass
 
-                # Register as flask blueprint
-                try:
-                    url_prefix = None
-                    if path:
-                        url_prefix = '/' + path
-                    self.app.register_blueprint(project.blueprint,
-                                                url_prefix=url_prefix)
-                except AttributeError:
-                    pass
-
-                # Get template dirs
-                if path == '' and 'templates' in dirs:
-                    loader = FileSystemLoader(os.path.join(root, 'templates'))
-                    loaders.append(loader)
-                if 'templates' in dirs:
-                    loader = FileSystemLoader(os.path.join(root, 'templates'))
-                    prefix_loaders.append((path, loader))
-
-        if len(prefix_loaders):
-            loaders.append(PrefixLoader(dict(prefix_loaders)))
+            ## Every directory is a template dir
+            loader = FileSystemLoader(root)
+            loaders.append(loader)
 
         self.app.jinja_loader = ChoiceLoader(loaders)
 
@@ -111,76 +94,64 @@ class TarbellSite:
         except TypeError:
             return ""
 
-    def preview(self, template, context=None, preview_mode=1, key_mode=False):
+    def preview(self, path=None, context=None, preview_mode=1, key_mode=False):
         """ Preview a template/path """
-        path_parts = template.split('/')
+        if path is None:
+            path = 'index.html'
+        if path.endswith('/'):
+            path += 'index.html'
 
-        if path_parts[0] in self.projects.keys():
-            project = self.projects[path_parts[0]]
-            root = path_parts[0]
-        else:
-            project = self.projects.get('')
-            root = ''
+        ## Serve JSON
+        #if self.project.CREATE_JSON and len(path_parts) > 2 and path_parts[-2] == 'json' and template.endswith('.json'):
+            #try:
+                #if not context:
+                    #context = self.get_context_from_gdoc(key_mode=key_mode,
+                        #global_values=False,**project.GOOGLE_DOC)
+                #worksheet = path_parts[-1][:-5]
+                #return Response(json.dumps(context[worksheet]),
+                                #mimetype="application/json")
+            #except:
+                #return 'error!', 404
 
-        if project:
-            pagename = path_parts[-1][:-5]
-            if template.endswith('/'):
-                template += 'index.html'
-                pagename = 'index'
-            if template in self.projects.keys():
-                template += '/index.html'
-                pagename = 'index'
+        ## Serve static
+        file = False
+        filepath = None
+        #print self.projects
+        for name, project, root in self.projects:
+            fullpath = os.path.join(root, path)
+            try:
+                with open(fullpath) as file:
+                    mimetype, encoding = mimetypes.guess_type(fullpath)
+                    filepath = fullpath
+            except IOError: pass
 
-            ## Serve JSON
-            if project.CREATE_JSON and len(path_parts) > 2 and path_parts[-2] == 'json' and template.endswith('.json'):
+        if filepath:
+            if mimetype.startswith("text/"):
+                template_context = {}
+                ## Get context from project config
+                try:
+                    template_context.update(self.projects[0][1].DEFAULT_CONTEXT)
+                    print "worked"
+                except AttributeError:
+                    print "didn't"
+                    pass
+
+                ### Get context from google doc
                 try:
                     if not context:
                         context = self.get_context_from_gdoc(key_mode=key_mode,
-                            global_values=False,**project.GOOGLE_DOC)
-                    worksheet = path_parts[-1][:-5]
-                    return Response(json.dumps(context[worksheet]),
-                                    mimetype="application/json")
-                except:
-                    return 'error!', 404
+                                                             **self.project.GOOGLE_DOC)
+                    template_context.update(context)
+                except AttributeError:
+                    pass
 
-            ## Serve static
-            if not template.endswith('.html'):
-                path = os.path.join(self.projects_path, project.__name__, 'static')
-                if root != '':
-                    template = '/'.join(path_parts[1:])
-                return send_from_directory(path, template)
+                rendered = render_template(path, **template_context)
+                return Response(rendered, mimetype=mimetype)
+            else:
+                dir, filename = os.path.split(filepath)
+                return send_from_directory(dir, filename)
 
-            if not key_mode:
-                key_mode = request.values.has_key('keys')
-
-            template_context = {
-                "pageroot": project.URL_ROOT,
-                "cache_buster": time.time(),
-                "filename": template,
-                "pagename": pagename,
-                "project": project.__name__,
-                "preview_mode": preview_mode,
-                "TARBELL_PROJECTS": self.projects,
-            }
-
-            ## Get context from config
-            try:
-                template_context.update(project.DEFAULT_CONTEXT)
-            except AttributeError:
-                pass
-
-            ## Get context from google doc
-            try:
-                if not context:
-                    context = self.get_context_from_gdoc(key_mode=key_mode,
-                                                         **project.GOOGLE_DOC)
-                template_context.update(context)
-            except AttributeError: 
-                pass
-
-            return render_template("%s" % template, **template_context)
-        else:
-            return 'error!', 404
+        return "error", 404
 
     def get_context_from_gdoc(self, key, account=None, password=None,
                               key_mode=False, global_values=True):
