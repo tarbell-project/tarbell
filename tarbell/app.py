@@ -110,7 +110,7 @@ class TarbellSite:
                     filepath = fullpath
             except IOError: pass
 
-        if filepath and mimetype.startswith("text/"):
+        if filepath and mimetype and mimetype.startswith("text/"):
             context = self.project.DEFAULT_CONTEXT
             context.update(self.get_context_from_gdoc())
             rendered = render_template(path, **context)
