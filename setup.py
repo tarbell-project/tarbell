@@ -57,6 +57,11 @@ settings.update(
     zip_safe=False,
     include_package_data=True,
     install_requires=required,
+    entry_points={
+        'console_scripts': [
+            'legit = legit.cli:main',
+        ],
+    }
 )
 
 
