@@ -11,7 +11,7 @@ except ImportError:
 
 APP_NAME = 'tarbell'
 APP_SCRIPT = './tarbell_runner'
-VERSION = '0.8'
+VERSION = '0.9-iter1'
 
 settings = dict()
 
