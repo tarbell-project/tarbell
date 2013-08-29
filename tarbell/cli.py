@@ -142,10 +142,10 @@ def tarbell_serve(args, path):
     script = "source ~/.virtualenvs/{root}/bin/activate && \
             python {server_path}/runserver.py {path} {ip}" \
             .format(root=path_parts[-1], server_path=server_path, path=path, ip=ip)
-    print script
     process = subprocess.Popen(["/bin/bash"], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-    process.communicate(script)
-
+    stdout, stderr = process.communicate(script)
+    print stdout
+    print stderr
 
 def tarbell_switch(args):
     cmd_switch(args)    # legit switch
