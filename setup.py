@@ -59,7 +59,7 @@ settings.update(
     install_requires=required,
     entry_points={
         'console_scripts': [
-            'legit = legit.cli:main',
+            'tarbell = tarbell.cli:main',
         ],
     }
 )
