@@ -48,7 +48,7 @@ def main():
 
     command = Command.lookup(args.get(0))
 
-    if len(args) == 0 or args.contains(('-h', '--help')):
+    if len(args) == 0 or args.contains(('-h', '--help', 'help')):
         display_info()
         sys.exit(1)
 
@@ -64,7 +64,7 @@ def main():
         sys.exit()
 
     else:
-        show_error(colored.red('Unknown command {0}'.format(args.get(0))))
+        show_error(colored.red('Error! Unknown command `{0}`.\n'.format(args.get(0))))
         display_info()
         sys.exit(1)
 
