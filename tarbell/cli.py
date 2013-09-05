@@ -235,9 +235,9 @@ def_cmd(
 
 
 def_cmd(
-    name='serve <address (optional)>',
+    name='serve',
     fn=tarbell_serve,
-    usage='serve',
+    usage='serve <address (optional)>',
     help='Run a preview server (typically handled by `switch`)')
 
 
