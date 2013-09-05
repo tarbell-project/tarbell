@@ -88,7 +88,7 @@ def display_info():
     for command in Command.all_commands():
         usage = command.usage or command.name
         help = command.help or ''
-        puts('{0:35} {1}'.format(
+        puts('{0:50} {1}'.format(
                 colored.green(usage),
                 first_sentence(help)))
 
@@ -235,7 +235,7 @@ def_cmd(
 
 
 def_cmd(
-    name='serve',
+    name='serve <address (optional)>',
     fn=tarbell_serve,
     usage='serve',
     help='Run a preview server (typically handled by `switch`)')
@@ -251,7 +251,7 @@ def_cmd(
 def_cmd(
     name='switch',
     fn=tarbell_switch,
-    usage='switch <project> --port PORT (optional) --ip IP (optional)',
+    usage='switch <project> <address (optional)>',
     help='Switch to the project named <project> and start a preview server.')
 
 
