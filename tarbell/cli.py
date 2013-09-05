@@ -158,7 +158,7 @@ def tarbell_stop(args, path):
 
 @ensure_site
 def tarbell_switch(args, path):
-    cmd_switch(args)    # legit switch
+    cmd_switch(args)        # legit switch
     tarbell_serve(args[1:]) # serve 'em up!
 
 
