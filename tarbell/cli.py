@@ -148,7 +148,7 @@ def tarbell_serve(args, path):
     ip = list_get(address, 0, '127.0.0.1')
     port = list_get(address, 1, 5000)
     site = TarbellSite(path)
-    site.app.run(ip, port=port)
+    site.app.run(ip, port=int(port))
 
 
 @ensure_site
@@ -159,7 +159,7 @@ def tarbell_stop(args, path):
 @ensure_site
 def tarbell_switch(args, path):
     cmd_switch(args)    # legit switch
-    tarbell_serve(args) # serve 'em up!
+    tarbell_serve(args[1:]) # serve 'em up!
 
 
 class Command(object):
