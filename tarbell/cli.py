@@ -130,8 +130,13 @@ def ensure_site(fn, path=None):
 
 
 @ensure_site
-def tarbell_list(args):
+def tarbell_list(args, path):
     print "@todo list projects"
+
+
+@ensure_site
+def tarbell_publish(args, path):
+    print "@todo publish"
 
 
 @ensure_site
@@ -158,8 +163,13 @@ def tarbell_stop(args, path):
 
 @ensure_site
 def tarbell_switch(args, path):
-    cmd_switch(args)    # legit switch
+    cmd_switch(args)        # legit switch
     tarbell_serve(args[1:]) # serve 'em up!
+
+
+@ensure_site
+def tarbell_unpublish(args, path):
+    print "@todo unpublish"
 
 
 class Command(object):
@@ -211,6 +221,13 @@ def_cmd(
 
 
 def_cmd(
+    name='publish',
+    fn=tarbell_publish,
+    usage='publish <target (default: staging)>',
+    help='Publish the current project to <target>.')
+
+
+def_cmd(
     name='newproject',
     fn=tarbell_newproject,
     usage='newproject <project>',
@@ -236,3 +253,12 @@ def_cmd(
     fn=tarbell_switch,
     usage='switch <project> --port PORT (optional) --ip IP (optional)',
     help='Switch to the project named <project> and start a preview server.')
+
+
+def_cmd(
+    name='unpublish',
+    fn=tarbell_unpublish,
+    usage='unpublish <target (default: staging)>',
+    help='Remove the current project from <target>.')
+
+
