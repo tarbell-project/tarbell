@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
 """
-legit.cli
+tarbell.cli
 ~~~~~~~~~
 
-This module provides the CLI interface to legit.
+This module provides the CLI interface to tarbell.
 """
 
 import os
@@ -22,12 +22,16 @@ from legit.cli import cmd_switch
 
 from .app import TarbellSite
 
-#from .core import __version__
-#from .settings import settings
-#from .helpers import is_lin, is_osx, is_win
-#from .scm import *
+__version__ = '0.9'
 
-__version__ = '0.9-cli'
+def list_get(l, idx, default=None):
+    try:
+        if l[idx]:
+            return l[idx]
+        else:
+            return default
+    except IndexError:
+        return default
 
 def black(s):
     #if settings.allow_black_foreground:
@@ -99,7 +103,7 @@ def display_version():
         colored.yellow('Tarbell'),
         __version__
     ))
-        
+
 
 def show_error(msg):
     sys.stdout.flush()
@@ -126,6 +130,11 @@ def ensure_site(fn, path=None):
 
 
 @ensure_site
+def tarbell_list(args):
+    print "@todo list projects"
+
+
+@ensure_site
 def tarbell_newproject(args, path):
     project = args.get(0)
     if project:
@@ -135,21 +144,22 @@ def tarbell_newproject(args, path):
 
 @ensure_site
 def tarbell_serve(args, path):
-    path_parts = path.split('/')
-    ip = args.get(0)
-    server_path = os.path.abspath(os.path.dirname(__file__))
-    if not ip: ip = '127.0.0.1'
-    script = "source ~/.virtualenvs/{root}/bin/activate && \
-            python {server_path}/runserver.py {path} {ip}" \
-            .format(root=path_parts[-1], server_path=server_path, path=path, ip=ip)
-    process = subprocess.Popen(["/bin/bash"], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-    stdout, stderr = process.communicate(script)
-    print stdout
-    print stderr
+    address = list_get(args, 0, "").split(":")
+    ip = list_get(address, 0, '127.0.0.1')
+    port = list_get(address, 1, 5000)
+    site = TarbellSite(path)
+    site.app.run(ip, port=int(port))
 
-def tarbell_switch(args):
+
+@ensure_site
+def tarbell_stop(args, path):
+    print "@todo stop server"
+
+
+@ensure_site
+def tarbell_switch(args, path):
     cmd_switch(args)    # legit switch
-    tarbell_serve(args) # serve 'em up!
+    tarbell_serve(args[1:]) # serve 'em up!
 
 
 class Command(object):
@@ -194,6 +204,13 @@ def def_cmd(name=None, short=None, fn=None, usage=None, help=None):
 
 
 def_cmd(
+    name='list',
+    fn=tarbell_list,
+    usage='list',
+    help='List all projects.')
+
+
+def_cmd(
     name='newproject',
     fn=tarbell_newproject,
     usage='newproject <project>',
@@ -208,7 +225,14 @@ def_cmd(
 
 
 def_cmd(
+    name='stop',
+    fn=tarbell_stop,
+    usage='stop',
+    help='Stop a running preview server.')
+
+
+def_cmd(
     name='switch',
     fn=tarbell_switch,
-    usage='switch <project>',
+    usage='switch <project> --port PORT (optional) --ip IP (optional)',
     help='Switch to the project named <project> and start a preview server.')
