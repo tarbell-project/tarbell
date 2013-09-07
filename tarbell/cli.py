@@ -69,11 +69,16 @@ def main():
         sys.exit(1)
 
 
-def first_sentence(s):
-    pos = s.find('. ')
-    if pos < 0:
-        pos = len(s) - 1
-    return s[:pos + 1]
+def split_sentences(s):
+    sentences = []
+    for index, sentence in enumerate(s.split('. ')):
+        pad = ''
+        if index > 0:
+            pad = ' ' * 41
+        if sentence.endswith('.'):
+            sentence = sentence[:-1]
+        sentences.append('%s %s.\n' % (pad, sentence))
+    return "".join(sentences)
 
 
 def display_info():
@@ -90,7 +95,7 @@ def display_info():
         help = command.help or ''
         puts('{0:50} {1}'.format(
                 colored.green(usage),
-                first_sentence(help)))
+                split_sentences(help)))
 
     puts('\n{0}'.format(
         black(u'A Chicago Tribune News Applications project')
@@ -238,7 +243,9 @@ def_cmd(
     name='serve',
     fn=tarbell_serve,
     usage='serve <address (optional)>',
-    help='Run a preview server (typically handled by `switch`)')
+    help='Run a preview server (typically handled by `switch`) \
+          Supply an optional address for the preview server such as \
+          `127.0.0.2:8000`')
 
 
 def_cmd(
@@ -252,7 +259,9 @@ def_cmd(
     name='switch',
     fn=tarbell_switch,
     usage='switch <project> <address (optional)>',
-    help='Switch to the project named <project> and start a preview server.')
+    help='Switch to the project named <project> and start a preview server. \
+          Supply an optional address for the preview server such as \
+          `127.0.0.2:8000`')
 
 
 def_cmd(
