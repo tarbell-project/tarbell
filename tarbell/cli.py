@@ -18,7 +18,7 @@ from clint import args
 from clint.eng import join as eng_join
 from clint.textui import colored, puts, columns
 
-from legit.cli import cmd_switch
+from legit.cli import cmd_switch, cmd_branches
 
 from .app import TarbellSite
 
