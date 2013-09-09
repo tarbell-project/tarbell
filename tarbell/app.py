@@ -5,6 +5,7 @@ from jinja2 import Markup, PrefixLoader, FileSystemLoader, ChoiceLoader
 from ordereddict import OrderedDict
 from gdata.spreadsheet.service import SpreadsheetsService
 from gdata.spreadsheet.service import CellQuery
+from .oauth import get_drive_api
 import json
 import imp
 import shutil
@@ -135,7 +136,13 @@ class TarbellSite:
         except AttributeError:
             return {}
 
-    def _get_context_from_gdoc(self, key, account=None, password=None,
+    def _get_context_from_gdoc(self, **kwargs):
+        from pprint import pprint
+        import pdb; pdb.set_trace();
+        api = get_drive_api(self.projects_path)
+        return {}
+
+    def __get_context_from_gdoc(self, key, account=None, password=None,
                               key_mode=False, global_values=True):
         """
         Turn a google doc into a Flask template context. The 'values' worksheet

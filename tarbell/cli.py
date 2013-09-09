@@ -22,6 +22,8 @@ from legit.cli import cmd_switch, cmd_branches
 
 from .app import TarbellSite
 
+from .oauth import get_drive_api
+
 __version__ = '0.9'
 
 def list_get(l, idx, default=None):
@@ -41,6 +43,9 @@ def black(s):
 
 class EnsureSite():
     """Context manager to ensure the user is in a Tarbell site environment."""
+    def __init__(self, reset=False):
+        self.reset = reset
+
     def __enter__(self):
         return self.ensure_site()
 
@@ -60,7 +65,12 @@ class EnsureSite():
             return self.ensure_site(path)
         else:
             os.chdir(path)
+            self.ensure_secrets(path)
             return path
+
+    def ensure_secrets(self, path):
+        api = get_drive_api(path, self.reset)
+        # Trap errors and show docs
 
 # Alias to lowercase
 ensure_site = EnsureSite
@@ -86,8 +96,14 @@ def main():
         arg = args.get(0)
         args.remove(arg)
 
-        with ensure_site() as path:
+        reset = False
+        if args.contains('--reset-creds'):
+            reset = True
+            args.remove('--reset-creds')
+
+        with ensure_site(reset) as path:
             command.__call__(args, path)
+
         sys.exit()
 
     else:
