@@ -39,6 +39,32 @@ def black(s):
     #else:
     return s.encode('utf-8')
 
+class EnsureSite():
+    """Context manager to ensure the user is in a Tarbell site environment."""
+    def __enter__(self):
+        return self.ensure_site()
+
+    def __exit__(self, type, value, traceback):
+        pass
+
+    def ensure_site(self, path=None):
+        if not path:
+            path = os.getcwd()
+
+        if path is "/":
+            show_error("The current directory is not part of a Tarbell project")
+            sys.exit(1)
+
+        if not os.path.exists(os.path.join(path, '.tarbell')):
+            path = os.path.realpath(os.path.join(path, '..'))
+            return self.ensure_site(path)
+        else:
+            os.chdir(path)
+            return path
+
+# Alias to lowercase
+ensure_site = EnsureSite
+
 # --------
 # Dispatch
 # --------
@@ -60,7 +86,8 @@ def main():
         arg = args.get(0)
         args.remove(arg)
 
-        command.__call__(args)
+        with ensure_site() as path:
+            command.__call__(args, path)
         sys.exit()
 
     else:
@@ -115,36 +142,17 @@ def show_error(msg):
     sys.stderr.write(msg + '\n')
 
 
-def ensure_site(fn, path=None):
-    def new_ensure_site(args):
-        return fn(args, path)
-
-    if not path:
-        path = os.getcwd()
-
-    if path is "/":
-        show_error("The current directory is not part of a Tarbell project")
-        sys.exit(1)
-
-    if not os.path.exists(os.path.join(path, '.tarbell')):
-        path = os.path.realpath(os.path.join(path, '..'))
-        return ensure_site(fn, path)
-    else:
-        os.chdir(path)
-        return new_ensure_site
-
-
-@ensure_site
 def tarbell_list(args, path):
-    print "@todo list projects"
+    """List tarbell projects."""
+
+    # Use legit branches command for now
+    cmd_branches(path)
 
 
-@ensure_site
 def tarbell_publish(args, path):
     print "@todo publish"
 
 
-@ensure_site
 def tarbell_newproject(args, path):
     project = args.get(0)
     if project:
@@ -152,7 +160,7 @@ def tarbell_newproject(args, path):
     else:
         show_error("No project name specified")
 
-@ensure_site
+
 def tarbell_serve(args, path):
     address = list_get(args, 0, "").split(":")
     ip = list_get(address, 0, '127.0.0.1')
@@ -161,18 +169,15 @@ def tarbell_serve(args, path):
     site.app.run(ip, port=int(port))
 
 
-@ensure_site
 def tarbell_stop(args, path):
     print "@todo stop server"
 
 
-@ensure_site
 def tarbell_switch(args, path):
     cmd_switch(args)        # legit switch
     tarbell_serve(args[1:]) # serve 'em up!
 
 
-@ensure_site
 def tarbell_unpublish(args, path):
     print "@todo unpublish"
 
