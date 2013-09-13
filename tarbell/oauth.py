@@ -8,8 +8,10 @@ import os
 import argparse
 import sys
 
-OAUTH_SCOPE = 'https://www.googleapis.com/auth/drive.file'
+OAUTH_SCOPE = 'https://www.googleapis.com/auth/drive'
 
+# Force the noauth_local_webserver flag to cover remote operation (e.g.
+# using these commands on a server or in a virtual machine.)
 parser = argparse.ArgumentParser(description=__doc__,
          formatter_class=argparse.RawDescriptionHelpFormatter,
          parents=[tools.argparser])

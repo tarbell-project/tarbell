@@ -69,7 +69,8 @@ class EnsureSite():
             return path
 
     def ensure_secrets(self, path):
-        api = get_drive_api(path, self.reset)
+        # Check for client secrets? Might be unnecessary, really.
+        client = get_drive_api(path, self.reset)
         # Trap errors and show docs
 
 # Alias to lowercase
@@ -117,11 +118,11 @@ def split_sentences(s):
     for index, sentence in enumerate(s.split('. ')):
         pad = ''
         if index > 0:
-            pad = ' ' * 41
+            pad = ' ' * 39
         if sentence.endswith('.'):
             sentence = sentence[:-1]
-        sentences.append('%s %s.\n' % (pad, sentence))
-    return "".join(sentences)
+        sentences.append('%s %s.' % (pad, sentence.strip()))
+    return "\n".join(sentences)
 
 
 def display_info():
@@ -136,9 +137,15 @@ def display_info():
     for command in Command.all_commands():
         usage = command.usage or command.name
         help = command.help or ''
-        puts('{0:50} {1}'.format(
+        puts('{0:48} {1}\n'.format(
                 colored.green(usage),
                 split_sentences(help)))
+
+    puts('\nOptions\n')
+    puts('{0:48} {1}'.format(
+        colored.green("--reset-creds"),
+        'Reset Google Drive OAuth2 credentials'
+    ))
 
     puts('\n{0}'.format(
         black(u'A Chicago Tribune News Applications project')
@@ -264,9 +271,9 @@ def_cmd(
     name='serve',
     fn=tarbell_serve,
     usage='serve <address (optional)>',
-    help='Run a preview server (typically handled by `switch`) \
-          Supply an optional address for the preview server such as \
-          `127.0.0.2:8000`')
+    help=('Run a preview server (typically handled by `switch`). '
+          'Supply an optional address for the preview server such as '
+          '`127.0.0.2:8000`'))
 
 
 def_cmd(
@@ -280,9 +287,9 @@ def_cmd(
     name='switch',
     fn=tarbell_switch,
     usage='switch <project> <address (optional)>',
-    help='Switch to the project named <project> and start a preview server. \
-          Supply an optional address for the preview server such as \
-          `127.0.0.2:8000`')
+    help=('Switch to the project named <project> and start a preview server. '
+          'Supply an optional address for the preview server such as '
+          '`127.0.0.2:8000`'))
 
 
 def_cmd(

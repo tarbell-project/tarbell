@@ -12,6 +12,8 @@ import shutil
 import codecs
 from slughifi import slughifi
 import mimetypes
+import xlrd
+TTL_MULTIPLIER = 5
 
 def silent_none(value):
     if value is None:
@@ -30,6 +32,7 @@ class TarbellSite:
         self.projects = self.load_projects()
         self.project = self.projects[0][1]
 
+        self.client = get_drive_api(self.projects_path)
         self.spreadsheet_data = {}
         self.expires = 0
 
@@ -123,23 +126,28 @@ class TarbellSite:
         # @TODO Return 404 template if it exists
         return "Not found", 404
 
-    def get_context_from_gdoc(self, global_values=True):
+    def get_context_from_gdoc(self):
         """Wrap getting context in a simple caching mechanism."""
         try:
             start = int(time.time())
             if start > self.expires:
-                self.spreadsheet_data = self._get_context_from_gdoc(global_values=global_values, **self.project.GOOGLE_DOC)
+                self.spreadsheet_data = self._get_context_from_gdoc(**self.project.GOOGLE_DOC)
                 end = int(time.time())
-                ttl = (end - start) * 5
+                ttl = (end - start) * TTL_MULTIPLIER
                 self.expires = end + ttl
             return self.spreadsheet_data
         except AttributeError:
             return {}
 
-    def _get_context_from_gdoc(self, **kwargs):
-        from pprint import pprint
-        import pdb; pdb.set_trace();
-        api = get_drive_api(self.projects_path)
+    def _get_context_from_gdoc(self, key, **kwargs):
+        # Dump some spreadsheets!!!
+        spreadsheet_file = self.client.files().get(fileId=key).execute()
+        links = spreadsheet_file.get('exportLinks')
+        downloadurl = links.get('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        resp, content = self.client._http.request(downloadurl)
+        import ipdb; ipdb.set_trace();
+        wb = xlrd.open_workbook(file_contents=content)
+        print ""
         return {}
 
     def __get_context_from_gdoc(self, key, account=None, password=None,
