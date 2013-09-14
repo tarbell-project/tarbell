@@ -5,12 +5,16 @@ from jinja2 import Markup, PrefixLoader, FileSystemLoader, ChoiceLoader
 from ordereddict import OrderedDict
 from gdata.spreadsheet.service import SpreadsheetsService
 from gdata.spreadsheet.service import CellQuery
+from .oauth import get_drive_api
 import json
 import imp
 import shutil
 import codecs
 from slughifi import slughifi
 import mimetypes
+import xlrd
+from string import uppercase
+TTL_MULTIPLIER = 5
 
 def silent_none(value):
     if value is None:
@@ -29,6 +33,7 @@ class TarbellSite:
         self.projects = self.load_projects()
         self.project = self.projects[0][1]
 
+        self.client = get_drive_api(self.projects_path)
         self.spreadsheet_data = {}
         self.expires = 0
 
@@ -122,106 +127,108 @@ class TarbellSite:
         # @TODO Return 404 template if it exists
         return "Not found", 404
 
-    def get_context_from_gdoc(self, global_values=True):
+    def get_context_from_gdoc(self):
         """Wrap getting context in a simple caching mechanism."""
         try:
             start = int(time.time())
             if start > self.expires:
-                self.spreadsheet_data = self._get_context_from_gdoc(global_values=global_values, **self.project.GOOGLE_DOC)
+                self.spreadsheet_data = self._get_context_from_gdoc(**self.project.GOOGLE_DOC)
                 end = int(time.time())
-                ttl = (end - start) * 5
+                ttl = (end - start) * TTL_MULTIPLIER
                 self.expires = end + ttl
             return self.spreadsheet_data
         except AttributeError:
             return {}
 
-    def _get_context_from_gdoc(self, key, account=None, password=None,
-                              key_mode=False, global_values=True):
-        """
-        Turn a google doc into a Flask template context. The 'values' worksheet
-        name is reserved for top-level of context namespace.
-        """
-        client = SpreadsheetsService()
 
-        if account or password:
-            client.email = account
-            client.password = password
-            client.ProgrammaticLogin()
-            visibility = "private"
-        else:
-            visibility = "public"
+    # Cell Types: 0=Empty, 1=Text, 2=Number, 3=Date, 4=Boolean, 5=Error, 6=Blank
+    def _get_context_from_gdoc(self, key, **kwargs):
+        data = {}
+        from pprint import pprint as pp
 
-        feed = client.GetWorksheetsFeed(key,
-                                        visibility=visibility,
-                                        projection='values')
-        context = {'last_updated': feed.updated.text}
-        for entry in feed.entry:
-            worksheet_id = entry.id.text.rsplit('/',1)[1]
+        # Download xlsx version of spreadsheet
+        spreadsheet_file = self.client.files().get(fileId=key).execute()
+        links = spreadsheet_file.get('exportLinks')
+        downloadurl = links.get('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        resp, content = self.client._http.request(downloadurl)
 
-            data_feed = client.GetListFeed(key, worksheet_id,
-                                           visibility=visibility,
-                                           projection="values")
+        # Open xlsx contents
+        workbook = xlrd.open_workbook(file_contents=content)
+        worksheets = workbook.sheet_names()
+        for worksheet_name in worksheets:
+            worksheet = workbook.sheet_by_name(worksheet_name)
+            worksheet.name = slughifi(worksheet.name)
+            headers = self.make_headers(worksheet)
+            worksheet_data = self.make_worksheet_data(headers, worksheet)
+            data[worksheet.name] = worksheet_data
 
-            if entry.title.text == 'values':
-                for row in data_feed.entry:
-                    text = self.parse_text_for_numbers(row.custom['value'].text)
-                    worksheet_key = slughifi(row.custom['key'].text)
-                    context[worksheet_key] = text
-            elif len(data_feed.entry):
-                headers = self._get_headers_from_worksheet(client, key,
-                                                           worksheet_id,
-                                                           visibility)
-                worksheet_key = slughifi(entry.title.text)
-
-                if 'key' in headers:
-                    context[worksheet_key] = OrderedDict()
-                    is_dict = True
+        # Copy values into global namespace
+        if 'values' in worksheets:
+            for k,v in data['values'].items():
+                if not data.get(k):
+                    data[k] = v
                 else:
-                    is_dict = False
-                    context[worksheet_key] = []
+                    print ("Warning: There is both a worksheet and a value named "
+                           "'{0}'. The worksheet data will be preserved." \
+                           .format(k))
+        return data
 
-                for i, row in enumerate(data_feed.entry):
-                    row_dict = OrderedDict()
-                    for header in headers:
-                        try:
-                            header_key = slughifi(header)
-                            value = row.custom[header_key.replace('_', '')].text
-                            row_dict[header_key] = self.parse_text_for_numbers(value)
-                        except KeyError:
-                            pass
-                    if is_dict:
-                        k = slughifi(row.custom['key'].text)
-                        context[worksheet_key][k] = row_dict
-                    else:
-                        context[worksheet_key].append(row_dict)
-        return context
-
-    def parse_text_for_numbers(self, value):
-        if value is not None:
-            try:
-                value = int(value)
-                return value
-            except ValueError:
-                pass
-
-            try:
-                value = float(value)
-                return value
-            except ValueError:
-                pass
-
-        return value
-
-    def _get_headers_from_worksheet(self, client, key, worksheet_id,
-                                    visibility):
-        """Get headers in correct order."""
-        headers = []
-        query = CellQuery()
-        query.max_row = '1'
-        query.min_row = '1'
-        cell_feed = client.GetCellsFeed(key, worksheet_id, query=query,
-                                        visibility=visibility,
-                                        projection='values')
-        for cell in cell_feed.entry:
-            headers.append(cell.cell.text)
+    def make_headers(self, worksheet):
+        # Make headers
+        headers = {}
+        cell_idx = 0
+        while cell_idx < worksheet.ncols:
+            cell_type = worksheet.cell_type(0, cell_idx)
+            if cell_type == 1:
+                header = slughifi(worksheet.cell_value(0, cell_idx))
+                if not header.startswith("_"):
+                    headers[cell_idx] = header
+            cell_idx += 1
         return headers
+
+
+    def make_worksheet_data(self, headers, worksheet):
+        # Make data
+        data = []
+        row_idx = 1
+        while row_idx < worksheet.nrows:
+            cell_idx = 0
+            row_dict = OrderedDict()
+            while cell_idx < worksheet.ncols:
+                cell_type = worksheet.cell_type(row_idx, cell_idx)
+                if cell_type > 0 and cell_type < 5:
+                    cell_value = worksheet.cell_value(row_idx, cell_idx)
+                    try:
+                        row_dict[headers[cell_idx]] = cell_value
+                    except KeyError:
+                        try:
+                            column = uppercase[cell_idx]
+                        except IndexError:
+                            column = cell_idx
+                        print ("Warning: There is no header for cell with "
+                               "value '{0}' in column '{1}' of '{2}'" .format(
+                                   cell_value, column, worksheet.name))
+                cell_idx += 1
+            data.append(row_dict)
+            row_idx += 1
+
+        # Magic key handling
+        if 'key' in headers.values():
+            keyed_data = OrderedDict()
+            for row in data:
+                if keyed_data.get(row['key']):
+                    print ("Warning: There is already a key named '{0}' with value "
+                           "'{1}' in '{2}'. It is being overwritten with "
+                           "value '{3}'.".format(row['key'],
+                                   keyed_data.get(row['key']),
+                                   worksheet.name,
+                                   row['value']))
+
+                # Magic values worksheet
+                if worksheet.name == "values":
+                    keyed_data[row['key']] = row['value']
+                else:
+                    keyed_data[row['key']] = row
+            data = keyed_data
+
+        return data
