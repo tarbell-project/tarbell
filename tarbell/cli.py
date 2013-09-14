@@ -18,9 +18,11 @@ from clint import args
 from clint.eng import join as eng_join
 from clint.textui import colored, puts, columns
 
-from legit.cli import cmd_switch
+from legit.cli import cmd_switch, cmd_branches
 
 from .app import TarbellSite
+
+from .oauth import get_drive_api
 
 __version__ = '0.9'
 
@@ -39,6 +41,41 @@ def black(s):
     #else:
     return s.encode('utf-8')
 
+class EnsureSite():
+    """Context manager to ensure the user is in a Tarbell site environment."""
+    def __init__(self, reset=False):
+        self.reset = reset
+
+    def __enter__(self):
+        return self.ensure_site()
+
+    def __exit__(self, type, value, traceback):
+        pass
+
+    def ensure_site(self, path=None):
+        if not path:
+            path = os.getcwd()
+
+        if path is "/":
+            show_error("The current directory is not part of a Tarbell project")
+            sys.exit(1)
+
+        if not os.path.exists(os.path.join(path, '.tarbell')):
+            path = os.path.realpath(os.path.join(path, '..'))
+            return self.ensure_site(path)
+        else:
+            os.chdir(path)
+            self.ensure_secrets(path)
+            return path
+
+    def ensure_secrets(self, path):
+        # Check for client secrets? Might be unnecessary, really.
+        client = get_drive_api(path, self.reset)
+        # Trap errors and show docs
+
+# Alias to lowercase
+ensure_site = EnsureSite
+
 # --------
 # Dispatch
 # --------
@@ -48,7 +85,7 @@ def main():
 
     command = Command.lookup(args.get(0))
 
-    if len(args) == 0 or args.contains(('-h', '--help')):
+    if len(args) == 0 or args.contains(('-h', '--help', 'help')):
         display_info()
         sys.exit(1)
 
@@ -60,20 +97,32 @@ def main():
         arg = args.get(0)
         args.remove(arg)
 
-        command.__call__(args)
+        reset = False
+        if args.contains('--reset-creds'):
+            reset = True
+            args.remove('--reset-creds')
+
+        with ensure_site(reset) as path:
+            command.__call__(args, path)
+
         sys.exit()
 
     else:
-        show_error(colored.red('Unknown command {0}'.format(args.get(0))))
+        show_error(colored.red('Error! Unknown command `{0}`.\n'.format(args.get(0))))
         display_info()
         sys.exit(1)
 
 
-def first_sentence(s):
-    pos = s.find('. ')
-    if pos < 0:
-        pos = len(s) - 1
-    return s[:pos + 1]
+def split_sentences(s):
+    sentences = []
+    for index, sentence in enumerate(s.split('. ')):
+        pad = ''
+        if index > 0:
+            pad = ' ' * 39
+        if sentence.endswith('.'):
+            sentence = sentence[:-1]
+        sentences.append('%s %s.' % (pad, sentence.strip()))
+    return "\n".join(sentences)
 
 
 def display_info():
@@ -88,9 +137,15 @@ def display_info():
     for command in Command.all_commands():
         usage = command.usage or command.name
         help = command.help or ''
-        puts('{0:50} {1}'.format(
+        puts('{0:48} {1}\n'.format(
                 colored.green(usage),
-                first_sentence(help)))
+                split_sentences(help)))
+
+    puts('\nOptions\n')
+    puts('{0:48} {1}'.format(
+        colored.green("--reset-creds"),
+        'Reset Google Drive OAuth2 credentials'
+    ))
 
     puts('\n{0}'.format(
         black(u'A Chicago Tribune News Applications project')
@@ -110,36 +165,17 @@ def show_error(msg):
     sys.stderr.write(msg + '\n')
 
 
-def ensure_site(fn, path=None):
-    def new_ensure_site(args):
-        return fn(args, path)
-
-    if not path:
-        path = os.getcwd()
-
-    if path is "/":
-        show_error("The current directory is not part of a Tarbell project")
-        sys.exit(1)
-
-    if not os.path.exists(os.path.join(path, '.tarbell')):
-        path = os.path.realpath(os.path.join(path, '..'))
-        return ensure_site(fn, path)
-    else:
-        os.chdir(path)
-        return new_ensure_site
-
-
-@ensure_site
 def tarbell_list(args, path):
-    print "@todo list projects"
+    """List tarbell projects."""
+
+    # Use legit branches command for now
+    cmd_branches(path)
 
 
-@ensure_site
 def tarbell_publish(args, path):
     print "@todo publish"
 
 
-@ensure_site
 def tarbell_newproject(args, path):
     project = args.get(0)
     if project:
@@ -147,7 +183,7 @@ def tarbell_newproject(args, path):
     else:
         show_error("No project name specified")
 
-@ensure_site
+
 def tarbell_serve(args, path):
     address = list_get(args, 0, "").split(":")
     ip = list_get(address, 0, '127.0.0.1')
@@ -156,18 +192,15 @@ def tarbell_serve(args, path):
     site.app.run(ip, port=int(port))
 
 
-@ensure_site
 def tarbell_stop(args, path):
     print "@todo stop server"
 
 
-@ensure_site
 def tarbell_switch(args, path):
     cmd_switch(args)        # legit switch
     tarbell_serve(args[1:]) # serve 'em up!
 
 
-@ensure_site
 def tarbell_unpublish(args, path):
     print "@todo unpublish"
 
@@ -238,7 +271,9 @@ def_cmd(
     name='serve',
     fn=tarbell_serve,
     usage='serve <address (optional)>',
-    help='Run a preview server (typically handled by `switch`)')
+    help=('Run a preview server (typically handled by `switch`). '
+          'Supply an optional address for the preview server such as '
+          '`127.0.0.2:8000`'))
 
 
 def_cmd(
@@ -252,7 +287,9 @@ def_cmd(
     name='switch',
     fn=tarbell_switch,
     usage='switch <project> <address (optional)>',
-    help='Switch to the project named <project> and start a preview server.')
+    help=('Switch to the project named <project> and start a preview server. '
+          'Supply an optional address for the preview server such as '
+          '`127.0.0.2:8000`'))
 
 
 def_cmd(
