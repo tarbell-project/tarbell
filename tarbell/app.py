@@ -16,6 +16,7 @@ import xlrd
 from string import uppercase
 TTL_MULTIPLIER = 5
 
+
 def silent_none(value):
     if value is None:
         return ''
@@ -144,7 +145,6 @@ class TarbellSite:
     # Cell Types: 0=Empty, 1=Text, 2=Number, 3=Date, 4=Boolean, 5=Error, 6=Blank
     def _get_context_from_gdoc(self, key, **kwargs):
         data = {}
-        from pprint import pprint as pp
 
         # Download xlsx version of spreadsheet
         spreadsheet_file = self.client.files().get(fileId=key).execute()
@@ -168,7 +168,7 @@ class TarbellSite:
                 if not data.get(k):
                     data[k] = v
                 else:
-                    print ("Warning: There is both a worksheet and a value named "
+                    self.app.logger.warning("There is both a worksheet and a value named "
                            "'{0}'. The worksheet data will be preserved." \
                            .format(k))
         return data
@@ -205,7 +205,7 @@ class TarbellSite:
                             column = uppercase[cell_idx]
                         except IndexError:
                             column = cell_idx
-                        print ("Warning: There is no header for cell with "
+                        self.app.logger.warning("There is no header for cell with "
                                "value '{0}' in column '{1}' of '{2}'" .format(
                                    cell_value, column, worksheet.name))
                 cell_idx += 1
@@ -216,19 +216,20 @@ class TarbellSite:
         if 'key' in headers.values():
             keyed_data = OrderedDict()
             for row in data:
-                if keyed_data.get(row['key']):
-                    print ("Warning: There is already a key named '{0}' with value "
+                key = slughifi(row['key'])
+                if keyed_data.get(key):
+                    self.app.logger.warning("There is already a key named '{0}' with value "
                            "'{1}' in '{2}'. It is being overwritten with "
-                           "value '{3}'.".format(row['key'],
-                                   keyed_data.get(row['key']),
+                           "value '{3}'.".format(key,
+                                   keyed_data.get(key),
                                    worksheet.name,
-                                   row['value']))
+                                   row))
 
                 # Magic values worksheet
                 if worksheet.name == "values":
-                    keyed_data[row['key']] = row['value']
+                    keyed_data[key] = row['value']
                 else:
-                    keyed_data[row['key']] = row
+                    keyed_data[key] = row
             data = keyed_data
 
         return data
