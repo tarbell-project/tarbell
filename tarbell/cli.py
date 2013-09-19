@@ -176,6 +176,9 @@ def tarbell_generate(args, path):
         tempdir = tempfile.mkdtemp(prefix="{0}-".format(site.project.__name__))
         os.makedirs(os.path.join(tempdir, site.project.__name__))
         output_root = os.path.join(tempdir, site.project.__name__)
+    else:
+        tempdir = output_root
+        output_root = os.path.join(tempdir, site.project.__name__)
     site.generate_static_site(output_root)
     puts("\nCreated site in {0}".format(output_root))
     return tempdir
