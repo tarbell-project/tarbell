@@ -239,8 +239,9 @@ def tarbell_stop(args, path):
 
 
 def tarbell_switch(args, path):
-    cmd_switch(args)        # legit switch
-    tarbell_serve(args[1:]) # serve 'em up!
+    """Switch to a project"""
+    cmd_switch(args)              # legit switch
+    tarbell_serve(args[1:], path) # serve 'em up!
 
 
 def tarbell_unpublish(args, path):
