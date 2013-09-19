@@ -177,7 +177,7 @@ def tarbell_generate(args, path):
         os.makedirs(os.path.join(tempdir, site.project.__name__))
         output_root = os.path.join(tempdir, site.project.__name__)
     site.generate_static_site(output_root)
-    print "\nCreated site in {0}".format(output_root)
+    puts("\nCreated site in {0}".format(output_root))
     return tempdir
 
 
@@ -196,8 +196,8 @@ def tarbell_publish(args, path):
 
     try:
         if bucket_uri:
-            print "Deploying to {0} ({1})\n".format(
-                colored.green(bucket_name), colored.green(bucket_uri))
+            puts("Deploying to {0} ({1})\n".format(
+                colored.green(bucket_name), colored.green(bucket_uri)))
             tempdir = tarbell_generate([], path)
             projectdir = os.path.join(tempdir, site.project.__name__)
             s3cmd = call(['s3cmd', 'sync', '--acl-public', '--delete-removed',
@@ -211,7 +211,7 @@ def tarbell_publish(args, path):
         # Delete tempdir
         try:
             shutil.rmtree(tempdir)  # delete directory
-            print "\nDeleted {0}".format(tempdir)
+            puts("\nDeleted {0}".format(tempdir))
         except OSError as exc:
             if exc.errno != 2:  # code 2 - no such file or directory
                 raise  # re-raise exception
