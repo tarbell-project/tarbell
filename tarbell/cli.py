@@ -20,6 +20,9 @@ from clint.textui import colored, puts, columns
 
 from legit.cli import cmd_switch, cmd_branches
 
+import tempfile
+import shutil
+
 from .app import TarbellSite
 
 from .oauth import get_drive_api
@@ -162,7 +165,20 @@ def display_version():
 
 def show_error(msg):
     sys.stdout.flush()
-    sys.stderr.write(msg + '\n')
+    sys.stderr.write("{0}: {1}".format(colored.red("Error"), msg + '\n'))
+
+
+def tarbell_generate(args, path):
+    """Generate static files."""
+    site = TarbellSite(path)
+    output_root = list_get(args, 0, False)
+    if not output_root:
+        tempdir = tempfile.mkdtemp(prefix="{0}-".format(site.project.__name__))
+        os.makedirs(os.path.join(tempdir, site.project.__name__))
+        output_root = os.path.join(tempdir, site.project.__name__)
+    site.generate_static_site(output_root)
+    print "\nCreated site in {0}".format(output_root)
+    return tempdir
 
 
 def tarbell_list(args, path):
@@ -173,7 +189,34 @@ def tarbell_list(args, path):
 
 
 def tarbell_publish(args, path):
-    print "@todo publish"
+    """Publish a site by calling s3cmd"""
+    site = TarbellSite(path)
+    bucket_name = list_get(args, 0, "staging")
+    bucket_uri = site.project.S3_BUCKETS.get(bucket_name, False)
+
+    try:
+        if bucket_uri:
+            print "Deploying to {0} ({1})\n".format(
+                colored.green(bucket_name), colored.green(bucket_uri))
+            tempdir = tarbell_generate([], path)
+            projectdir = os.path.join(tempdir, site.project.__name__)
+            s3cmd = call(['s3cmd', 'sync', '--acl-public', '--delete-removed',
+                projectdir, bucket_uri])
+        else:
+            show_error(("There's no bucket configuration called '{0}' "
+                "in config.py.\n".format(bucket_name)))
+    except KeyboardInterrupt:
+        show_error("ctrl-c pressed, bailing out!")
+    finally:
+        # Delete tempdir
+        try:
+            shutil.rmtree(tempdir)  # delete directory
+            print "\nDeleted {0}".format(tempdir)
+        except OSError as exc:
+            if exc.errno != 2:  # code 2 - no such file or directory
+                raise  # re-raise exception
+        except UnboundLocalError:
+            pass
 
 
 def tarbell_newproject(args, path):
@@ -190,7 +233,6 @@ def tarbell_serve(args, path):
     port = list_get(address, 1, 5000)
     site = TarbellSite(path)
     site.app.run(ip, port=int(port))
-
 
 def tarbell_stop(args, path):
     print "@todo stop server"
@@ -244,6 +286,14 @@ class Command(object):
 def def_cmd(name=None, short=None, fn=None, usage=None, help=None):
     command = Command(name=name, short=short, fn=fn, usage=usage, help=help)
     Command.register(command)
+
+
+def_cmd(
+    name='generate',
+    fn=tarbell_generate,
+    usage='generate <output dir (optional)>',
+    help=('Generate static files for the current project. If no output '
+          'directory is specified, create a temporary directory.'))
 
 
 def_cmd(

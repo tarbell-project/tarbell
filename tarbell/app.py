@@ -14,6 +14,7 @@ from slughifi import slughifi
 import mimetypes
 import xlrd
 from string import uppercase
+from werkzeug.wsgi import FileWrapper
 TTL_MULTIPLIER = 5
 
 
@@ -24,29 +25,33 @@ def silent_none(value):
 
 
 class TarbellSite:
-    def __init__(self, projects_path):
+    def __init__(self, path):
         self.app = Flask(__name__)
 
         self.app.jinja_env.finalize = silent_none  # Don't print "None"
         self.app.debug = True  # Always debug
 
-        self.projects_path = projects_path
+        self.path = path
         self.projects = self.load_projects()
         self.project = self.projects[0][1]
 
-        self.client = get_drive_api(self.projects_path)
-        self.spreadsheet_data = {}
+        self.client = get_drive_api(self.path)
+        self.data = {}
         self.expires = 0
 
         self.app.add_url_rule('/', view_func=self.preview)
         self.app.add_url_rule('/<path:path>', view_func=self.preview)
         self.app.add_template_filter(slughifi, 'slugify')
 
-    def filter_projects(self):
-        for dirpath, dirnames, filenames in os.walk(self.projects_path):
+    def filter_files(self, path):
+        for dirpath, dirnames, filenames in os.walk(path):
             dirnames[:] = [
                 dn for dn in dirnames
                 if not dn.startswith('.') and not dn.startswith('_') 
+                ]
+            filenames[:] = [
+                fn for fn in filenames
+                if not fn.startswith('.') and not fn.startswith('_')
                 ]
             yield dirpath, dirnames, filenames
 
@@ -56,7 +61,7 @@ class TarbellSite:
 
     def load_projects(self):
         projects = []
-        for root, dirs, files in self.filter_projects():
+        for root, dirs, files in self.filter_files(self.path):
             if 'config.py' in files:
                 name = root.split('/')[-1]
                 filename, pathname, description = imp.find_module('config', [root])
@@ -102,7 +107,7 @@ class TarbellSite:
             path += 'index.html'
 
         ## Serve JSON
-        if path == 'data.json':
+        if self.project.CREATE_JSON and path == 'data.json':
             context = self.get_context_from_gdoc()
             return Response(json.dumps(context), mimetype="application/json")
 
@@ -125,19 +130,20 @@ class TarbellSite:
             dir, filename = os.path.split(filepath)
             return send_from_directory(dir, filename)
 
-        # @TODO Return 404 template if it exists
+        # @TODO Return 404 template if it exists, use Response object
         return "Not found", 404
+
 
     def get_context_from_gdoc(self):
         """Wrap getting context in a simple caching mechanism."""
         try:
             start = int(time.time())
             if start > self.expires:
-                self.spreadsheet_data = self._get_context_from_gdoc(**self.project.GOOGLE_DOC)
+                self.data = self._get_context_from_gdoc(**self.project.GOOGLE_DOC)
                 end = int(time.time())
                 ttl = (end - start) * TTL_MULTIPLIER
                 self.expires = end + ttl
-            return self.spreadsheet_data
+            return self.data
         except AttributeError:
             return {}
 
@@ -233,3 +239,31 @@ class TarbellSite:
             data = keyed_data
 
         return data
+
+    def generate_static_site(self, output_root):
+        for name, project, project_path in self.projects:
+            for root, dirs, files in self.filter_files(project_path):
+                files[:] = [
+                    filename for filename in files
+                    if not filename.endswith('.py') and not filename.endswith('.pyc')
+                    ]
+                for filename in files:
+                    # Strip out full filesystem paths
+                    dirname = root.replace(project_path, "")
+                    path = "{0}/{1}".format(dirname, filename)
+                    if path.startswith("/"):
+                        path = path[1:]
+                    output_path = os.path.join(output_root, path)
+                    output_dir = os.path.dirname(output_path)
+
+                    # @TODO account for overwriting
+                    self.app.logger.info("Writing {0}".format(output_path))
+                    with self.app.test_request_context():
+                        preview = self.preview(path)
+                        if not os.path.exists(output_dir):
+                            os.makedirs(output_dir)
+                        with open(output_path, "wb") as f:
+                            if isinstance(preview.response, FileWrapper):
+                                f.write(preview.response.file.read())
+                            else:
+                                f.write(preview.data)
