@@ -334,13 +334,6 @@ def_cmd(
 
 
 def_cmd(
-    name='stop',
-    fn=tarbell_stop,
-    usage='stop',
-    help='Stop a running preview server.')
-
-
-def_cmd(
     name='switch',
     fn=tarbell_switch,
     usage='switch <project> <address (optional)>',

@@ -145,15 +145,25 @@ class TarbellSite:
             return {}
 
     def _get_context_from_gdoc(self, key, **kwargs):
-        data = {}
 
-        # Download xlsx version of spreadsheet
+        content = self.export_xlsx(key)
+        data = self.process_xlsx(content)
+        if 'values' in data:
+            data = self.copy_global_values(data)
+
+        return data
+
+    def export_xlsx(self, key):
+        """Download xlsx version of spreadsheet"""
         spreadsheet_file = self.client.files().get(fileId=key).execute()
         links = spreadsheet_file.get('exportLinks')
         downloadurl = links.get('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
         resp, content = self.client._http.request(downloadurl)
+        return content
 
-        # Open xlsx contents
+    def process_xlsx(self, content):
+        """Turn Excel file contents into Tarbell worksheet data"""
+        data = {}
         workbook = xlrd.open_workbook(file_contents=content)
         worksheets = workbook.sheet_names()
         for worksheet_name in worksheets:
@@ -162,21 +172,21 @@ class TarbellSite:
             headers = self.make_headers(worksheet)
             worksheet_data = self.make_worksheet_data(headers, worksheet)
             data[worksheet.name] = worksheet_data
+        return data
 
-        # Copy values into global namespace
-        if 'values' in worksheets:
-            for k, v in data['values'].items():
-                if not data.get(k):
-                    data[k] = v
-                else:
-                    self.app.logger.warning("There is both a worksheet and a "
-                            "value named '{0}'. The worksheet data will be "
-                            "preserved."
-                           .format(k))
+    def copy_global_values(self, data):
+        """Copy values worksheet into global namespace."""
+        for k, v in data['values'].items():
+            if not data.get(k):
+                data[k] = v
+            else:
+                self.app.logger.warning("There is both a worksheet and a "
+                                        "value named '{0}'. The worksheet data "
+                                        "will be preserved.".format(k))
         return data
 
     def make_headers(self, worksheet):
-        # Make headers
+        """Make headers"""
         headers = {}
         cell_idx = 0
         while cell_idx < worksheet.ncols:
