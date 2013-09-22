@@ -10,13 +10,9 @@ This module provides the CLI interface to tarbell.
 import os
 import sys
 from subprocess import call
-import subprocess
-from time import sleep
 
-import clint.resources
 from clint import args
-from clint.eng import join as eng_join
-from clint.textui import colored, puts, columns
+from clint.textui import colored, puts
 
 from legit.cli import cmd_switch, cmd_branches
 
@@ -24,12 +20,13 @@ import tempfile
 import shutil
 
 from .app import TarbellSite
-
 from .oauth import get_drive_api
 
 __version__ = '0.9'
 
+
 def list_get(l, idx, default=None):
+    """Get from a list with an optional default value."""
     try:
         if l[idx]:
             return l[idx]
@@ -38,11 +35,14 @@ def list_get(l, idx, default=None):
     except IndexError:
         return default
 
+
 def black(s):
+    """Black text."""
     #if settings.allow_black_foreground:
         #return colored.black(s)
     #else:
     return s.encode('utf-8')
+
 
 class EnsureSite():
     """Context manager to ensure the user is in a Tarbell site environment."""
@@ -60,7 +60,8 @@ class EnsureSite():
             path = os.getcwd()
 
         if path is "/":
-            show_error("The current directory is not part of a Tarbell project")
+            show_error(("The current directory is not part of a Tarbell "
+                        "project"))
             sys.exit(1)
 
         if not os.path.exists(os.path.join(path, '.tarbell')):
@@ -79,10 +80,10 @@ class EnsureSite():
 # Alias to lowercase
 ensure_site = EnsureSite
 
+
 # --------
 # Dispatch
 # --------
-
 def main():
     """Primary Tarbell command dispatch."""
 
@@ -117,6 +118,7 @@ def main():
 
 
 def split_sentences(s):
+    """Split sentences for formatting."""
     sentences = []
     for index, sentence in enumerate(s.split('. ')):
         pad = ''
@@ -154,6 +156,7 @@ def display_info():
         black(u'A Chicago Tribune News Applications project')
     ))
 
+
 def display_version():
     """Displays Legit version/release."""
 
@@ -164,6 +167,7 @@ def display_version():
 
 
 def show_error(msg):
+    """Displays error message."""
     sys.stdout.flush()
     sys.stderr.write("{0}: {1}".format(colored.red("Error"), msg + '\n'))
 
@@ -186,8 +190,6 @@ def tarbell_generate(args, path):
 
 def tarbell_list(args, path):
     """List tarbell projects."""
-
-    # Use legit branches command for now
     cmd_branches(path)
 
 
@@ -203,11 +205,11 @@ def tarbell_publish(args, path):
                 colored.green(bucket_name), colored.green(bucket_uri)))
             tempdir = tarbell_generate([], path)
             projectdir = os.path.join(tempdir, site.project.__name__)
-            s3cmd = call(['s3cmd', 'sync', '--acl-public', '--delete-removed',
-                projectdir, bucket_uri])
+            call(['s3cmd', 'sync', '--acl-public', '--delete-removed',
+                  projectdir, bucket_uri])
         else:
             show_error(("There's no bucket configuration called '{0}' "
-                "in config.py.\n".format(bucket_name)))
+                        "in config.py.\n".format(bucket_name)))
     except KeyboardInterrupt:
         show_error("ctrl-c pressed, bailing out!")
     finally:
@@ -223,6 +225,7 @@ def tarbell_publish(args, path):
 
 
 def tarbell_newproject(args, path):
+    """Create new Tarbell project."""
     project = args.get(0)
     if project:
         print "@todo create new project {0}".format(project)
@@ -231,23 +234,22 @@ def tarbell_newproject(args, path):
 
 
 def tarbell_serve(args, path):
+    """Serve the current Tarbell project."""
     address = list_get(args, 0, "").split(":")
     ip = list_get(address, 0, '127.0.0.1')
     port = list_get(address, 1, 5000)
     site = TarbellSite(path)
     site.app.run(ip, port=int(port))
 
-def tarbell_stop(args, path):
-    print "@todo stop server"
-
 
 def tarbell_switch(args, path):
     """Switch to a project"""
-    cmd_switch(args)              # legit switch
-    tarbell_serve(args[1:], path) # serve 'em up!
+    cmd_switch(args)               # legit switch
+    tarbell_serve(args[1:], path)  # serve 'em up!
 
 
 def tarbell_unpublish(args, path):
+    """Delete a project."""
     print "@todo unpublish"
 
 
@@ -288,6 +290,7 @@ class Command(object):
 
 
 def def_cmd(name=None, short=None, fn=None, usage=None, help=None):
+    """Define a command."""
     command = Command(name=name, short=short, fn=fn, usage=usage, help=help)
     Command.register(command)
 
@@ -351,5 +354,3 @@ def_cmd(
     fn=tarbell_unpublish,
     usage='unpublish <target (default: staging)>',
     help='Remove the current project from <target>.')
-
-

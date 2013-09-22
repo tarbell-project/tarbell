@@ -1,15 +1,11 @@
-from flask import Flask, render_template, request, send_from_directory, Response
+from flask import Flask, render_template, send_from_directory, Response
 import time
 import os
-from jinja2 import Markup, PrefixLoader, FileSystemLoader, ChoiceLoader
+from jinja2 import FileSystemLoader, ChoiceLoader
 from ordereddict import OrderedDict
-from gdata.spreadsheet.service import SpreadsheetsService
-from gdata.spreadsheet.service import CellQuery
 from .oauth import get_drive_api
 import json
 import imp
-import shutil
-import codecs
 from slughifi import slughifi
 import mimetypes
 import xlrd
@@ -47,7 +43,7 @@ class TarbellSite:
         for dirpath, dirnames, filenames in os.walk(path):
             dirnames[:] = [
                 dn for dn in dirnames
-                if not dn.startswith('.') and not dn.startswith('_') 
+                if not dn.startswith('.') and not dn.startswith('_')
                 ]
             filenames[:] = [
                 fn for fn in filenames
@@ -56,7 +52,8 @@ class TarbellSite:
             yield dirpath, dirnames, filenames
 
     def sort_modules(self, x, y):
-        if x[0] == "base": return 1
+        if x[0] == "base":
+            return 1
         return -1
 
     def load_projects(self):
@@ -98,7 +95,6 @@ class TarbellSite:
 
         return projects
 
-
     def preview(self, path=None):
         """ Preview a project path """
         if path is None:
@@ -116,10 +112,11 @@ class TarbellSite:
         for name, project, root in self.projects:
             fullpath = os.path.join(root, path)
             try:
-                with open(fullpath) as file:
+                with open(fullpath):
                     mimetype, encoding = mimetypes.guess_type(fullpath)
                     filepath = fullpath
-            except IOError: pass
+            except IOError:
+                pass
 
         if filepath and mimetype and mimetype.startswith("text/"):
             context = self.project.DEFAULT_CONTEXT
@@ -133,13 +130,13 @@ class TarbellSite:
         # @TODO Return 404 template if it exists, use Response object
         return "Not found", 404
 
-
     def get_context_from_gdoc(self):
         """Wrap getting context in a simple caching mechanism."""
         try:
             start = int(time.time())
             if start > self.expires:
-                self.data = self._get_context_from_gdoc(**self.project.GOOGLE_DOC)
+                self.data = self._get_context_from_gdoc(
+                    **self.project.GOOGLE_DOC)
                 end = int(time.time())
                 ttl = (end - start) * TTL_MULTIPLIER
                 self.expires = end + ttl
@@ -147,8 +144,6 @@ class TarbellSite:
         except AttributeError:
             return {}
 
-
-    # Cell Types: 0=Empty, 1=Text, 2=Number, 3=Date, 4=Boolean, 5=Error, 6=Blank
     def _get_context_from_gdoc(self, key, **kwargs):
         data = {}
 
@@ -170,12 +165,13 @@ class TarbellSite:
 
         # Copy values into global namespace
         if 'values' in worksheets:
-            for k,v in data['values'].items():
+            for k, v in data['values'].items():
                 if not data.get(k):
                     data[k] = v
                 else:
-                    self.app.logger.warning("There is both a worksheet and a value named "
-                           "'{0}'. The worksheet data will be preserved." \
+                    self.app.logger.warning("There is both a worksheet and a "
+                            "value named '{0}'. The worksheet data will be "
+                            "preserved."
                            .format(k))
         return data
 
@@ -191,7 +187,6 @@ class TarbellSite:
                     headers[cell_idx] = header
             cell_idx += 1
         return headers
-
 
     def make_worksheet_data(self, headers, worksheet):
         # Make data
