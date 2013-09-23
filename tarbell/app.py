@@ -133,19 +133,21 @@ class TarbellSite:
     def get_context_from_gdoc(self):
         """Wrap getting context in a simple caching mechanism."""
         try:
-            start = int(time.time())
-            if start > self.expires:
-                self.data = self._get_context_from_gdoc(
-                    **self.project.GOOGLE_DOC)
-                end = int(time.time())
-                ttl = (end - start) * TTL_MULTIPLIER
-                self.expires = end + ttl
+            #start = int(time.time())
+            #if start > self.expires:
+                #self.data = self._get_context_from_gdoc(
+                    #**self.project.GOOGLE_DOC)
+                #end = int(time.time())
+                #ttl = (end - start) * TTL_MULTIPLIER
+                #self.expires = end + ttl
+            self.data = self._get_context_from_gdoc(
+                **self.project.GOOGLE_DOC)
             return self.data
         except AttributeError:
             return {}
 
     def _get_context_from_gdoc(self, key, **kwargs):
-
+        """Create a Jinja2 context from a Google spreadsheet."""
         content = self.export_xlsx(key)
         data = self.process_xlsx(content)
         if 'values' in data:
@@ -172,6 +174,7 @@ class TarbellSite:
             headers = self.make_headers(worksheet)
             worksheet_data = self.make_worksheet_data(headers, worksheet)
             data[worksheet.name] = worksheet_data
+        print data
         return data
 
     def copy_global_values(self, data):
@@ -238,7 +241,9 @@ class TarbellSite:
 
                 # Magic values worksheet
                 if worksheet.name == "values":
-                    keyed_data[key] = row['value']
+                    value = row.get('value')
+                    if value:
+                        keyed_data[key] = value
                 else:
                     keyed_data[key] = row
             data = keyed_data

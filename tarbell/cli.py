@@ -12,12 +12,21 @@ import sys
 from subprocess import call
 
 from clint import args
+from clint.arguments import Args
 from clint.textui import colored, puts
 
-from legit.cli import cmd_switch, cmd_branches
+from legit.cli import cmd_switch, cmd_branches, cmd_sprout
+
+import jinja2
+import codecs
+import mimetypes
 
 import tempfile
 import shutil
+
+from apiclient import errors
+from apiclient.http import MediaFileUpload as _MediaFileUpload
+from oauth2client.clientsecrets import InvalidClientSecretsError
 
 from .app import TarbellSite
 from .oauth import get_drive_api
@@ -73,9 +82,16 @@ class EnsureSite():
             return path
 
     def ensure_secrets(self, path):
-        # Check for client secrets? Might be unnecessary, really.
-        client = get_drive_api(path, self.reset)
-        # Trap errors and show docs
+        try:
+            get_drive_api(path, self.reset)
+        except InvalidClientSecretsError:
+            show_error(("\nYou don't have the `{0}` file necessary to work "
+                        "with Google spreadsheets. Go to {1} to create an "
+                        "app and generate an API client authentication file."
+                        .format(colored.red("client_secrets.json"),
+                                colored.yellow("https://code.google.com/apis/console/"))
+                        ))
+            sys.exit(1)
 
 # Alias to lowercase
 ensure_site = EnsureSite
@@ -112,7 +128,8 @@ def main():
         sys.exit()
 
     else:
-        show_error(colored.red('Error! Unknown command `{0}`.\n'.format(args.get(0))))
+        show_error(colored.red('Error! Unknown command `{0}`.\n'
+                               .format(args.get(0))))
         display_info()
         sys.exit(1)
 
@@ -227,10 +244,106 @@ def tarbell_publish(args, path):
 def tarbell_newproject(args, path):
     """Create new Tarbell project."""
     project = args.get(0)
-    if project:
-        print "@todo create new project {0}".format(project)
-    else:
+    if not project:
         show_error("No project name specified")
+        sys.exit(1)
+
+    #cmd_sprout(Args(["master", project]))
+
+    site = TarbellSite(path)
+    key = _create_spreadsheet(project, path)
+    context = site._get_context_from_gdoc(key)
+    _copy_project_files(project, path, context)
+
+def _copy_project_files(project, path, context):
+    proj_dir = os.path.join(path, project)
+    try:
+        os.mkdir(proj_dir)
+    except OSError, e:
+        if e.errno == 17:
+            print ("ABORTING: Directory %s "
+                   "already exists.") % proj_dir
+        else:
+            print "ABORTING: OSError %s" % e
+        return
+
+    # Get and walk project template
+    loader = jinja2.FileSystemLoader(os.path.join(path, '_project_template'))
+    env = jinja2.Environment(loader=loader)
+
+    for root, dirs, files in os.walk(os.path.join(path, '_project_template')):
+        for filename in files:
+            # Strip out full filesystem paths
+            dirname = root.replace(path, "")\
+                          .replace("_project_template", "")
+
+            relpath = "{0}/{1}".format(dirname, filename)
+            if relpath.startswith("/"):
+                relpath = relpath[1:]
+
+            filepath = os.path.join(root, filename)
+            output_path = filepath.replace("_project_template", project)
+            output_dir = os.path.dirname(output_path)
+
+            if not os.path.exists(output_dir):
+                os.makedirs(output_dir)
+
+            mimetype, encoding = mimetypes.guess_type(filepath)
+
+            puts("Writing {0}".format(colored.yellow(output_path)))
+            if mimetype and mimetype.startswith("text/"):
+                content = env.get_template(relpath).render(context)
+                codecs.open(output_path, "w", encoding="utf-8").write(content)
+            else:
+                shutil.copy(filepath, output_path)
+
+
+def _create_spreadsheet(project, path):
+    puts("\nGenerating Google spreadsheet")
+    email = raw_input(("What Google account should have access to "
+                       "this spreadsheet? "))
+    media_body = _MediaFileUpload(os.path.join(path,
+                                  '_project_template/tarbell_template.xlsx'),
+                                  mimetype='application/vnd.ms-excel')
+
+    service = get_drive_api(path)
+    body = {
+        'title': '%s [Tarbell project]' % project,
+        'description': '%s [Tarbell project]' % project,
+        'mimeType': 'application/vnd.ms-excel',
+    }
+    try:
+        newfile = service.files()\
+            .insert(body=body, media_body=media_body, convert=True).execute()
+        _add_user_to_file(newfile['id'], service, user_email=email)
+        _add_user_to_file(newfile['id'], service, user_email='anyone',
+                          perm_type='anyone', role='reader')
+        puts(("Success! View the file at "
+              "https://docs.google.com/spreadsheet/ccc?key={0}"
+              .format(newfile['id'])))
+        return newfile['id']
+    except errors.HttpError, error:
+        show_error('An error occurred: {0}'.format(error))
+        sys.exit(1)
+
+
+def _add_user_to_file(file_id, service, user_email,
+                      perm_type='user', role='reader'):
+    """
+    Grants the given set of permissions for a given file_id. service is an
+    already-credentialed Google Drive service instance.
+    """
+    new_permission = {
+        'value': user_email,
+        'type': perm_type,
+        'role': role
+    }
+    try:
+        service.permissions()\
+            .insert(fileId=file_id, body=new_permission)\
+            .execute()
+    except errors.HttpError, error:
+        print 'An error occurred: %s' % error
 
 
 def tarbell_serve(args, path):
