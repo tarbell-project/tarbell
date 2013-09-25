@@ -174,7 +174,6 @@ class TarbellSite:
             headers = self.make_headers(worksheet)
             worksheet_data = self.make_worksheet_data(headers, worksheet)
             data[worksheet.name] = worksheet_data
-        print data
         return data
 
     def copy_global_values(self, data):
