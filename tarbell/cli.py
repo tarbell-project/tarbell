@@ -200,6 +200,10 @@ def tarbell_generate(args, path):
     else:
         tempdir = output_root
         output_root = os.path.join(tempdir, site.project.__name__)
+
+    if args.contains('--context'):
+        site.project.CONTEXT_SOURCE_FILE = args.value_after('--context')
+
     site.generate_static_site(output_root)
     puts("\nCreated site in {0}".format(output_root))
     return tempdir
@@ -256,6 +260,7 @@ def tarbell_newproject(args, path):
     context['spreadsheet_key'] = key
     _copy_project_files(project, path, context)
 
+
 def _copy_project_files(project, path, context):
     proj_dir = os.path.join(path, project)
     try:
@@ -301,8 +306,10 @@ def _copy_project_files(project, path, context):
 
 def _create_spreadsheet(project, path):
     puts("\nGenerating Google spreadsheet")
-    email = raw_input(("What Google account should have access to "
-                       "this spreadsheet? "))
+    email = raw_input((
+        "What Google account should have access to this "
+        "this spreadsheet? Use a full email address, such as "
+        "your.name@gmail.com or the Google account equivalent."))
     media_body = _MediaFileUpload(os.path.join(path,
                                   '_project_template/tarbell_template.xlsx'),
                                   mimetype='application/vnd.ms-excel')
