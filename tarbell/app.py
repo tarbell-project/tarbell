@@ -1,16 +1,21 @@
 from flask import Flask, render_template, send_from_directory, Response
-import time
-import os
 from jinja2 import FileSystemLoader, ChoiceLoader
 from ordereddict import OrderedDict
 from .oauth import get_drive_api
-import json
-import imp
 from slughifi import slughifi
-import mimetypes
-import xlrd
 from string import uppercase
 from werkzeug.wsgi import FileWrapper
+
+import os
+import json
+import imp
+import mimetypes
+import xlrd
+import csv
+import re
+import requests
+import StringIO
+
 TTL_MULTIPLIER = 5
 
 
@@ -104,7 +109,7 @@ class TarbellSite:
 
         ## Serve JSON
         if self.project.CREATE_JSON and path == 'data.json':
-            context = self.get_context_from_gdoc()
+            context = self.get_context()
             return Response(json.dumps(context), mimetype="application/json")
 
         ## Detect files
@@ -120,7 +125,7 @@ class TarbellSite:
 
         if filepath and mimetype and mimetype.startswith("text/"):
             context = self.project.DEFAULT_CONTEXT
-            context.update(self.get_context_from_gdoc())
+            context.update(self.get_context())
             rendered = render_template(path, **context)
             return Response(rendered, mimetype=mimetype)
         elif filepath:
@@ -129,6 +134,39 @@ class TarbellSite:
 
         # @TODO Return 404 template if it exists, use Response object
         return "Not found", 404
+
+    def get_context(self):
+        """
+        Use optional CONTEXT_SOURCE_FILE setting to determine data source.
+        Return the parsed data.
+
+        Can be an http|https url or local file. Supports csv and excel files.
+        """
+        try:
+            file = self.project.CONTEXT_SOURCE_FILE
+            # CSV
+            if re.search(r'(csv|CSV)$', file):
+                return self.get_context_from_csv()
+            # Excel
+            if re.search(r'(xlsx|XLSX|xls|XLS)$', file):
+                pass
+        except AttributeError:
+            return self.get_context_from_gdoc()
+
+    def get_context_from_csv(self):
+        """
+        Open CONTEXT_SOURCE_FILE, parse and return a context
+        """
+        if re.search('^(http|https)://', self.project.CONTEXT_SOURCE_FILE):
+            data = requests.get(self.project.CONTEXT_SOURCE_FILE)
+            reader = csv.reader(
+                data.iter_lines(), delimiter=',', quotechar='"')
+            ret = {rows[0]: rows[1] for rows in reader}
+        else:
+            with open(self.project.CONTEXT_SOURCE_FILE) as csvfile:
+                reader = csv.reader(csvfile, delimiter=',', quotechar='"')
+                ret = {rows[0]: rows[1] for rows in reader}
+        return ret
 
     def get_context_from_gdoc(self):
         """Wrap getting context in a simple caching mechanism."""

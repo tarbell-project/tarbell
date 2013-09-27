@@ -200,6 +200,10 @@ def tarbell_generate(args, path):
     else:
         tempdir = output_root
         output_root = os.path.join(tempdir, site.project.__name__)
+
+    if args.contains('--context'):
+        site.project.CONTEXT_SOURCE_FILE = args.value_after('--context')
+
     site.generate_static_site(output_root)
     puts("\nCreated site in {0}".format(output_root))
     return tempdir
@@ -254,6 +258,7 @@ def tarbell_newproject(args, path):
     key = _create_spreadsheet(project, path)
     context = site._get_context_from_gdoc(key)
     _copy_project_files(project, path, context)
+
 
 def _copy_project_files(project, path, context):
     proj_dir = os.path.join(path, project)
