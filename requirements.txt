@@ -16,3 +16,8 @@ scrubber==1.6.1
 smmap==0.8.2
 unicodecsv==0.9.4
 wsgiref==0.1.2
+google-api-python-client==1.2
+keyring==3.0.2
+xlrd==0.9.2
+python-dateutil==2.1
+Markdown==2.3.1

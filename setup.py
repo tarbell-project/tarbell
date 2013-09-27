@@ -10,7 +10,6 @@ except ImportError:
 
 
 APP_NAME = 'tarbell'
-APP_SCRIPT = './tarbell_runner'
 VERSION = '0.9-iter1'
 
 settings = dict()
@@ -54,7 +53,13 @@ settings.update(
         'console_scripts': [
             'tarbell = tarbell.cli:main',
         ],
-    }
+    },
+    keywords=['Development Status :: 3 - alpha',
+          'License :: OSI Approved :: MIT License',
+          'Operating System :: OS Independent',
+          'Programming Language :: Python',
+          'Topic :: Internet',
+          ],
 )
 
 
