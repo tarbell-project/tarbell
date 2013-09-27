@@ -250,7 +250,6 @@ def tarbell_newproject(args, path):
     project = args.get(0)
     if not project:
         project = raw_input("\nNo project name specified. Please enter a project name: ")
-        print "Creating new project", project
 
     #cmd_sprout(Args(["master", project]))
 
