@@ -253,6 +253,7 @@ def tarbell_newproject(args, path):
     site = TarbellSite(path)
     key = _create_spreadsheet(project, path)
     context = site._get_context_from_gdoc(key)
+    context['spreadsheet_key'] = key
     _copy_project_files(project, path, context)
 
 def _copy_project_files(project, path, context):
