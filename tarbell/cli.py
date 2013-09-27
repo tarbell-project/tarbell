@@ -308,7 +308,7 @@ def _create_spreadsheet(project, path):
     puts("\nGenerating Google spreadsheet")
     email = raw_input((
         "What Google account should have access to this "
-        "this spreadsheet? )Use a full email address, such as "
+        "this spreadsheet? (Use a full email address, such as "
         "your.name@gmail.com or the Google account equivalent.) "))
     media_body = _MediaFileUpload(os.path.join(path,
                                   '_project_template/tarbell_template.xlsx'),
