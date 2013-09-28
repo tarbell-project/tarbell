@@ -14,7 +14,6 @@ import xlrd
 import csv
 import re
 import requests
-import StringIO
 
 TTL_MULTIPLIER = 5
 
@@ -49,11 +48,11 @@ class TarbellSite:
             dirnames[:] = [
                 dn for dn in dirnames
                 if not dn.startswith('.') and not dn.startswith('_')
-                ]
+            ]
             filenames[:] = [
                 fn for fn in filenames
                 if not fn.startswith('.') and not fn.startswith('_')
-                ]
+            ]
             yield dirpath, dirnames, filenames
 
     def sort_modules(self, x, y):
