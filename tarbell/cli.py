@@ -249,14 +249,14 @@ def tarbell_newproject(args, path):
     """Create new Tarbell project."""
     project = args.get(0)
     if not project:
-        show_error("No project name specified")
-        sys.exit(1)
+        project = raw_input("\nNo project name specified. Please enter a project name: ")
 
     #cmd_sprout(Args(["master", project]))
 
     site = TarbellSite(path)
     key = _create_spreadsheet(project, path)
     context = site._get_context_from_gdoc(key)
+    context['spreadsheet_key'] = key
     _copy_project_files(project, path, context)
 
 
@@ -307,8 +307,8 @@ def _create_spreadsheet(project, path):
     puts("\nGenerating Google spreadsheet")
     email = raw_input((
         "What Google account should have access to this "
-        "this spreadsheet? Use a full email address, such as "
-        "your.name@gmail.com or the Google account equivalent."))
+        "this spreadsheet? (Use a full email address, such as "
+        "your.name@gmail.com or the Google account equivalent.) "))
     media_body = _MediaFileUpload(os.path.join(path,
                                   '_project_template/tarbell_template.xlsx'),
                                   mimetype='application/vnd.ms-excel')
