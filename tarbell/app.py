@@ -163,9 +163,17 @@ class TarbellSite:
                 data.iter_lines(), delimiter=',', quotechar='"')
             ret = {rows[0]: rows[1] for rows in reader}
         else:
-            with open(self.project.CONTEXT_SOURCE_FILE) as csvfile:
-                reader = csv.reader(csvfile, delimiter=',', quotechar='"')
-                ret = {rows[0]: rows[1] for rows in reader}
+            try:
+                with open(self.project.CONTEXT_SOURCE_FILE) as csvfile:
+                    reader = csv.reader(csvfile, delimiter=',', quotechar='"')
+                    ret = {rows[0]: rows[1] for rows in reader}
+            except IOError:
+                file = "%s/%s" % (
+                    os.path.abspath(self.path),
+                    self.project.CONTEXT_SOURCE_FILE)
+                with open(file) as csvfile:
+                    reader = csv.reader(csvfile, delimiter=',', quotechar='"')
+                    ret = {rows[0]: rows[1] for rows in reader}
         return ret
 
     def get_context_from_gdoc(self):
