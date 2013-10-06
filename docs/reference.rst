@@ -2,6 +2,10 @@
 Command line reference
 ======================
 
+`tarbell configure`
+-------------------
+
+
 `tarbell newproject`
 --------------------
 
@@ -22,6 +26,11 @@ Command line reference
 
 `tarbell update`
 ----------------
+
+**Requires current directory to be a Tarbell project.**
+
+`tarbell generate`
+------------------
 
 **Requires current directory to be a Tarbell project.**
 

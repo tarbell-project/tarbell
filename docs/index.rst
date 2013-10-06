@@ -30,6 +30,7 @@ Reference
 =========
 
 .. toctree::
-    reference
     contributing
+    reference
+    configuring
 

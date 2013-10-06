@@ -2,26 +2,26 @@
 Install Tarbell
 ===============
 
-Getting Tarbell
----------------
+Install Tarbell with `pip install tarbell`
+------------------------------------------
 
 ::
 
     pip install tarbell
 
-Set up Google docs (optional)
------------------------------
+Set up Google Drive access (optional)
+-------------------------------------
 
 This step is recommended but optional.
 
-Set up Amazon S3 bucket (optional)
+Set up Amazon S3 buckets (optional)
 ----------------------------------
 
 If you don't want an Amazon S3 bucket, you'll need to upload your files yourself.
 See the tarbell generate documentation for more.
 
-Configure Tarbell
------------------
+Configure Tarbell with `tarbell configure`
+------------------------------------------
 
 ::
 
@@ -54,7 +54,9 @@ You'll be prompted to answer some questions:
     <Google docs workflow>
 
     <if google docs>
-    Please specify a default Google account (such as somebody@gmail.com) that will have access to created spreadsheets. Leave blank to specify for every new project. 
+    Please specify a default Google account (such as somebody@gmail.com) that 
+    will have access to created spreadsheets. Leave blank to specify for every 
+    new project. 
 
     What is your default staging Amazon S3 path (such as s3://mybucket.beta.myorg.com/projects) [leave blank to skip]
     What is your default production Amazon S3 path (such as s3://mybucket.myorg.com/projects) [leave blank to skip]
@@ -71,8 +73,5 @@ You'll be prompted to answer some questions:
 
     Lastly, where will your Tarbell projects be stored? This directory will be created if it doesn't exist. [~/tarbell/]
 
-
-Creating a project
-------------------
 
 Now you're ready to create a project...
