@@ -2,35 +2,77 @@
 Install Tarbell
 ===============
 
-*Clone repository, install virtual environment, install requirements, configure
-your system for Amazon S3, and run a test server.*
-
-Tarbell is a Python library based on Flask which powers static sites. Truth be
-told, it doesn't do much on its own except read a directory and render
-templates in any subdirectory it finds a ``config.py`` file. To see Tarbell in
-action, you should probably start with the Tarbell template, which sets up an
-Amazon S3 publishing workflow and basic framework for building modern web apps
-using Tarbell.
-
-Make sure you have ``python`` (2.6+), ``git``, ``pip``, ``virtualenv`` and
-``virtualenv-wrapper`` installed on your system.
+Getting Tarbell
+---------------
 
 ::
 
-    git clone https://github.com/newsapps/tarbell
-    cd tarbell
-    mkvirtualenv tarbell
-    pip install -r requirements.txt
-    python runserver.py
+    pip install tarbell
 
-Now visit http://localhost:5000/readme in your browser. You should see the
-latest version of this page.
+Set up Google docs (optional)
+-----------------------------
 
-How do I install these tools on my system?
-==========================================
+This step is recommended but optional.
 
-For a very basic guide, see the `Chicago Birthrates installation docs.
-<https://hackpad.com/Install-Chicago-Birthrates-6V2O2Un04Ow>`_
+Set up Amazon S3 bucket (optional)
+----------------------------------
 
-For more detailed, Mac-specific information, see Brian Boyer's `Lion dev
-environment notes. <https://gist.github.com/brianboyer/1696819>`_
+If you don't want an Amazon S3 bucket, you'll need to upload your files yourself.
+See the tarbell generate documentation for more.
+
+Configure Tarbell
+-----------------
+
+::
+
+  tarbell configure
+
+You'll be prompted to answer some questions:
+
+::
+
+    Would you like to use Google spreadsheets [Y/n]? Y
+
+    <if n>
+    No worries! Don't forget you'll need to configure your context variables
+    in your projects' config.py files.
+
+    <if Y>
+    Login in to Google and go to https://code.google.com/apis/console/ to create
+    an app and generate the client_secrets.json authentication file. You should
+    create an "installed app" authentication file. See 
+    http://tarbell.readthedocs.com/#correctlink for more information.
+
+    Where is your client secrets file? [~/Downloads/client_secrets.json]
+    <if exists>
+    Copying client secrets to .tarbell/client_secrets.json. Authenticating your app..
+
+    <if not exists>
+    That file doesn't exist. Try again? You can always do this later. [Y/n] Y
+    Where is your client secrets file? [~/Downloads/client_secrets.json]
+
+    <Google docs workflow>
+
+    <if google docs>
+    Please specify a default Google account (such as somebody@gmail.com) that will have access to created spreadsheets. Leave blank to specify for every new project. 
+
+    What is your default staging Amazon S3 path (such as s3://mybucket.beta.myorg.com/projects) [leave blank to skip]
+    What is your default production Amazon S3 path (such as s3://mybucket.myorg.com/projects) [leave blank to skip]
+
+    Would you like to use the default Tarbell example projects? [Y/n]
+
+    <if n>
+    No problem. You'll need to register some project templates once you're done
+    using the `tarbell template add <template name> <template_repo>` 
+    (e.g.`tarbell template add "Searchable map" https://github.com/newsapps/tarbell-searchable-map`).
+
+    <if Y>
+    Adding default Tarbell example projects...
+
+    Lastly, where will your Tarbell projects be stored? This directory will be created if it doesn't exist. [~/tarbell/]
+
+
+Creating a project
+------------------
+
+Now you're ready to create a project...

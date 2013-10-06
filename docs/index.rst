@@ -15,13 +15,21 @@ Tarbell is named after Ida Tarbell, a distinguished muckraking journalist whose
 reporting. `Read more about her on Wikipedia
 <http://en.wikipedia.org/wiki/Ida_Tarbell>`_.
 
-Building a project
-==================
-.. toctree::
-   :maxdepth: 2
+Using Tarbell
+=============
 
+.. toctree::
    install
    create
    build
    publish
-   reference
+   managingprojects
+
+
+Reference
+=========
+
+.. toctree::
+    reference
+    contributing
+
