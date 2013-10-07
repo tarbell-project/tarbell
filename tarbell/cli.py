@@ -15,8 +15,6 @@ from clint import args
 from clint.arguments import Args
 from clint.textui import colored, puts
 
-from legit.cli import cmd_switch, cmd_branches, cmd_sprout
-
 import jinja2
 import codecs
 import mimetypes
@@ -28,8 +26,8 @@ from apiclient import errors
 from apiclient.http import MediaFileUpload as _MediaFileUpload
 from oauth2client.clientsecrets import InvalidClientSecretsError
 
-from .app import TarbellSite
 from .oauth import get_drive_api
+from .contextmanagers import ensure_settings, ensure_site, tarbell_configure
 
 __version__ = '0.9'
 
@@ -53,49 +51,20 @@ def black(s):
     return s.encode('utf-8')
 
 
-class EnsureSite():
-    """Context manager to ensure the user is in a Tarbell site environment."""
-    def __init__(self, reset=False):
-        self.reset = reset
 
-    def __enter__(self):
-        return self.ensure_site()
-
-    def __exit__(self, type, value, traceback):
-        pass
-
-    def ensure_site(self, path=None):
-        if not path:
-            path = os.getcwd()
-
-        if path is "/":
-            show_error(("The current directory is not part of a Tarbell "
-                        "project"))
-            sys.exit(1)
-
-        if not os.path.exists(os.path.join(path, '.tarbell')):
-            path = os.path.realpath(os.path.join(path, '..'))
-            return self.ensure_site(path)
-        else:
-            os.chdir(path)
-            self.ensure_secrets(path)
-            return path
-
-    def ensure_secrets(self, path):
-        try:
-            get_drive_api(path, self.reset)
-        except InvalidClientSecretsError:
-            show_error(("\nYou don't have the `{0}` file necessary to work "
-                        "with Google spreadsheets. Go to {1} to create an "
-                        "app and generate an API client authentication file."
-                        .format(colored.red("client_secrets.json"),
-                                colored.yellow("https://code.google.com/apis/console/"))
-                        ))
-            sys.exit(1)
-
-# Alias to lowercase
-ensure_site = EnsureSite
-
+    # ---
+    #def ensure_secrets(self, path):
+        #try:
+            #get_drive_api(path, self.reset)
+        #except InvalidClientSecretsError:
+            #show_error(("\nYou don't have the `{0}` file necessary to work "
+                        #"with Google spreadsheets. Go to {1} to create an "
+                        #"app and generate an API client authentication file."
+                        #.format(colored.red("client_secrets.json"),
+                                #colored.yellow("https://code.google.com/apis/console/"))
+                        #))
+            #sys.exit(1)
+    # ---
 
 # --------
 # Dispatch
@@ -116,15 +85,7 @@ def main():
     elif command:
         arg = args.get(0)
         args.remove(arg)
-
-        reset = False
-        if args.contains('--reset-creds'):
-            reset = True
-            args.remove('--reset-creds')
-
-        with ensure_site(reset) as path:
-            command.__call__(args, path)
-
+        command.__call__(args)
         sys.exit()
 
     else:
@@ -189,75 +150,78 @@ def show_error(msg):
     sys.stderr.write("{0}: {1}".format(colored.red("Error"), msg + '\n'))
 
 
-def tarbell_generate(args, path):
+def tarbell_generate(args):
     """Generate static files."""
-    site = TarbellSite(path)
-    output_root = list_get(args, 0, False)
-    if not output_root:
-        tempdir = tempfile.mkdtemp(prefix="{0}-".format(site.project.__name__))
-        os.makedirs(os.path.join(tempdir, site.project.__name__))
-        output_root = os.path.join(tempdir, site.project.__name__)
-    else:
-        tempdir = output_root
-        output_root = os.path.join(tempdir, site.project.__name__)
 
-    if args.contains('--context'):
-        site.project.CONTEXT_SOURCE_FILE = args.value_after('--context')
-
-    site.generate_static_site(output_root)
-    puts("\nCreated site in {0}".format(output_root))
-    return tempdir
-
-
-def tarbell_list(args, path):
-    """List tarbell projects."""
-    cmd_branches(path)
-
-
-def tarbell_publish(args, path):
-    """Publish a site by calling s3cmd"""
-    site = TarbellSite(path)
-    bucket_name = list_get(args, 0, "staging")
-    bucket_uri = site.project.S3_BUCKETS.get(bucket_name, False)
-
-    try:
-        if bucket_uri:
-            puts("Deploying to {0} ({1})\n".format(
-                colored.green(bucket_name), colored.green(bucket_uri)))
-            tempdir = tarbell_generate([], path)
-            projectdir = os.path.join(tempdir, site.project.__name__)
-            call(['s3cmd', 'sync', '--acl-public', '--delete-removed',
-                  projectdir, bucket_uri])
+    with ensure_settings(args) as settings, ensure_site(args) as site:
+        output_root = list_get(args, 0, False)
+        if not output_root:
+            tempdir = tempfile.mkdtemp(prefix="{0}-".format(site.project.__name__))
+            os.makedirs(os.path.join(tempdir, site.project.__name__))
+            output_root = os.path.join(tempdir, site.project.__name__)
         else:
-            show_error(("There's no bucket configuration called '{0}' "
-                        "in config.py.\n".format(bucket_name)))
-    except KeyboardInterrupt:
-        show_error("ctrl-c pressed, bailing out!")
-    finally:
-        # Delete tempdir
+            tempdir = output_root
+            output_root = os.path.join(tempdir, site.project.__name__)
+
+        if args.contains('--context'):
+            site.project.CONTEXT_SOURCE_FILE = args.value_after('--context')
+
+        site.generate_static_site(output_root)
+        puts("\nCreated site in {0}".format(output_root))
+        return tempdir
+
+
+def tarbell_list(args):
+    """List tarbell projects."""
+    with ensure_settings(args) as settings:
+        print "list..."
+        #cmd_branches(path)
+
+
+def tarbell_publish(args):
+    """Publish a site by calling s3cmd"""
+    with ensure_settings(args) as settings, ensure_site(args) as site:
+        bucket_name = list_get(args, 0, "staging")
+        bucket_uri = site.project.S3_BUCKETS.get(bucket_name, False)
+
         try:
-            shutil.rmtree(tempdir)  # delete directory
-            puts("\nDeleted {0}".format(tempdir))
-        except OSError as exc:
-            if exc.errno != 2:  # code 2 - no such file or directory
-                raise  # re-raise exception
-        except UnboundLocalError:
-            pass
+            if bucket_uri:
+                puts("Deploying to {0} ({1})\n".format(
+                    colored.green(bucket_name), colored.green(bucket_uri)))
+                tempdir = tarbell_generate([], path)
+                projectdir = os.path.join(tempdir, site.project.__name__)
+                call(['s3cmd', 'sync', '--acl-public', '--delete-removed',
+                      projectdir, bucket_uri])
+            else:
+                show_error(("There's no bucket configuration called '{0}' "
+                            "in config.py.\n".format(bucket_name)))
+        except KeyboardInterrupt:
+            show_error("ctrl-c pressed, bailing out!")
+        finally:
+            # Delete tempdir
+            try:
+                shutil.rmtree(tempdir)  # delete directory
+                puts("\nDeleted {0}".format(tempdir))
+            except OSError as exc:
+                if exc.errno != 2:  # code 2 - no such file or directory
+                    raise  # re-raise exception
+            except UnboundLocalError:
+                pass
 
 
-def tarbell_newproject(args, path):
+def tarbell_newproject(args):
     """Create new Tarbell project."""
-    project = args.get(0)
-    if not project:
-        project = raw_input("\nNo project name specified. Please enter a project name: ")
+    with ensure_settings(args) as settings:
+        project = args.get(0)
+        if not project:
+            project = raw_input("\nNo project name specified. Please enter a project name: ")
 
-    #cmd_sprout(Args(["master", project]))
-
-    site = TarbellSite(path)
-    key = _create_spreadsheet(project, path)
-    context = site._get_context_from_gdoc(key)
-    context['spreadsheet_key'] = key
-    _copy_project_files(project, path, context)
+        #cmd_sprout(Args(["master", project]))
+        #site = TarbellSite(path)
+        #key = _create_spreadsheet(project, path)
+        #context = site._get_context_from_gdoc(key)
+        #context['spreadsheet_key'] = key
+        #_copy_project_files(project, path, context)
 
 
 def _copy_project_files(project, path, context):
@@ -353,24 +317,26 @@ def _add_user_to_file(file_id, service, user_email,
         print 'An error occurred: %s' % error
 
 
-def tarbell_serve(args, path):
+def tarbell_serve(args):
     """Serve the current Tarbell project."""
-    address = list_get(args, 0, "").split(":")
-    ip = list_get(address, 0, '127.0.0.1')
-    port = list_get(address, 1, 5000)
-    site = TarbellSite(path)
-    site.app.run(ip, port=int(port))
+    with ensure_settings(args) as settings, ensure_site(args) as site:
+        address = list_get(args, 0, "").split(":")
+        ip = list_get(address, 0, '127.0.0.1')
+        port = list_get(address, 1, 5000)
+        site.app.run(ip, port=int(port))
 
 
-def tarbell_switch(args, path):
+def tarbell_switch(args):
     """Switch to a project"""
-    cmd_switch(args)               # legit switch
-    tarbell_serve(args[1:], path)  # serve 'em up!
+    with ensure_settings(args) as settings:
+        #cmd_switch(args)               # legit switch
+        tarbell_serve(args[1:], path)  # serve 'em up!
 
 
-def tarbell_unpublish(args, path):
-    """Delete a project."""
-    print "@todo unpublish"
+def tarbell_unpublish(args):
+    with ensure_settings(args) as settings, ensure_site(args) as site:
+        """Delete a project."""
+        print "@todo unpublish"
 
 
 class Command(object):
@@ -413,6 +379,14 @@ def def_cmd(name=None, short=None, fn=None, usage=None, help=None):
     """Define a command."""
     command = Command(name=name, short=short, fn=fn, usage=usage, help=help)
     Command.register(command)
+
+
+# Note that the tarbell_configure function is imported from contextmanagers.py
+def_cmd(
+    name='configure',
+    fn=tarbell_configure,
+    usage='configure',
+    help='Configure Tarbell.')
 
 
 def_cmd(
