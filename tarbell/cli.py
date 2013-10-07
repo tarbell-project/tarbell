@@ -28,43 +28,9 @@ from oauth2client.clientsecrets import InvalidClientSecretsError
 
 from .oauth import get_drive_api
 from .contextmanagers import ensure_settings, ensure_site, tarbell_configure
+from .utils import list_get, black, split_sentences, show_error
 
 __version__ = '0.9'
-
-
-def list_get(l, idx, default=None):
-    """Get from a list with an optional default value."""
-    try:
-        if l[idx]:
-            return l[idx]
-        else:
-            return default
-    except IndexError:
-        return default
-
-
-def black(s):
-    """Black text."""
-    #if settings.allow_black_foreground:
-        #return colored.black(s)
-    #else:
-    return s.encode('utf-8')
-
-
-
-    # ---
-    #def ensure_secrets(self, path):
-        #try:
-            #get_drive_api(path, self.reset)
-        #except InvalidClientSecretsError:
-            #show_error(("\nYou don't have the `{0}` file necessary to work "
-                        #"with Google spreadsheets. Go to {1} to create an "
-                        #"app and generate an API client authentication file."
-                        #.format(colored.red("client_secrets.json"),
-                                #colored.yellow("https://code.google.com/apis/console/"))
-                        #))
-            #sys.exit(1)
-    # ---
 
 # --------
 # Dispatch
@@ -93,19 +59,6 @@ def main():
                                .format(args.get(0))))
         display_info()
         sys.exit(1)
-
-
-def split_sentences(s):
-    """Split sentences for formatting."""
-    sentences = []
-    for index, sentence in enumerate(s.split('. ')):
-        pad = ''
-        if index > 0:
-            pad = ' ' * 39
-        if sentence.endswith('.'):
-            sentence = sentence[:-1]
-        sentences.append('%s %s.' % (pad, sentence.strip()))
-    return "\n".join(sentences)
 
 
 def display_info():
@@ -142,12 +95,6 @@ def display_version():
         colored.yellow('Tarbell'),
         __version__
     ))
-
-
-def show_error(msg):
-    """Displays error message."""
-    sys.stdout.flush()
-    sys.stderr.write("{0}: {1}".format(colored.red("Error"), msg + '\n'))
 
 
 def tarbell_generate(args):
