@@ -1,6 +1,8 @@
 from flask import Flask, render_template, send_from_directory, Response
 from jinja2 import FileSystemLoader, ChoiceLoader
 from jinja2.loaders import BaseLoader
+from jinja2.utils import open_if_exists
+from jinja2.exceptions import TemplateNotFound
 from ordereddict import OrderedDict
 from .oauth import get_drive_api
 from slughifi import slughifi
@@ -28,9 +30,9 @@ def split_template_path(template):
     """
     pieces = []
     for piece in template.split('/'):
-        if path.sep in piece \
-           or (path.altsep and path.altsep in piece) or \
-           piece == path.pardir:
+        if os.path.sep in piece \
+           or (os.path.altsep and os.path.altsep in piece) or \
+           piece == os.path.pardir:
             raise TemplateNotFound(template)
         elif piece and piece != '.':
             pieces.append(piece)
@@ -46,7 +48,7 @@ class TarbellFileSystemLoader(BaseLoader):
     def get_source(self, environment, template):
         pieces = split_template_path(template)
         for searchpath in self.searchpath:
-            filename = path.join(searchpath, *pieces)
+            filename = os.path.join(searchpath, *pieces)
             f = open_if_exists(filename)
             if f is None:
                 continue
@@ -55,10 +57,10 @@ class TarbellFileSystemLoader(BaseLoader):
             finally:
                 f.close()
 
-            mtime = path.getmtime(filename)
+            mtime = os.path.getmtime(filename)
             def uptodate():
                 try:
-                    return path.getmtime(filename) == mtime
+                    return os.path.getmtime(filename) == mtime
                 except OSError:
                     return False
             return contents, filename, uptodate
@@ -99,7 +101,7 @@ class TarbellSite:
         self.expires = 0
 
         self.app.add_url_rule('/', view_func=self.preview)
-        self.app.add_url_rule('/<path:_path>', view_func=self.preview)
+        self.app.add_url_rule('/<path:path>', view_func=self.preview)
         self.app.add_template_filter(slughifi, 'slugify')
 
 
@@ -111,12 +113,9 @@ class TarbellSite:
         try:
             filename, pathname, description = imp.find_module('base', [base_dir])
             base = imp.load_module('base', filename, pathname, description)
-            #try:
-                #self.app.register_blueprint(base.blueprint)
-            #except AttributeError:
-                #pass
+            self.app.register_blueprint(base.blueprint)
         except ImportError:
-            self.app.logger.warning("No _base/base.py file found")
+            self.app.logger.info("No _base/base.py file found")
 
         filename, pathname, description = imp.find_module('tarbell', [path])
         project = imp.load_module('project', filename, pathname, description)
@@ -137,41 +136,44 @@ class TarbellSite:
         except AttributeError:
             project.DEFAULT_CONTEXT = {}
 
-        #try:
-            #self.app.register_blueprint(project.blueprint)
-        #except AttributeError:
-            #pass
-
+        try:
+            self.app.register_blueprint(project.blueprint)
+        except AttributeError:
+            pass
 
         # Set up template loaders
-        loaders = []
-        #if os.path.isdir(base_dir):
-            #loader = TarbellFileSystemLoader(base_dir)
-            #loaders.append(loader)
+        template_dirs = [path]
+        if os.path.isdir(base_dir):
+            template_dirs.append(base_dir)
 
-        loader = FileSystemLoader(path)
-        loaders.append(loader)
-
-        #self.app.jinja_loader = TarbellFileSystemLoader(path)
-        self.app.jinja_loader = ChoiceLoader(loaders)
-        #import ipdb;ipdb.set_trace();
+        self.app.jinja_loader = TarbellFileSystemLoader(template_dirs)
 
         return project, base
 
-    def preview(self, _path=None):
+    def preview(self, path=None):
         """ Preview a project path """
-        if _path is None:
-            _path = 'index.html'
+        if path is None:
+            path = 'index.html'
 
         ## Serve JSON
-        if self.project.CREATE_JSON and _path == 'data/data.json':
+        if self.project.CREATE_JSON and path == 'data.json':
             context = self.get_context()
             return Response(json.dumps(context), mimetype="application/json")
 
         ## Detect files
         filepath = None
         for root, dirs, files in filter_files(self.path):
-            fullpath = os.path.join(root, _path)
+            # Does it exist under _base?
+            basepath = os.path.join(root, "_base", path)
+            try:
+                with open(basepath):
+                    mimetype, encoding = mimetypes.guess_type(basepath)
+                    filepath = basepath
+            except IOError:
+                pass
+
+            # Does it exist under regular path?
+            fullpath = os.path.join(root, path)
             try:
                 with open(fullpath):
                     mimetype, encoding = mimetypes.guess_type(fullpath)
@@ -182,14 +184,7 @@ class TarbellSite:
         if filepath and mimetype and mimetype.startswith("text/"):
             context = self.project.DEFAULT_CONTEXT
             context.update(self.get_context())
-            print "PATH"
-            print _path
-            print "---"
-            import ipdb; ipdb.set_trace();
-            rendered = render_template(_path, **context)
-            #rendered="foo"
-            #print self.app.jinja_loader
-            #print "ARGH"
+            rendered = render_template(path, **context)
             return Response(rendered, mimetype=mimetype)
         elif filepath:
             dir, filename = os.path.split(filepath)
