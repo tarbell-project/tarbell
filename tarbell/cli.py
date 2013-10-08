@@ -27,7 +27,8 @@ from apiclient.http import MediaFileUpload as _MediaFileUpload
 from oauth2client.clientsecrets import InvalidClientSecretsError
 
 from .oauth import get_drive_api
-from .contextmanagers import ensure_settings, ensure_site, tarbell_configure
+from .contextmanagers import ensure_settings, ensure_site
+from .configure import tarbell_configure
 from .utils import list_get, black, split_sentences, show_error
 
 __version__ = '0.9'
