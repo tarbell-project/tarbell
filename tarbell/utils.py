@@ -63,3 +63,16 @@ def get_config_from_args(args):
         return os.path.expanduser(os.path.join("~",
                                                ".{0}".format("tarbell")
                                                ))
+
+def filter_files(path):
+    for dirpath, dirnames, filenames in os.walk(path):
+        dirnames[:] = [
+            dn for dn in dirnames
+            if not dn.startswith('.') and not dn.startswith('_')
+        ]
+        filenames[:] = [
+            fn for fn in filenames
+            if not fn.endswith('.py') and not fn.endswith('.pyc') and not fn.startswith('.') and not fn.startswith('_')
+        ]
+        yield dirpath, dirnames, filenames
+

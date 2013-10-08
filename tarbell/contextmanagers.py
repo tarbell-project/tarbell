@@ -12,6 +12,7 @@ import sys
 
 from clint.textui import colored, puts
 
+from .app import TarbellSite
 from .settings import Settings
 from .utils import show_error, get_config_from_args
 
@@ -54,11 +55,12 @@ class EnsureSite():
                         "project"))
             sys.exit(1)
 
-        if not os.path.exists(os.path.join(path, '.tarbell_project')):
+        if not os.path.exists(os.path.join(path, 'tarbell.py')):
             path = os.path.realpath(os.path.join(path, '..'))
             return self.ensure_site(path)
         else:
             os.chdir(path)
-            return TarbellSite(path)
+            with ensure_settings(self.args) as settings:
+                return TarbellSite(path, settings.path)
 
 ensure_site = EnsureSite

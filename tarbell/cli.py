@@ -35,6 +35,66 @@ from .utils import list_get, black, split_sentences, show_error
 
 __version__ = '0.9'
 
+from jinja2.loaders import BaseLoader
+from .utils import filter_files
+
+class TarbellFileSystemLoader(BaseLoader):
+    """Loads templates from the file system.  This loader can find templates
+    in folders on the file system and is the preferred way to load them.
+
+    The loader takes the path to the templates as string, or if multiple
+    locations are wanted a list of them which is then looked up in the
+    given order:
+
+    >>> loader = FileSystemLoader('/path/to/templates')
+    >>> loader = FileSystemLoader(['/path/to/templates', '/other/path'])
+
+    Per default the template encoding is ``'utf-8'`` which can be changed
+    by setting the `encoding` parameter to something else.
+    """
+
+    def __init__(self, searchpath, encoding='utf-8'):
+        if isinstance(searchpath, string_types):
+            searchpath = [searchpath]
+        self.searchpath = list(searchpath)
+        self.encoding = encoding
+
+    def get_source(self, environment, template):
+        pieces = split_template_path(template)
+        for searchpath in self.searchpath:
+            filename = path.join(searchpath, *pieces)
+            f = open_if_exists(filename)
+            if f is None:
+                continue
+            try:
+                contents = f.read().decode(self.encoding)
+            finally:
+                f.close()
+
+            mtime = path.getmtime(filename)
+            def uptodate():
+                try:
+                    return path.getmtime(filename) == mtime
+                except OSError:
+                    return False
+            return contents, filename, uptodate
+        raise TemplateNotFound(template)
+
+    def list_templates(self):
+        found = set()
+        for searchpath in self.searchpath:
+            for dirpath, dirnames, filenames in filter_files(searchpath):
+                for filename in filenames:
+                    template = os.path.join(dirpath, filename) \
+                        [len(searchpath):].strip(os.path.sep) \
+                                          .replace(os.path.sep, '/')
+                    if template[:2] == './':
+                        template = template[2:]
+                    if template not in found:
+                        found.add(template)
+        return sorted(found)
+
+
 # --------
 # Dispatch
 # --------
