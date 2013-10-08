@@ -101,7 +101,7 @@ def _setup_google_spreadsheets(path):
         shutil.copy(secrets_path, path)
 
         # Now, try and obtain the API for the first time
-        get_drive_api(path) #, reset_creds=True)
+        get_drive_api(path, reset_creds=True)
 
         account = raw_input(("What Google account should have access to new spreadsheets? "
                              "(e.g. somebody@gmail.com, leave blank to specify for each new "
@@ -153,6 +153,7 @@ def _setup_s3(path, access_key=None, access_key_id=None):
 
     puts("\n- Done configuring Amazon S3.")
     return settings
+
 
 def _setup_tarbell_project_path(path):
     default_path = os.path.expanduser(os.path.join("~", "tarbell"))

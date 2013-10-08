@@ -26,6 +26,8 @@ from apiclient import errors
 from apiclient.http import MediaFileUpload as _MediaFileUpload
 from oauth2client.clientsecrets import InvalidClientSecretsError
 
+from git import Repo
+
 from .oauth import get_drive_api
 from .contextmanagers import ensure_settings, ensure_site
 from .configure import tarbell_configure
@@ -160,16 +162,67 @@ def tarbell_publish(args):
 def tarbell_newproject(args):
     """Create new Tarbell project."""
     with ensure_settings(args) as settings:
-        project = args.get(0)
-        if not project:
-            project = raw_input("\nNo project name specified. Please enter a project name: ")
+        # Project settings
+        name = args.get(0)
+        while not name:
+            name = raw_input("No project name specified. Please enter a project name: ")
 
-        #cmd_sprout(Args(["master", project]))
-        #site = TarbellSite(path)
-        #key = _create_spreadsheet(project, path)
+        default_projects_path = settings.config.get("projects_path")
+        projects_path = None
+
+        if default_projects_path:
+            projects_path = raw_input("Where would you like to create this project? [{0}] ".format(default_projects_path))
+            if not projects_path:
+                projects_path = default_projects_path
+        else:
+            while not projects_path:
+                projects_path = raw_input("Where would you like to create this project? (e.g. ~/mytarbellsites/) ")
+
+        path = os.path.join(projects_path, name)
+
+        # Get template
+        puts("\nPick a template")
+        template = None
+        while not template:
+            puts("\n")
+            for idx, option in enumerate(settings.config.get("project_templates"), start=1):
+                puts("  {0:5} {1:36} {2}".format(colored.yellow("[{0}]".format(idx)),
+                                               colored.green(option.get("name")),
+                                               colored.yellow(option.get("url"))
+                                              ))
+            index = raw_input("\nWhich template would you like to use? ")
+            try:
+                index = int(index) - 1
+                template = settings.config["project_templates"][index]
+            except:
+                pass
+
+        tempdir = tempfile.mkdtemp(prefix="{0}-".format(name))
+        puts("\nCloning {0} to {1}".format(template.get("url"), tempdir))
+        Repo.clone_from(template.get("url"), tempdir)
+
+        # Create spreadsheet/context vars
+        # Copy project files
+
+        if settings.client_secrets:
+            puts("\nClient secrets available, creating spreadsheet...")
+            key = _create_spreadsheet(name, tempdir, settings)
+        print key
         #context = site._get_context_from_gdoc(key)
         #context['spreadsheet_key'] = key
         #_copy_project_files(project, path, context)
+
+        # Delete tempdir
+        try:
+            shutil.rmtree(tempdir)  # delete directory
+            puts("\nDeleted {0}".format(tempdir))
+        except OSError as exc:
+            if exc.errno != 2:  # code 2 - no such file or directory
+                raise  # re-raise exception
+        except UnboundLocalError:
+            pass
+
+
 
 
 def _copy_project_files(project, path, context):
@@ -215,17 +268,30 @@ def _copy_project_files(project, path, context):
                 shutil.copy(filepath, output_path)
 
 
-def _create_spreadsheet(project, path):
+def _create_spreadsheet(project, path, settings):
     puts("\nGenerating Google spreadsheet")
-    email = raw_input((
+
+    email_message = (
         "What Google account should have access to this "
-        "this spreadsheet? (Use a full email address, such as "
-        "your.name@gmail.com or the Google account equivalent.) "))
+        "this spreadsheet? Use a full email address, such as "
+        "your.name@gmail.com or the Google account equivalent. ")
+
+    if settings.config.get("google_account"):
+        email = raw_input("{0}(Default: {1}) ".format(email_message,
+                                             settings.config.get("google_account")
+                                            ))
+        if not email:
+            email = settings.config.get("google_account")
+    else:
+        email = None
+        while not email:
+            email = raw_input(email_message)
+
     media_body = _MediaFileUpload(os.path.join(path,
-                                  '_project_template/tarbell_template.xlsx'),
+                                  'data.xlsx'),
                                   mimetype='application/vnd.ms-excel')
 
-    service = get_drive_api(path)
+    service = get_drive_api(settings.path)
     body = {
         'title': '%s [Tarbell project]' % project,
         'description': '%s [Tarbell project]' % project,
@@ -235,8 +301,6 @@ def _create_spreadsheet(project, path):
         newfile = service.files()\
             .insert(body=body, media_body=media_body, convert=True).execute()
         _add_user_to_file(newfile['id'], service, user_email=email)
-        _add_user_to_file(newfile['id'], service, user_email='anyone',
-                          perm_type='anyone', role='reader')
         puts(("Success! View the file at "
               "https://docs.google.com/spreadsheet/ccc?key={0}"
               .format(newfile['id'])))
