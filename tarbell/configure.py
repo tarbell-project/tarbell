@@ -1,8 +1,3 @@
-import os
-import sys
-import yaml
-import shutil
-
 # -*- coding: utf-8 -*-
 
 """
@@ -16,6 +11,7 @@ import os
 import sys
 import yaml
 import shutil
+from subprocess import call
 
 from clint.textui import colored, puts
 
@@ -28,7 +24,9 @@ def tarbell_configure(args):
     puts("Configuring Tarbell")
 
     path = get_config_from_args(args)
+
     _get_or_create_config_dir(path)
+
     settings = {}
     settings.update(
             _setup_google_spreadsheets(path))
@@ -41,12 +39,13 @@ def tarbell_configure(args):
 
     settings_path = os.path.join(path, "settings.yaml")
     _backup(path, "settings.yaml")
+
     with open(settings_path, "w") as f:
-        puts("\nCreating {0}".format(colored.yellow(settings_path)))
+        puts("\nCreating {0}".format(colored.green(settings_path)))
         yaml.dump(settings, f, default_flow_style=False)
 
-    puts("\n- Done configuring Tarbell. Type `tarbell` for help.")
-    sys.exit() # Always bail when this is done
+    puts("\n- Done configuring Tarbell. Type `{0}` for help."
+         .format(colored.green("tarbell")))
 
 
 def _get_or_create_config_dir(path):
@@ -101,7 +100,7 @@ def _setup_google_spreadsheets(path):
         shutil.copy(secrets_path, path)
 
         # Now, try and obtain the API for the first time
-        get_drive_api(path, reset_creds=True)
+        get_drive_api(path) #, reset_creds=True)
 
         account = raw_input(("What Google account should have access to new spreadsheets? "
                              "(e.g. somebody@gmail.com, leave blank to specify for each new "
@@ -126,33 +125,21 @@ def _setup_s3(path, access_key=None, access_key_id=None):
         puts("\n- Not configuring Amazon S3.")
         return {}
 
-    access_key = raw_input("What is your Amazon S3 access key? ")
-    if access_key == "":
-        puts("Access key required for Amazon S3. Starting over... \n")
-        return _setup_s3(path)
-
-    access_key_id = raw_input("What is your Amazon S3 access key ID? ")
-    if access_key_id == "":
-        puts("Access key ID required for Amazon S3. Starting over... \n")
-        return _setup_s3(path)
-
-    settings = {"s3_access_key": access_key, "s3_access_key_id": access_key_id}
+    puts("\nCalling s3cmd --configure\n")
+    call(['s3cmd', '--configure'])
 
     buckets = {}
 
-    staging = raw_input("What is your default staging bucket? (e.g. s3://apps.beta.myorg.com, leave blank to skip) ")
+    staging = raw_input("\nWhat is your default staging bucket? (e.g. s3://apps.beta.myorg.com/, leave blank to skip) ")
     if staging != "":
         buckets.update({"staging": staging})
 
-    production = raw_input("What is your default production bucket? (e.g. s3://apps.myorg.com, leave blank to skip) ")
+    production = raw_input("\nWhat is your default production bucket? (e.g. s3://apps.myorg.com/, leave blank to skip) ")
     if production != "":
         buckets.update({"production": production})
 
-    if buckets:
-        settings['s3_buckets'] = buckets
-
     puts("\n- Done configuring Amazon S3.")
-    return settings
+    return {"s3_buckets": buckets}
 
 
 def _setup_tarbell_project_path(path):
@@ -161,10 +148,17 @@ def _setup_tarbell_project_path(path):
     if projects_path == "":
         projects_path = default_path
     if projects_path.lower() == 'none':
-        puts("\n- Not creating projects path.")
+        puts("\n- Not creating projects directory.")
         return {}
 
-    puts("Projects path is {0}".format(projects_path))
+    if os.path.isdir(projects_path):
+        puts("\nDirectory exists!")
+    else:
+        puts("\nDirectory does not exist.")
+        make = raw_input("\nWould you like to create it? [Y/n] ")
+        if make.lower() == "y" or not make:
+            os.makedirs(projects_path)
+    puts("\nProjects path is {0}".format(projects_path))
     puts("\n- Done setting up projects path.")
     return {"projects_path": projects_path}
 
@@ -174,11 +168,6 @@ def _setup_default_templates(path):
         "name": "Basic template",
         "url": "https://github.com/newsapps/tarbell-template",
     }]
-
-    use = raw_input("\nWould you like to use the example Tarbell templates? [Y/n] ")
-    if use.lower() == "y" or use == "":
-        pass
-
     for project in project_templates:
         puts("+ Adding {0} ({1})".format(project["name"], project["url"]))
 

@@ -101,11 +101,13 @@ def display_version():
     ))
 
 
-def tarbell_generate(args):
+def tarbell_generate(args, skip_args=False):
     """Generate static files."""
 
+    output_root = None
     with ensure_settings(args) as settings, ensure_site(args) as site:
-        output_root = list_get(args, 0, False)
+        if not skip_args:
+            output_root = list_get(args, 0, False)
         if not output_root:
             output_root = tempfile.mkdtemp(prefix="{0}-".format(site.project.__name__))
 
@@ -134,10 +136,10 @@ def tarbell_publish(args):
             if bucket_uri:
                 puts("Deploying to {0} ({1})\n".format(
                     colored.green(bucket_name), colored.green(bucket_uri)))
-                tempdir = tarbell_generate([], path)
-                projectdir = os.path.join(tempdir, site.project.__name__)
+                tempdir = tarbell_generate(args, skip_args=True)
+                os.chdir(tempdir)
                 call(['s3cmd', 'sync', '--acl-public', '--delete-removed',
-                      projectdir, bucket_uri])
+                      './', bucket_uri])
             else:
                 show_error(("There's no bucket configuration called '{0}' "
                             "in config.py.\n".format(bucket_name)))
