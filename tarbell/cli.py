@@ -107,19 +107,14 @@ def tarbell_generate(args):
     with ensure_settings(args) as settings, ensure_site(args) as site:
         output_root = list_get(args, 0, False)
         if not output_root:
-            tempdir = tempfile.mkdtemp(prefix="{0}-".format(site.project.__name__))
-            os.makedirs(os.path.join(tempdir, site.project.__name__))
-            output_root = os.path.join(tempdir, site.project.__name__)
-        else:
-            tempdir = output_root
-            output_root = os.path.join(tempdir, site.project.__name__)
+            output_root = tempfile.mkdtemp(prefix="{0}-".format(site.project.__name__))
 
         if args.contains('--context'):
             site.project.CONTEXT_SOURCE_FILE = args.value_after('--context')
 
         site.generate_static_site(output_root)
         puts("\nCreated site in {0}".format(output_root))
-        return tempdir
+        return output_root
 
 
 def tarbell_list(args):

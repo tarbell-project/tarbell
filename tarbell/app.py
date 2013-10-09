@@ -18,8 +18,9 @@ import xlrd
 import csv
 import re
 import requests
+import time
 
-TTL_MULTIPLIER = 5
+SPREADSHEET_CACHE_TTL = 2000
 
 from jinja2._compat import string_types, iteritems
 
@@ -121,9 +122,10 @@ class TarbellSite:
         project = imp.load_module('project', filename, pathname, description)
 
         try:
-            project.SPREADSHEET_KEY
+            self.key = project.SPREADSHEET_KEY
             self.client = get_drive_api(self.path)
         except AttributeError:
+            self.key = None
             self.client = None
 
         try:
@@ -186,12 +188,13 @@ class TarbellSite:
             context.update(self.get_context())
             rendered = render_template(path, **context)
             return Response(rendered, mimetype=mimetype)
+
         elif filepath:
             dir, filename = os.path.split(filepath)
             return send_from_directory(dir, filename)
 
         # @TODO Return 404 template if it exists, use Response object
-        return "Not found", 404
+        return Response(status=404) 
 
     def get_context(self):
         """
@@ -237,26 +240,21 @@ class TarbellSite:
     def get_context_from_gdoc(self):
         """Wrap getting context in a simple caching mechanism."""
         try:
-            #start = int(time.time())
-            #if start > self.expires:
-                #self.data = self._get_context_from_gdoc(
-                    #**self.project.GOOGLE_DOC)
-                #end = int(time.time())
-                #ttl = (end - start) * TTL_MULTIPLIER
-                #self.expires = end + ttl
-            self.data = self._get_context_from_gdoc(
-                **self.project.GOOGLE_DOC)
+            start = int(time.time())
+            if start > self.expires:
+                self.data = self._get_context_from_gdoc(self.project.SPREADSHEET_KEY)
+                end = int(time.time())
+                self.expires = end + SPREADSHEET_CACHE_TTL
             return self.data
         except AttributeError:
             return {}
 
-    def _get_context_from_gdoc(self, key, **kwargs):
+    def _get_context_from_gdoc(self, key):
         """Create a Jinja2 context from a Google spreadsheet."""
         content = self.export_xlsx(key)
         data = self.process_xlsx(content)
         if 'values' in data:
             data = self.copy_global_values(data)
-
         return data
 
     def export_xlsx(self, key):
@@ -354,29 +352,39 @@ class TarbellSite:
         return data
 
     def generate_static_site(self, output_root):
-        for name, project, project_path in self.projects:
-            for root, dirs, files in self.filter_files(project_path):
-                files[:] = [
-                    filename for filename in files
-                    if not filename.endswith('.py') and not filename.endswith('.pyc')
-                    ]
-                for filename in files:
-                    # Strip out full filesystem paths
-                    dirname = root.replace(project_path, "")
-                    path = "{0}/{1}".format(dirname, filename)
-                    if path.startswith("/"):
-                        path = path[1:]
-                    output_path = os.path.join(output_root, path)
-                    output_dir = os.path.dirname(output_path)
+        base_dir = os.path.join(self.path, "_base/")
 
-                    # @TODO account for overwriting
-                    self.app.logger.info("Writing {0}".format(output_path))
-                    with self.app.test_request_context():
-                        preview = self.preview(path)
-                        if not os.path.exists(output_dir):
-                            os.makedirs(output_dir)
-                        with open(output_path, "wb") as f:
-                            if isinstance(preview.response, FileWrapper):
-                                f.write(preview.response.file.read())
-                            else:
-                                f.write(preview.data)
+        for root, dirs, files in filter_files(base_dir):
+            for filename in files:
+                print "basedir"
+                print root
+                print filename
+                self._copy_file(root.replace("_base/", ""), filename, output_root)
+
+        for root, dirs, files in filter_files(self.path):
+            for filename in files:
+                print "projectdir"
+                print root
+                print filename
+                self._copy_file(root, filename, output_root)
+
+    def _copy_file(self, root, filename, output_root):
+        # Strip out full filesystem paths
+        path = os.path.join(root, filename)
+        rel_path = os.path.join(root.replace(self.path, ""), filename)
+        if rel_path.startswith("/"):
+            rel_path = rel_path[1:]
+        output_path = os.path.join(output_root, rel_path)
+        output_dir = os.path.dirname(output_path)
+
+        # @TODO account for overwriting
+        self.app.logger.info("Writing {0}".format(output_path))
+        with self.app.test_request_context():
+            preview = self.preview(rel_path)
+            if not os.path.exists(output_dir):
+                os.makedirs(output_dir)
+            with open(output_path, "wb") as f:
+                if isinstance(preview.response, FileWrapper):
+                    f.write(preview.response.file.read())
+                else:
+                    f.write(preview.data)
