@@ -354,16 +354,10 @@ class TarbellSite:
 
         for root, dirs, files in filter_files(base_dir):
             for filename in files:
-                print "basedir"
-                print root
-                print filename
                 self._copy_file(root.replace("_base/", ""), filename, output_root)
 
         for root, dirs, files in filter_files(self.path):
             for filename in files:
-                print "projectdir"
-                print root
-                print filename
                 self._copy_file(root, filename, output_root)
 
     def _copy_file(self, root, filename, output_root):
@@ -375,7 +369,6 @@ class TarbellSite:
         output_path = os.path.join(output_root, rel_path)
         output_dir = os.path.dirname(output_path)
 
-        # @TODO account for overwriting
         self.app.logger.info("Writing {0}".format(output_path))
         with self.app.test_request_context():
             preview = self.preview(rel_path)
