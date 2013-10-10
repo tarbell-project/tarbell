@@ -1,15 +1,3 @@
-from flask import Flask, render_template, send_from_directory, Response
-from jinja2 import FileSystemLoader, ChoiceLoader
-from jinja2.loaders import BaseLoader
-from jinja2.utils import open_if_exists
-from jinja2.exceptions import TemplateNotFound
-from ordereddict import OrderedDict
-from .oauth import get_drive_api
-from slughifi import slughifi
-from string import uppercase
-from werkzeug.wsgi import FileWrapper
-from utils import filter_files
-
 import os
 import json
 import imp
@@ -20,9 +8,21 @@ import re
 import requests
 import time
 
-SPREADSHEET_CACHE_TTL = 2000
-
+from flask import Flask, render_template, send_from_directory, Response
+from jinja2 import FileSystemLoader, ChoiceLoader
+from jinja2.loaders import BaseLoader
+from jinja2.utils import open_if_exists
+from jinja2.exceptions import TemplateNotFound
 from jinja2._compat import string_types, iteritems
+from ordereddict import OrderedDict
+from slughifi import slughifi
+from string import uppercase
+from werkzeug.wsgi import FileWrapper
+from utils import filter_files
+
+from .oauth import get_drive_api
+
+SPREADSHEET_CACHE_TTL = 2000
 
 
 def split_template_path(template):
