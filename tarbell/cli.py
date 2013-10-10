@@ -134,22 +134,26 @@ def tarbell_publish(args):
 
         try:
             if bucket_uri:
-                puts("Deploying to {0} ({1})\n".format(
-                    colored.green(bucket_name), colored.green(bucket_uri)))
-                tempdir = tarbell_generate(args, skip_args=True)
-                os.chdir(tempdir)
-                call(['s3cmd', 'sync', '--acl-public', '--delete-removed',
-                      './', bucket_uri])
+                tempdir = "%s/" % tarbell_generate(args, skip_args=True)
+                puts("\nDeploying {0} to {1} ({2})".format(
+                      colored.yellow(site.project.TITLE),
+                      colored.red(bucket_name),
+                      colored.green(bucket_uri)
+                     ))
+                command = ['s3cmd', 'sync', '--acl-public', '--delete-removed',
+                           '--verbose', tempdir, bucket_uri]
+                puts("\nCalling {0}".format(colored.yellow(" ".join(command))))
+                call(command)
             else:
-                show_error(("There's no bucket configuration called '{0}' "
-                            "in config.py.\n".format(bucket_name)))
+                show_error(("\nThere's no bucket configuration called '{0}' "
+                            "in tarbell.py.".format(colored.yellow(bucket_name))))
         except KeyboardInterrupt:
             show_error("ctrl-c pressed, bailing out!")
         finally:
             # Delete tempdir
             try:
                 shutil.rmtree(tempdir)  # delete directory
-                puts("\nDeleted {0}".format(tempdir))
+                puts("\nDeleted {0}!".format(tempdir))
             except OSError as exc:
                 if exc.errno != 2:  # code 2 - no such file or directory
                     raise  # re-raise exception
@@ -165,6 +169,10 @@ def tarbell_newproject(args):
         while not name:
             name = raw_input("No project name specified. Please enter a project name: ")
 
+        title = None
+        while not title:
+            title = raw_input("Please enter a long name for this project: ")
+
         default_projects_path = settings.config.get("projects_path")
         projects_path = None
 
@@ -177,6 +185,14 @@ def tarbell_newproject(args):
                 projects_path = raw_input("Where would you like to create this project? (e.g. ~/mytarbellsites/) ")
 
         path = os.path.join(projects_path, name)
+        try:
+            os.mkdir(path)
+        except OSError, e:
+            if e.errno == 17:
+                show_error("ABORTING: Directory {0} already exists.".format(path))
+            else:
+                show_error("ABORTING: OSError {0}".format(e))
+            sys.exit()
 
         # Get template
         puts("\nPick a template")
@@ -199,16 +215,24 @@ def tarbell_newproject(args):
         puts("\nCloning {0} to {1}".format(template.get("url"), tempdir))
         Repo.clone_from(template.get("url"), tempdir)
 
-        # Create spreadsheet/context vars
-        # Copy project files
+        context = {
+            "name": name,
+            "title": title,
+        }
 
+        # Create spreadsheet/context vars
         if settings.client_secrets:
             puts("\nClient secrets available, creating spreadsheet...")
-            key = _create_spreadsheet(name, tempdir, settings)
-        print key
-        #context = site._get_context_from_gdoc(key)
-        #context['spreadsheet_key'] = key
-        #_copy_project_files(project, path, context)
+            context['key'] = _create_spreadsheet(name, tempdir, settings)
+
+        if settings.config.get("s3_buckets"):
+            if settings.config["s3_buckets"].get("staging"):
+                context["staging_bucket"] = settings.config["s3_buckets"].get("staging")
+            if settings.config["s3_buckets"].get("production"):
+                context["production_bucket"] = settings.config["s3_buckets"].get("production")
+
+        puts("\nCopying project files...")
+        _copy_project_files(tempdir, path, context)
 
         # Delete tempdir
         try:
@@ -222,48 +246,32 @@ def tarbell_newproject(args):
 
 
 
+def _filter_project_template(path): 
+    for root, dirs, files in os.walk(path):
+        dirs[:] = [
+            dn for dn in dirs
+            if not dn.startswith('.')
+        ]
+        yield root, dirs, files
 
-def _copy_project_files(project, path, context):
-    proj_dir = os.path.join(path, project)
-    try:
-        os.mkdir(proj_dir)
-    except OSError, e:
-        if e.errno == 17:
-            print ("ABORTING: Directory %s "
-                   "already exists.") % proj_dir
-        else:
-            print "ABORTING: OSError %s" % e
-        return
+def _copy_project_files(source, dest, context):
+    
 
     # Get and walk project template
-    loader = jinja2.FileSystemLoader(os.path.join(path, '_project_template'))
-    env = jinja2.Environment(loader=loader)
-
-    for root, dirs, files in os.walk(os.path.join(path, '_project_template')):
+    #file_paths = [os.path.join(root, d, f) for root,dirs,files in os.walk(source) for d in dirs if not d.startswith(".") for f in files]
+    #print file_paths
+    #for path in file_paths:
+    for root, dirs, files in _filter_project_template(source):
+        dst_subdir = root.replace(source, "")
+        if dst_subdir.startswith("/"):
+            dst_subdir = dst_subdir[1:]
+        dst_dir = os.path.join(dest, dst_subdir)
+        if not os.path.exists(dst_dir):
+            os.makedirs(dst_dir)
         for filename in files:
-            # Strip out full filesystem paths
-            dirname = root.replace(path, "")\
-                          .replace("_project_template", "")
+            dst_file = os.path.join(dst_dir, filename)
+            shutil.copy2(os.path.join(root, filename), dst_file)
 
-            relpath = "{0}/{1}".format(dirname, filename)
-            if relpath.startswith("/"):
-                relpath = relpath[1:]
-
-            filepath = os.path.join(root, filename)
-            output_path = filepath.replace("_project_template", project)
-            output_dir = os.path.dirname(output_path)
-
-            if not os.path.exists(output_dir):
-                os.makedirs(output_dir)
-
-            mimetype, encoding = mimetypes.guess_type(filepath)
-
-            puts("Writing {0}".format(colored.yellow(output_path)))
-            if mimetype and mimetype.startswith("text/"):
-                content = env.get_template(relpath).render(context)
-                codecs.open(output_path, "w", encoding="utf-8").write(content)
-            else:
-                shutil.copy(filepath, output_path)
 
 
 def _create_spreadsheet(project, path, settings):
