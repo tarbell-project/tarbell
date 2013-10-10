@@ -368,6 +368,7 @@ def tarbell_serve(args):
         address = list_get(args, 0, "").split(":")
         ip = list_get(address, 0, '127.0.0.1')
         port = list_get(address, 1, 5000)
+        puts("Press {0} to stop the server".format(colored.red("ctrl-c")))
         site.app.run(ip, port=int(port))
 
 
@@ -376,7 +377,7 @@ def tarbell_switch(args):
     show_error("Not implemented!")
 
 
-def tarbell_update(args):
+def tarbell_updateproject(args):
     """Update the current tarbell project."""
     with ensure_settings(args) as settings, ensure_project(args) as site:
         repo = Repo(site.path)
@@ -488,10 +489,10 @@ def_cmd(
 
 
 def_cmd(
-    name='update',
-    fn=tarbell_update,
-    usage='update',
-    help='Update base template.')
+    name='updateproject',
+    fn=tarbell_updateproject,
+    usage='updateproject',
+    help='Update base template in current project.')
 
 
 def_cmd(
