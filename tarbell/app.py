@@ -193,8 +193,6 @@ class TarbellSite:
             dir, filename = os.path.split(filepath)
             return send_from_directory(dir, filename)
 
-        # @TODO Return 404 template if it exists, use Response object
-        return Response(status=404) 
 
     def get_context(self):
         """
