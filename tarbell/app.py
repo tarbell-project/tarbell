@@ -1,11 +1,3 @@
-from flask import Flask, render_template, send_from_directory, Response
-from jinja2 import FileSystemLoader, ChoiceLoader
-from ordereddict import OrderedDict
-from .oauth import get_drive_api
-from slughifi import slughifi
-from string import uppercase
-from werkzeug.wsgi import FileWrapper
-
 import os
 import json
 import imp
@@ -14,8 +6,80 @@ import xlrd
 import csv
 import re
 import requests
+import time
 
-TTL_MULTIPLIER = 5
+from flask import Flask, render_template, send_from_directory, Response
+from jinja2 import FileSystemLoader, ChoiceLoader
+from jinja2.loaders import BaseLoader
+from jinja2.utils import open_if_exists
+from jinja2.exceptions import TemplateNotFound
+from jinja2._compat import string_types, iteritems
+from ordereddict import OrderedDict
+from slughifi import slughifi
+from string import uppercase
+from werkzeug.wsgi import FileWrapper
+from utils import filter_files
+
+from .oauth import get_drive_api
+
+SPREADSHEET_CACHE_TTL = 2000
+
+
+def split_template_path(template):
+    """Split a path into segments and perform a sanity check.  If it detects
+    '..' in the path it will raise a `TemplateNotFound` error.
+    """
+    pieces = []
+    for piece in template.split('/'):
+        if os.path.sep in piece \
+           or (os.path.altsep and os.path.altsep in piece) or \
+           piece == os.path.pardir:
+            raise TemplateNotFound(template)
+        elif piece and piece != '.':
+            pieces.append(piece)
+    return pieces
+
+class TarbellFileSystemLoader(BaseLoader):
+    def __init__(self, searchpath, encoding='utf-8'):
+        if isinstance(searchpath, string_types):
+            searchpath = [searchpath]
+        self.searchpath = list(searchpath)
+        self.encoding = encoding
+
+    def get_source(self, environment, template):
+        pieces = split_template_path(template)
+        for searchpath in self.searchpath:
+            filename = os.path.join(searchpath, *pieces)
+            f = open_if_exists(filename)
+            if f is None:
+                continue
+            try:
+                contents = f.read().decode(self.encoding)
+            finally:
+                f.close()
+
+            mtime = os.path.getmtime(filename)
+            def uptodate():
+                try:
+                    return os.path.getmtime(filename) == mtime
+                except OSError:
+                    return False
+            return contents, filename, uptodate
+        raise TemplateNotFound(template)
+
+    def list_templates(self):
+        found = set()
+        for searchpath in self.searchpath:
+            for dirpath, dirnames, filenames in filter_files(searchpath):
+                for filename in filenames:
+                    template = os.path.join(dirpath, filename) \
+                        [len(searchpath):].strip(os.path.sep) \
+                                          .replace(os.path.sep, '/')
+                    if template[:2] == './':
+                        template = template[2:]
+                    if template not in found:
+                        found.add(template)
+        return sorted(found)
 
 
 def silent_none(value):
@@ -25,17 +89,15 @@ def silent_none(value):
 
 
 class TarbellSite:
-    def __init__(self, path):
+    def __init__(self, path, client_secrets_path=None):
         self.app = Flask(__name__)
 
         self.app.jinja_env.finalize = silent_none  # Don't print "None"
         self.app.debug = True  # Always debug
 
         self.path = path
-        self.projects = self.load_projects()
-        self.project = self.projects[0][1]
+        self.project, self.base = self.load_project(path)
 
-        self.client = get_drive_api(self.path)
         self.data = {}
         self.expires = 0
 
@@ -43,68 +105,57 @@ class TarbellSite:
         self.app.add_url_rule('/<path:path>', view_func=self.preview)
         self.app.add_template_filter(slughifi, 'slugify')
 
-    def filter_files(self, path):
-        for dirpath, dirnames, filenames in os.walk(path):
-            dirnames[:] = [
-                dn for dn in dirnames
-                if not dn.startswith('.') and not dn.startswith('_')
-            ]
-            filenames[:] = [
-                fn for fn in filenames
-                if not fn.startswith('.') and not fn.startswith('_')
-            ]
-            yield dirpath, dirnames, filenames
 
-    def sort_modules(self, x, y):
-        if x[0] == "base":
-            return 1
-        return -1
+    def load_project(self, path):
+        base = None
+        base_dir = os.path.join(path, "_base/")
 
-    def load_projects(self):
-        projects = []
-        for root, dirs, files in self.filter_files(self.path):
-            if 'config.py' in files:
-                name = root.split('/')[-1]
-                filename, pathname, description = imp.find_module('config', [root])
-                project = imp.load_module(name, filename, pathname, description)
-                projects.append((name, project, root))
+        # Get the base as register it as a blueprint
+        try:
+            filename, pathname, description = imp.find_module('base', [base_dir])
+            base = imp.load_module('base', filename, pathname, description)
+            self.app.register_blueprint(base.blueprint)
+        except ImportError:
+            self.app.logger.info("No _base/base.py file found")
 
-        # Sort modules
-        projects = sorted(projects, cmp=self.sort_modules)
+        filename, pathname, description = imp.find_module('tarbell', [path])
+        project = imp.load_module('project', filename, pathname, description)
 
-        loaders = []
-        for name, project, root in projects:
+        try:
+            self.key = project.SPREADSHEET_KEY
+            self.client = get_drive_api(self.path)
+        except AttributeError:
+            self.key = None
+            self.client = None
 
-            try:
-                project.CREATE_JSON
-            except AttributeError:
-                project.CREATE_JSON = True
+        try:
+            project.CREATE_JSON
+        except AttributeError:
+            project.CREATE_JSON = True
 
-            try:
-                project.DEFAULT_CONTEXT
-            except AttributeError:
-                project.DEFAULT_CONTEXT = {}
+        try:
+            project.DEFAULT_CONTEXT
+        except AttributeError:
+            project.DEFAULT_CONTEXT = {}
 
-            ## Register as flask blueprint
-            try:
-                self.app.register_blueprint(project.blueprint)
-            except AttributeError:
-                pass
+        try:
+            self.app.register_blueprint(project.blueprint)
+        except AttributeError:
+            pass
 
-            ## Every directory is a template dir
-            loader = FileSystemLoader(root)
-            loaders.append(loader)
+        # Set up template loaders
+        template_dirs = [path]
+        if os.path.isdir(base_dir):
+            template_dirs.append(base_dir)
 
-        self.app.jinja_loader = ChoiceLoader(loaders)
+        self.app.jinja_loader = TarbellFileSystemLoader(template_dirs)
 
-        return projects
+        return project, base
 
     def preview(self, path=None):
         """ Preview a project path """
         if path is None:
             path = 'index.html'
-        if path.endswith('/'):
-            path += 'index.html'
 
         ## Serve JSON
         if self.project.CREATE_JSON and path == 'data.json':
@@ -113,7 +164,17 @@ class TarbellSite:
 
         ## Detect files
         filepath = None
-        for name, project, root in self.projects:
+        for root, dirs, files in filter_files(self.path):
+            # Does it exist under _base?
+            basepath = os.path.join(root, "_base", path)
+            try:
+                with open(basepath):
+                    mimetype, encoding = mimetypes.guess_type(basepath)
+                    filepath = basepath
+            except IOError:
+                pass
+
+            # Does it exist under regular path?
             fullpath = os.path.join(root, path)
             try:
                 with open(fullpath):
@@ -127,12 +188,11 @@ class TarbellSite:
             context.update(self.get_context())
             rendered = render_template(path, **context)
             return Response(rendered, mimetype=mimetype)
+
         elif filepath:
             dir, filename = os.path.split(filepath)
             return send_from_directory(dir, filename)
 
-        # @TODO Return 404 template if it exists, use Response object
-        return "Not found", 404
 
     def get_context(self):
         """
@@ -178,26 +238,21 @@ class TarbellSite:
     def get_context_from_gdoc(self):
         """Wrap getting context in a simple caching mechanism."""
         try:
-            #start = int(time.time())
-            #if start > self.expires:
-                #self.data = self._get_context_from_gdoc(
-                    #**self.project.GOOGLE_DOC)
-                #end = int(time.time())
-                #ttl = (end - start) * TTL_MULTIPLIER
-                #self.expires = end + ttl
-            self.data = self._get_context_from_gdoc(
-                **self.project.GOOGLE_DOC)
+            start = int(time.time())
+            if start > self.expires:
+                self.data = self._get_context_from_gdoc(self.project.SPREADSHEET_KEY)
+                end = int(time.time())
+                self.expires = end + SPREADSHEET_CACHE_TTL
             return self.data
         except AttributeError:
             return {}
 
-    def _get_context_from_gdoc(self, key, **kwargs):
+    def _get_context_from_gdoc(self, key):
         """Create a Jinja2 context from a Google spreadsheet."""
         content = self.export_xlsx(key)
         data = self.process_xlsx(content)
         if 'values' in data:
             data = self.copy_global_values(data)
-
         return data
 
     def export_xlsx(self, key):
@@ -295,29 +350,32 @@ class TarbellSite:
         return data
 
     def generate_static_site(self, output_root):
-        for name, project, project_path in self.projects:
-            for root, dirs, files in self.filter_files(project_path):
-                files[:] = [
-                    filename for filename in files
-                    if not filename.endswith('.py') and not filename.endswith('.pyc')
-                    ]
-                for filename in files:
-                    # Strip out full filesystem paths
-                    dirname = root.replace(project_path, "")
-                    path = "{0}/{1}".format(dirname, filename)
-                    if path.startswith("/"):
-                        path = path[1:]
-                    output_path = os.path.join(output_root, path)
-                    output_dir = os.path.dirname(output_path)
+        base_dir = os.path.join(self.path, "_base/")
 
-                    # @TODO account for overwriting
-                    self.app.logger.info("Writing {0}".format(output_path))
-                    with self.app.test_request_context():
-                        preview = self.preview(path)
-                        if not os.path.exists(output_dir):
-                            os.makedirs(output_dir)
-                        with open(output_path, "wb") as f:
-                            if isinstance(preview.response, FileWrapper):
-                                f.write(preview.response.file.read())
-                            else:
-                                f.write(preview.data)
+        for root, dirs, files in filter_files(base_dir):
+            for filename in files:
+                self._copy_file(root.replace("_base/", ""), filename, output_root)
+
+        for root, dirs, files in filter_files(self.path):
+            for filename in files:
+                self._copy_file(root, filename, output_root)
+
+    def _copy_file(self, root, filename, output_root):
+        # Strip out full filesystem paths
+        path = os.path.join(root, filename)
+        rel_path = os.path.join(root.replace(self.path, ""), filename)
+        if rel_path.startswith("/"):
+            rel_path = rel_path[1:]
+        output_path = os.path.join(output_root, rel_path)
+        output_dir = os.path.dirname(output_path)
+
+        self.app.logger.info("Writing {0}".format(output_path))
+        with self.app.test_request_context():
+            preview = self.preview(rel_path)
+            if not os.path.exists(output_dir):
+                os.makedirs(output_dir)
+            with open(output_path, "wb") as f:
+                if isinstance(preview.response, FileWrapper):
+                    f.write(preview.response.file.read())
+                else:
+                    f.write(preview.data)
