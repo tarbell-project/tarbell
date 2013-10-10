@@ -29,7 +29,7 @@ from oauth2client.clientsecrets import InvalidClientSecretsError
 from git import Repo
 
 from .oauth import get_drive_api
-from .contextmanagers import ensure_settings, ensure_site
+from .contextmanagers import ensure_settings, ensure_project
 from .configure import tarbell_configure
 from .utils import list_get, black, split_sentences, show_error
 
@@ -105,7 +105,7 @@ def tarbell_generate(args, skip_args=False):
     """Generate static files."""
 
     output_root = None
-    with ensure_settings(args) as settings, ensure_site(args) as site:
+    with ensure_settings(args) as settings, ensure_project(args) as site:
         if not skip_args:
             output_root = list_get(args, 0, False)
         if not output_root:
@@ -128,7 +128,7 @@ def tarbell_list(args):
 
 def tarbell_publish(args):
     """Publish a site by calling s3cmd"""
-    with ensure_settings(args) as settings, ensure_site(args) as site:
+    with ensure_settings(args) as settings, ensure_project(args) as site:
         bucket_name = list_get(args, 0, "staging")
         bucket_uri = site.project.S3_BUCKETS.get(bucket_name, False)
 
@@ -337,7 +337,7 @@ def _add_user_to_file(file_id, service, user_email,
 
 def tarbell_serve(args):
     """Serve the current Tarbell project."""
-    with ensure_settings(args) as settings, ensure_site(args) as site:
+    with ensure_settings(args) as settings, ensure_project(args) as site:
         address = list_get(args, 0, "").split(":")
         ip = list_get(address, 0, '127.0.0.1')
         port = list_get(address, 1, 5000)
@@ -352,7 +352,7 @@ def tarbell_switch(args):
 
 
 def tarbell_unpublish(args):
-    with ensure_settings(args) as settings, ensure_site(args) as site:
+    with ensure_settings(args) as settings, ensure_project(args) as site:
         """Delete a project."""
         print "@todo unpublish"
 

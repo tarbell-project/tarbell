@@ -33,9 +33,8 @@ class EnsureSettings():
     def __exit__(self, type, value, traceback):
         pass
 
-ensure_settings = EnsureSettings
 
-class EnsureSite():
+class EnsureProject():
     """Context manager to ensure the user is in a Tarbell site environment."""
     def __init__(self, args):
         self.args = args
@@ -61,6 +60,13 @@ class EnsureSite():
         else:
             os.chdir(path)
             with ensure_settings(self.args) as settings:
-                return TarbellSite(path, settings.path)
+                site = TarbellSite(path, settings.path)
+                puts("Activating {0} ({1})\n".format(
+                        colored.red(site.project.TITLE),
+                        colored.yellow(site.project.NAME)
+                    ))
+                return site
 
-ensure_site = EnsureSite
+# Lowercase aliases
+ensure_settings = EnsureSettings
+ensure_project = EnsureProject
