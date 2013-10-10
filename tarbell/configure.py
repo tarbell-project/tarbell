@@ -47,6 +47,7 @@ def tarbell_configure(args):
     puts("\n- Done configuring Tarbell. Type `{0}` for help."
          .format(colored.green("tarbell")))
 
+    return Settings(path)
 
 def _get_or_create_config_dir(path):
     """Get or create a Tarbell configuration directory."""

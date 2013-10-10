@@ -15,7 +15,7 @@ from clint.textui import colored, puts
 from .app import TarbellSite
 from .settings import Settings
 from .utils import show_error, get_config_from_args
-
+from .configure import tarbell_configure
 
 class EnsureSettings():
     """Ensure the user has a Tarbell configuration."""
@@ -28,7 +28,9 @@ class EnsureSettings():
             return Settings(self.path)
         else:
             puts(colored.red("-- No Tarbell configuration found, configuring Tarbell. --\n"))
-            tarbell_configure(self.args)
+            settings = tarbell_configure(self.args)
+            puts(colored.red("\n\n-- Trying to run tarbell {0} again --\n\n".format(self.args.get(0))))
+            return settings
 
     def __exit__(self, type, value, traceback):
         pass
