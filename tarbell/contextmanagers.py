@@ -56,13 +56,13 @@ class EnsureProject():
 
         if not os.path.exists(os.path.join(path, 'tarbell.py')):
             path = os.path.realpath(os.path.join(path, '..'))
-            return self.ensure_site(path)
+            return self.ensure_project(path)
         else:
             os.chdir(path)
             with ensure_settings(self.args) as settings:
                 site = TarbellSite(path, settings.path)
                 puts("Activating {0} ({1})\n".format(
-                        colored.red(site.project.TITLE),
+                        colored.green(site.project.TITLE),
                         colored.yellow(site.project.NAME)
                     ))
                 return site

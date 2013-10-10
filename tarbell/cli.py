@@ -164,118 +164,97 @@ def tarbell_publish(args):
 def tarbell_newproject(args):
     """Create new Tarbell project."""
     with ensure_settings(args) as settings:
-        # Project settings
+        name = _get_project_name(args)
+        path = _get_path(name, settings)
+        title = _get_project_title()
+        template = _get_template(settings)
+        repo = _clone_repo(template, path)
+
+        _create_spreadsheet(name, title, path, settings)
+        _copy_config_template(name, title, template, path, settings)
+        _configure_remotes(name, template, repo)
+
+        puts("\nAll done! To preview your new project, type:\n")
+        puts("    {0}".format(colored.green("cd %s" % path)))
+        puts("    {0}".format(colored.green("tarbell serve\n")))
+
+
+def _get_project_name(args):
+        """Get project name"""
         name = args.get(0)
         while not name:
             name = raw_input("No project name specified. Please enter a project name: ")
+        return name
 
+
+def _get_project_title():
+        """Get project title"""
         title = None
         while not title:
             title = raw_input("Please enter a long name for this project: ")
 
-        default_projects_path = settings.config.get("projects_path")
-        projects_path = None
+        return title
 
-        if default_projects_path:
-            projects_path = raw_input("Where would you like to create this project? [{0}] ".format(default_projects_path))
-            if not projects_path:
-                projects_path = default_projects_path
+
+def _get_path(name, settings):
+    """Generate a project path."""
+    default_projects_path = settings.config.get("projects_path")
+    projects_path = None
+
+    if default_projects_path:
+        projects_path = raw_input("Where would you like to create this project? [{0}] ".format(default_projects_path))
+        if not projects_path:
+            projects_path = default_projects_path
+    else:
+        while not projects_path:
+            projects_path = raw_input("Where would you like to create this project? (e.g. ~/mytarbellsites/) ")
+
+    path = os.path.join(projects_path, name)
+    try:
+        os.mkdir(path)
+    except OSError, e:
+        if e.errno == 17:
+            show_error("ABORTING: Directory {0} already exists.".format(path))
         else:
-            while not projects_path:
-                projects_path = raw_input("Where would you like to create this project? (e.g. ~/mytarbellsites/) ")
+            show_error("ABORTING: OSError {0}".format(e))
+        sys.exit()
 
-        path = os.path.join(projects_path, name)
+    return path
+
+
+def _get_template(settings):
+    puts("\nPick a template\n")
+    template = None
+    while not template:
+        for idx, option in enumerate(settings.config.get("project_templates"), start=1):
+            puts("  {0:5} {1:36} {2}".format(colored.yellow("[{0}]".format(idx)),
+                                           colored.green(option.get("name")),
+                                           colored.yellow(option.get("url"))
+                                          ))
+        index = raw_input("\nWhich template would you like to use? [1] ")
+        if not template:
+            index = "1"
         try:
-            os.mkdir(path)
-        except OSError, e:
-            if e.errno == 17:
-                show_error("ABORTING: Directory {0} already exists.".format(path))
-            else:
-                show_error("ABORTING: OSError {0}".format(e))
-            sys.exit()
-
-        # Get template
-        puts("\nPick a template")
-        template = None
-        while not template:
-            puts("\n")
-            for idx, option in enumerate(settings.config.get("project_templates"), start=1):
-                puts("  {0:5} {1:36} {2}".format(colored.yellow("[{0}]".format(idx)),
-                                               colored.green(option.get("name")),
-                                               colored.yellow(option.get("url"))
-                                              ))
-            index = raw_input("\nWhich template would you like to use? ")
-            try:
-                index = int(index) - 1
-                template = settings.config["project_templates"][index]
-            except:
-                pass
-
-        tempdir = tempfile.mkdtemp(prefix="{0}-".format(name))
-        puts("\nCloning {0} to {1}".format(template.get("url"), tempdir))
-        Repo.clone_from(template.get("url"), tempdir)
-
-        context = {
-            "name": name,
-            "title": title,
-        }
-
-        # Create spreadsheet/context vars
-        if settings.client_secrets:
-            puts("\nClient secrets available, creating spreadsheet...")
-            context['key'] = _create_spreadsheet(name, tempdir, settings)
-
-        if settings.config.get("s3_buckets"):
-            if settings.config["s3_buckets"].get("staging"):
-                context["staging_bucket"] = settings.config["s3_buckets"].get("staging")
-            if settings.config["s3_buckets"].get("production"):
-                context["production_bucket"] = settings.config["s3_buckets"].get("production")
-
-        puts("\nCopying project files...")
-        _copy_project_files(tempdir, path, context)
-
-        # Delete tempdir
-        try:
-            shutil.rmtree(tempdir)  # delete directory
-            puts("\nDeleted {0}".format(tempdir))
-        except OSError as exc:
-            if exc.errno != 2:  # code 2 - no such file or directory
-                raise  # re-raise exception
-        except UnboundLocalError:
+            index = int(index) - 1
+            return settings.config["project_templates"][index]
+        except:
+            puts("\"{0}\" isn't a valid option!".format(colored.red("{0}".format(index))))
             pass
 
 
-
-def _filter_project_template(path): 
-    for root, dirs, files in os.walk(path):
-        dirs[:] = [
-            dn for dn in dirs
-            if not dn.startswith('.')
-        ]
-        yield root, dirs, files
-
-def _copy_project_files(source, dest, context):
-    
-
-    # Get and walk project template
-    #file_paths = [os.path.join(root, d, f) for root,dirs,files in os.walk(source) for d in dirs if not d.startswith(".") for f in files]
-    #print file_paths
-    #for path in file_paths:
-    for root, dirs, files in _filter_project_template(source):
-        dst_subdir = root.replace(source, "")
-        if dst_subdir.startswith("/"):
-            dst_subdir = dst_subdir[1:]
-        dst_dir = os.path.join(dest, dst_subdir)
-        if not os.path.exists(dst_dir):
-            os.makedirs(dst_dir)
-        for filename in files:
-            dst_file = os.path.join(dst_dir, filename)
-            shutil.copy2(os.path.join(root, filename), dst_file)
+def _clone_repo(template, path):
+    """Clone a template"""
+    template_url = template.get("url")
+    puts("\nCloning {0} to {1}".format(template_url, path))
+    return Repo.clone_from(template_url, path)
 
 
-
-def _create_spreadsheet(project, path, settings):
-    puts("\nGenerating Google spreadsheet")
+def _create_spreadsheet(name, title, path, settings):
+    """Create Google spreadsheet"""
+    if settings.client_secrets:
+        create = raw_input("\nclient_secrets.json found. Would you like to create a Google spreadsheet? [Y/n] ")
+        if create and not create.lower() == "y":
+            return puts("Not creating spreadsheet...")
 
     email_message = (
         "What Google account should have access to this "
@@ -283,7 +262,7 @@ def _create_spreadsheet(project, path, settings):
         "your.name@gmail.com or the Google account equivalent. ")
 
     if settings.config.get("google_account"):
-        email = raw_input("{0}(Default: {1}) ".format(email_message,
+        email = raw_input("\n{0}(Default: {1}) ".format(email_message,
                                              settings.config.get("google_account")
                                             ))
         if not email:
@@ -293,27 +272,32 @@ def _create_spreadsheet(project, path, settings):
         while not email:
             email = raw_input(email_message)
 
-    media_body = _MediaFileUpload(os.path.join(path,
-                                  'data.xlsx'),
-                                  mimetype='application/vnd.ms-excel')
+    try:
+        media_body = _MediaFileUpload(os.path.join(path, '_base/_config/'
+                                      'spreadsheet_values.xlsx'),
+                                      mimetype='application/vnd.ms-excel')
+    except IOError:
+        show_error("_base/_config/spreadsheet_values.xlsx doesn't exist!")
+        return
 
     service = get_drive_api(settings.path)
     body = {
-        'title': '%s [Tarbell project]' % project,
-        'description': '%s [Tarbell project]' % project,
+        'title': '{0} (Tarbell)'.format(title),
+        'description': '{0} ({1})'.format(title, name),
         'mimeType': 'application/vnd.ms-excel',
     }
     try:
         newfile = service.files()\
             .insert(body=body, media_body=media_body, convert=True).execute()
         _add_user_to_file(newfile['id'], service, user_email=email)
-        puts(("Success! View the file at "
-              "https://docs.google.com/spreadsheet/ccc?key={0}"
-              .format(newfile['id'])))
+        puts("Success! View the spreadsheet at {0}".format(
+            colored.yellow("https://docs.google.com/spreadsheet/ccc?key={0}"
+                           .format(newfile['id'])
+                          )
+            ))
         return newfile['id']
     except errors.HttpError, error:
-        show_error('An error occurred: {0}'.format(error))
-        sys.exit(1)
+        show_error('An error occurred creating spreadsheet: {0}'.format(error))
 
 
 def _add_user_to_file(file_id, service, user_email,
@@ -335,6 +319,49 @@ def _add_user_to_file(file_id, service, user_email,
         print 'An error occurred: %s' % error
 
 
+def _copy_config_template(name, title, template, path, settings):
+        """Get and render tarbell.py.template from base"""
+
+        puts("\nCreating tarbell.py project configuration file")
+        context = settings.config
+        context.update({
+            "name": name,
+            "title": title,
+            "template_repo_url": template.get('url')
+        })
+        s3_buckets = settings.config.get("s3_buckets")
+        if s3_buckets:
+            print "\n"
+            for bucket, url in s3_buckets.items():
+                puts("Configuring {0} bucket at {1}".format(
+                        colored.green(bucket),
+                        colored.yellow("{0}/{1}".format(url, name))
+                    ))
+
+        config_template = os.path.join(path, "_base/_config/tarbell.py.template")
+        if os.path.exists(config_template):
+            puts("\nCopying configuration file...")
+            loader = jinja2.FileSystemLoader(os.path.join(path, '_base/_config'))
+            env = jinja2.Environment(loader=loader)
+            content = env.get_template('tarbell.py.template').render(context)
+            codecs.open(os.path.join(path, "tarbell.py"), "w", encoding="utf-8").write(content)
+
+
+def _configure_remotes(name, template, repo):
+    """Shuffle remotes"""
+    puts("\nSetting up project repository...")
+    puts("\nRenaming {0} to {1}".format(colored.yellow("master"), colored.yellow("update_project_template")))
+    repo.remotes.origin.rename("update_project_template")
+    root_path = "/".join(template.get("url").split("/")[0:-1])
+    remote_url_suggestion = "{0}/{1}".format(root_path, name)
+    remote_url = raw_input("What is the URL of your project repository? [{0}] ".format(remote_url_suggestion))
+    if not remote_url:
+        remote_url = remote_url_suggestion
+    puts("\nCreating new remote 'origin' to track {0}.".format(colored.yellow(remote_url)))
+    repo.create_remote("origin", remote_url)
+    puts("{0}: It's up to you to create this repository!".format(colored.red("Don't forget")))
+
+
 def tarbell_serve(args):
     """Serve the current Tarbell project."""
     with ensure_settings(args) as settings, ensure_project(args) as site:
@@ -346,15 +373,21 @@ def tarbell_serve(args):
 
 def tarbell_switch(args):
     """Switch to a project"""
-    with ensure_settings(args) as settings:
-        #cmd_switch(args)               # legit switch
-        tarbell_serve(args[1:], path)  # serve 'em up!
+    show_error("Not implemented!")
 
+
+def tarbell_update(args):
+    """Update the current tarbell project."""
+    with ensure_settings(args) as settings, ensure_project(args) as site:
+        repo = Repo(site.path)
+        repo.remotes.update_project_template.fetch()
+        repo.remotes.update_project_template.pull()
+        # @TODO make this chatty
 
 def tarbell_unpublish(args):
     with ensure_settings(args) as settings, ensure_project(args) as site:
         """Delete a project."""
-        print "@todo unpublish"
+        show_error("Not implemented!")
 
 
 class Command(object):
@@ -452,6 +485,13 @@ def_cmd(
     help=('Switch to the project named <project> and start a preview server. '
           'Supply an optional address for the preview server such as '
           '`127.0.0.2:8000`'))
+
+
+def_cmd(
+    name='update',
+    fn=tarbell_update,
+    usage='update',
+    help='Update base template.')
 
 
 def_cmd(
