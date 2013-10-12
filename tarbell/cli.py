@@ -397,7 +397,7 @@ def tarbell_switch(args):
     show_error("Not implemented!")
 
 
-def tarbell_updateproject(args):
+def tarbell_update(args):
     """Update the current tarbell project."""
     with ensure_settings(args) as settings, ensure_project(args) as site:
         repo = Repo(site.path)
@@ -509,9 +509,9 @@ def_cmd(
 
 
 def_cmd(
-    name='updateproject',
-    fn=tarbell_updateproject,
-    usage='updateproject',
+    name='update',
+    fn=tarbell_update,
+    usage='update',
     help='Update base template in current project.')
 
 
