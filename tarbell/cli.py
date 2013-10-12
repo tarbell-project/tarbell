@@ -76,12 +76,12 @@ def display_info(args):
     for command in Command.all_commands():
         usage = command.usage or command.name
         help = command.help or ''
-        puts('{0:48} {1}\n'.format(
+        puts('{0:50} {1}\n'.format(
                 colored.green(usage),
                 split_sentences(help)))
 
     puts('\nOptions\n')
-    puts('{0:48} {1}'.format(
+    puts('{0:50} {1}'.format(
         colored.green("--reset-creds"),
         'Reset Google Drive OAuth2 credentials'
     ))
@@ -130,6 +130,21 @@ def tarbell_generate(args, skip_args=False):
         site.generate_static_site(output_root)
         puts("\nCreated site in {0}".format(output_root))
         return output_root
+
+
+def tarbell_get(args):
+    puts("get")
+    pass
+
+
+def tarbell_get_project(args):
+    puts("install project")
+    pass
+
+
+def tarbell_get_template(args):
+    puts("install template")
+    pass
 
 
 def tarbell_list(args):
@@ -467,6 +482,20 @@ def_cmd(
     usage='generate <output dir (optional)>',
     help=('Generate static files for the current project. If no output '
           'directory is specified, create a temporary directory.'))
+
+
+def_cmd(
+    name='get_project',
+    fn=tarbell_get_project,
+    usage='get_project <url to project repository>',
+    help='Install a project')
+
+
+def_cmd(
+    name='get_template',
+    fn=tarbell_get_template,
+    usage='get_template <url to template>',
+    help='Install a project template')
 
 
 def_cmd(

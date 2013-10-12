@@ -36,7 +36,7 @@ def split_sentences(s):
     for index, sentence in enumerate(s.split('. ')):
         pad = ''
         if index > 0:
-            pad = ' ' * 39
+            pad = ' ' * 41
         if sentence.endswith('.'):
             sentence = sentence[:-1]
         sentences.append('%s %s.' % (pad, sentence.strip()))
