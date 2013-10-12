@@ -396,7 +396,7 @@ def _configure_remotes(name, template, repo):
     if remote_url:
         puts("\nCreating new remote 'origin' to track {0}.".format(colored.yellow(remote_url)))
         repo.create_remote("origin", remote_url)
-        puts("\n{0}: Don't forget! It's up to you to create this repository.".format(colored.cyan("Warning:")))
+        puts("\n{0}: Don't forget! It's up to you to create this repository.".format(colored.cyan("Warning")))
     else:
         puts("\n- Not setting up remote repository. Use your own version control!")
 
