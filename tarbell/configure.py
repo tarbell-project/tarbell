@@ -170,6 +170,9 @@ def _setup_default_templates(path):
     project_templates = [{
         "name": "Basic Bootstrap 3 template",
         "url": "https://github.com/newsapps/tarbell-template",
+    }, {
+        "name": "Searchable map template",
+        "url": "https://github.com/eads/tarbell-map-template",
     }]
     for project in project_templates:
         puts("+ Adding {0} ({1})".format(project["name"], project["url"]))

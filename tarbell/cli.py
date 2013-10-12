@@ -27,6 +27,7 @@ from oauth2client.clientsecrets import InvalidClientSecretsError
 
 from git import Repo
 
+from .app import pprint_lines, process_xlsx, copy_global_values
 from .oauth import get_drive_api
 from .contextmanagers import ensure_settings, ensure_project
 from .configure import tarbell_configure
@@ -400,11 +401,29 @@ def _copy_config_template(name, title, template, path, key, settings):
         puts("\nCopying configuration file")
         context = settings.config
         context.update({
+            "default_context": {
+                "name": name,
+                "title": title,
+            },
             "name": name,
             "title": title,
             "template_repo_url": template.get('url'),
             "key": key,
         })
+
+        # @TODO refactor this a bit
+        if not key:
+            spreadsheet_path = os.path.join(path, '_base/_config/', 'spreadsheet_values.xlsx')
+            with open(spreadsheet_path, "rb") as f:
+                try:
+                    puts("Copying _base/_config/spreadsheet_values.xlsx to tarbell.py's DEFAULT_CONTEXT") 
+                    data = process_xlsx(f.read())
+                    if 'values' in data:
+                        data = copy_global_values(data)
+                    context["default_context"].update(data)
+                except IOError:
+                    show_error("No spreadsheet available")
+
         s3_buckets = settings.config.get("s3_buckets")
         if s3_buckets:
             puts("")
@@ -421,6 +440,7 @@ def _copy_config_template(name, title, template, path, key, settings):
             ))
             loader = jinja2.FileSystemLoader(os.path.join(path, '_base/_config'))
             env = jinja2.Environment(loader=loader)
+            env.filters["pprint_lines"] = pprint_lines
             content = env.get_template('tarbell.py.template').render(context)
             codecs.open(os.path.join(path, "tarbell.py"), "w", encoding="utf-8").write(content)
         puts("\n- Done copying configuration file")
