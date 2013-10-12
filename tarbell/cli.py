@@ -137,15 +137,20 @@ def tarbell_generate(args, skip_args=False):
 
 
 def tarbell_install(args):
+    """Install a project."""
     with ensure_settings(args) as settings:
-        pass
-    puts("add project")
-    # Clone project from arg
-    # Set up remote
-    # Ask about repo (with default set)
-    # Tell the user about tarbell update
-    pass
-
+        project_url = args.get(0)
+        puts("\n- Getting project information for {0}".format(project_url)) 
+        tempdir = tempfile.mkdtemp()
+        Repo.clone_from(project_url, tempdir)
+        filename, pathname, description = imp.find_module('tarbell', [tempdir])
+        tarbell = imp.load_module('tarbell', filename, pathname, description)
+        puts("\n- Found tarbell.py")
+        path = _get_path(tarbell.NAME, settings)
+        repo = Repo.clone_from(project_url, path)
+        repo.create_remote("update_project_template", tarbell.TEMPLATE_REPO_URL)
+        puts("\n- Done installing project in {0}".format(path))
+        # @TODO delete tempdir
 
 def tarbell_install_template(args):
     with ensure_settings(args) as settings:
@@ -175,6 +180,9 @@ def tarbell_install_template(args):
 
         settings.config["project_templates"].append({"name": name, "url": template_url})
         settings.save()
+
+        # @TODO delete tempdir
+
         puts("\n+ Added new project template: {0}".format(colored.yellow(name)))
 
 
@@ -237,7 +245,7 @@ def tarbell_newproject(args):
         key = _create_spreadsheet(name, title, path, settings)
 
         _copy_config_template(name, title, template, path, key, settings)
-        _configure_remotes(name, template, repo)
+        _configure_remotes(repo)
 
         puts("\nAll done! To preview your new project, type:\n")
         puts("    {0}".format(colored.green("cd %s" % path)))
@@ -446,7 +454,7 @@ def _copy_config_template(name, title, template, path, key, settings):
         puts("\n- Done copying configuration file")
 
 
-def _configure_remotes(name, template, repo):
+def _configure_remotes(repo):
     """Shuffle remotes"""
     puts("\nSetting up git remote repositories")
     puts("\n- Renaming {0} to {1}".format(colored.yellow("master"), colored.yellow("update_project_template")))
@@ -483,7 +491,7 @@ def tarbell_update(args):
     with ensure_settings(args) as settings, ensure_project(args) as site:
         repo = Repo(site.path)
         repo.remotes.update_project_template.fetch()
-        repo.remotes.update_project_template.pull()
+        repo.remotes.update_project_template.pull("master")
         # @TODO make this chatty
 
 def tarbell_unpublish(args):
