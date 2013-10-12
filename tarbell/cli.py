@@ -233,9 +233,9 @@ def tarbell_newproject(args):
         title = _get_project_title()
         template = _get_template(settings)
         repo = _clone_repo(template, path)
+        key = _create_spreadsheet(name, title, path, settings)
 
-        _create_spreadsheet(name, title, path, settings)
-        _copy_config_template(name, title, template, path, settings)
+        _copy_config_template(name, title, template, path, key, settings)
         _configure_remotes(name, template, repo)
 
         puts("\nAll done! To preview your new project, type:\n")
@@ -353,7 +353,7 @@ def _create_spreadsheet(name, title, path, settings):
                                       mimetype='application/vnd.ms-excel')
     except IOError:
         show_error("_base/_config/spreadsheet_values.xlsx doesn't exist!")
-        return
+        return None
 
     service = get_drive_api(settings.path)
     body = {
@@ -373,6 +373,7 @@ def _create_spreadsheet(name, title, path, settings):
         return newfile['id']
     except errors.HttpError, error:
         show_error('An error occurred creating spreadsheet: {0}'.format(error))
+        return None
 
 
 def _add_user_to_file(file_id, service, user_email,
@@ -394,14 +395,15 @@ def _add_user_to_file(file_id, service, user_email,
         print 'An error occurred: %s' % error
 
 
-def _copy_config_template(name, title, template, path, settings):
+def _copy_config_template(name, title, template, path, key, settings):
         """Get and render tarbell.py.template from base"""
         puts("\nCopying configuration file")
         context = settings.config
         context.update({
             "name": name,
             "title": title,
-            "template_repo_url": template.get('url')
+            "template_repo_url": template.get('url'),
+            "key": key,
         })
         s3_buckets = settings.config.get("s3_buckets")
         if s3_buckets:
