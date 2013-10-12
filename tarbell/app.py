@@ -96,7 +96,13 @@ def silent_none(value):
 
 
 def pprint_lines(value):
-    return Markup(pformat(value, width=1))
+    pformatted = pformat(value, width=1, indent=4)
+    formatted = "{0}\n {1}\n{2}".format(
+        pformatted[0],
+        pformatted[1:-1],
+        pformatted[-1]
+    )
+    return Markup(formatted)
 
 
 def process_xlsx(content):
