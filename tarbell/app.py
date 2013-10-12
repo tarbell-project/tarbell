@@ -183,15 +183,19 @@ class TarbellSite:
             except IOError:
                 pass
 
-        if filepath and mimetype and mimetype.startswith("text/"):
+        if filepath and mimetype and (mimetype.startswith("text/") or mimetype.startswith("application/")):
             context = self.project.DEFAULT_CONTEXT
             context.update(self.get_context())
+            import pprint;
+            pprint.pprint(context);
             rendered = render_template(path, **context)
             return Response(rendered, mimetype=mimetype)
 
         elif filepath:
             dir, filename = os.path.split(filepath)
             return send_from_directory(dir, filename)
+
+        return Response(status=404)
 
 
     def get_context(self):

@@ -297,7 +297,6 @@ def _get_template(settings):
         if not index:
             index = "1"
         try:
-            import ipdb; ipdb.set_trace();
             index = int(index) - 1
             return settings.config["project_templates"][index]
         except:
@@ -430,7 +429,7 @@ def _configure_remotes(name, template, repo):
     puts("\nSetting up git remote repositories")
     puts("\n- Renaming {0} to {1}".format(colored.yellow("master"), colored.yellow("update_project_template")))
     repo.remotes.origin.rename("update_project_template")
-    remote_url = raw_input("\nWhat is the URL of your project repository? (e.g. git@github.com:eads/myproject.git, leave blank to skip) ".format(remote_url_suggestion))
+    remote_url = raw_input("\nWhat is the URL of your project repository? (e.g. git@github.com:eads/myproject.git, leave blank to skip) ")
     if remote_url:
         puts("\nCreating new remote 'origin' to track {0}.".format(colored.yellow(remote_url)))
         repo.create_remote("origin", remote_url)
