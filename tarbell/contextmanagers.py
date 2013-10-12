@@ -27,12 +27,20 @@ class EnsureSettings():
         if (os.path.isdir(self.path)):
             return Settings(self.path)
         else:
-            puts(colored.red("-- No Tarbell configuration found, configuring Tarbell. --\n"))
+            puts("\n{0}: {1}".format(
+                colored.red("Warning:"),
+                "No Tarbell configuration found, running {0}.".format(
+                    colored.green("tarbell configure")
+                )
+            ))
             settings = tarbell_configure(self.args)
-            puts(colored.red("\n\n-- Trying to run tarbell {0} again --\n\n".format(self.args.get(0))))
+            puts("\n\n Trying to run {0} again".format(
+                colored.yellow("tarbell {0}".format(self.args.get(0)))
+            ))
             return settings
 
     def __exit__(self, type, value, traceback):
+        # @TODO This isn't quite right, __enter__ does too much work.
         pass
 
 

@@ -21,7 +21,7 @@ from .oauth import get_drive_api
 from .utils import show_error, get_config_from_args
 
 def tarbell_configure(args):
-    puts("Configuring Tarbell")
+    puts("Configuring Tarbell. Press ctrl-c to bail out!")
 
     path = get_config_from_args(args)
 

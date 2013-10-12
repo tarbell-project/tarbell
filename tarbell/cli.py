@@ -31,7 +31,7 @@ from git import Repo
 from .oauth import get_drive_api
 from .contextmanagers import ensure_settings, ensure_project
 from .configure import tarbell_configure
-from .utils import list_get, black, split_sentences, show_error
+from .utils import list_get, black, split_sentences, show_error, get_config_from_args
 
 __version__ = '0.9'
 
@@ -45,7 +45,7 @@ def main():
     command = Command.lookup(args.get(0))
 
     if len(args) == 0 or args.contains(('-h', '--help', 'help')):
-        display_info()
+        display_info(args)
         sys.exit(1)
 
     elif args.contains(('-v', '--version')):
@@ -61,14 +61,13 @@ def main():
     else:
         show_error(colored.red('Error! Unknown command `{0}`.\n'
                                .format(args.get(0))))
-        display_info()
+        display_info(args)
         sys.exit(1)
 
 
-def display_info():
+def display_info(args):
     """Displays Tarbell info."""
-
-    puts('{0}\n'.format(
+    puts('\n{0}\n'.format(
         black('Tarbell: Simple web publishing'),
     ))
 
@@ -86,6 +85,20 @@ def display_info():
         colored.green("--reset-creds"),
         'Reset Google Drive OAuth2 credentials'
     ))
+
+    config = get_config_from_args(args)
+    if not os.path.isdir(config):
+        puts('\n---\n\n{0}: {1}'.format(
+            colored.red("Warning"),
+            "No Tarbell configuration found. Run:"
+        ))
+        puts('\n    {0}'.format(
+            colored.green("tarbell configure")
+        ))
+        puts('\n{0}'.format(
+            "to configure Tarbell."
+        ))
+
 
     puts('\n{0}'.format(
         black(u'A Chicago Tribune News Applications project')
@@ -199,17 +212,16 @@ def _get_project_title():
 def _get_path(name, settings):
     """Generate a project path."""
     default_projects_path = settings.config.get("projects_path")
-    projects_path = None
+    path = None
 
     if default_projects_path:
-        projects_path = raw_input("Where would you like to create this project? [{0}] ".format(default_projects_path))
-        if not projects_path:
-            projects_path = default_projects_path
+        path = raw_input("Where would you like to create this project? [{0}/{1}] ".format(default_projects_path, name))
+        if not path:
+            path = os.path.join(default_projects_path, name)
     else:
-        while not projects_path:
-            projects_path = raw_input("Where would you like to create this project? (e.g. ~/mytarbellsites/) ")
+        while not path:
+            path = raw_input("Where would you like to create this project? (e.g. ~/tarbell/) ")
 
-    path = os.path.join(projects_path, name)
     try:
         os.mkdir(path)
     except OSError, e:
@@ -359,7 +371,7 @@ def _configure_remotes(name, template, repo):
         remote_url = remote_url_suggestion
     puts("\nCreating new remote 'origin' to track {0}.".format(colored.yellow(remote_url)))
     repo.create_remote("origin", remote_url)
-    puts("{0}: It's up to you to create this repository!".format(colored.red("Don't forget")))
+    puts("\n{0}: It's up to you to create this repository!".format(colored.cyan("Don't forget")))
 
 
 def tarbell_serve(args):
