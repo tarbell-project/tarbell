@@ -178,6 +178,7 @@ def tarbell_newproject(args):
     """Create new Tarbell project."""
     with ensure_settings(args) as settings:
         name = _get_project_name(args)
+        puts("Creating {0}".format(colored.cyan(name)))
         path = _get_path(name, settings)
         title = _get_project_title()
         template = _get_template(settings)
@@ -273,9 +274,9 @@ def _create_spreadsheet(name, title, path, settings):
             return puts("Not creating spreadsheet...")
 
     email_message = (
-        "What Google account should have access to this "
-        "this spreadsheet? Use a full email address, such as "
-        "your.name@gmail.com or the Google account equivalent. ")
+        "\nWhat Google account should have access to this "
+        "this spreadsheet? (Use a full email address, such as "
+        "your.name@gmail.com or the Google account equivalent.) ") 
 
     if settings.config.get("google_account"):
         email = raw_input("\n{0}(Default: {1}) ".format(email_message,
@@ -377,6 +378,8 @@ def _configure_remotes(name, template, repo):
         puts("\nCreating new remote 'origin' to track {0}.".format(colored.yellow(remote_url)))
         repo.create_remote("origin", remote_url)
         puts("\n{0}: Don't forget! It's up to you to create this repository.".format(colored.cyan("Warning:")))
+    else:
+        puts("\n- Not setting up remote repository. Use your own version control!")
 
 
 def tarbell_serve(args):
@@ -385,7 +388,7 @@ def tarbell_serve(args):
         address = list_get(args, 0, "").split(":")
         ip = list_get(address, 0, '127.0.0.1')
         port = list_get(address, 1, 5000)
-        puts("Press {0} to stop the server".format(colored.red("ctrl-c")))
+        puts("\nPress {0} to stop the server".format(colored.cyan("ctrl-c")))
         site.app.run(ip, port=int(port))
 
 
