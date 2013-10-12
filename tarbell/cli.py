@@ -334,7 +334,9 @@ def _add_user_to_file(file_id, service, user_email,
 def _copy_config_template(name, title, template, path, settings):
         """Get and render tarbell.py.template from base"""
 
-        puts("\nCreating tarbell.py project configuration file")
+        puts("\nCreating {0} project configuration file".format(
+            colored.cyan("tarbell.py")
+        ))
         context = settings.config
         context.update({
             "name": name,
@@ -343,9 +345,9 @@ def _copy_config_template(name, title, template, path, settings):
         })
         s3_buckets = settings.config.get("s3_buckets")
         if s3_buckets:
-            print "\n"
+            puts("")
             for bucket, url in s3_buckets.items():
-                puts("Configuring {0} bucket at {1}".format(
+                puts("Configuring {0} bucket at {1}\n".format(
                         colored.green(bucket),
                         colored.yellow("{0}/{1}".format(url, name))
                     ))
