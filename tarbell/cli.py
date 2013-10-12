@@ -334,7 +334,7 @@ def _add_user_to_file(file_id, service, user_email,
 def _copy_config_template(name, title, template, path, settings):
         """Get and render tarbell.py.template from base"""
 
-        puts("\nCreating {0} project configuration file".format(
+        puts("\n- Creating {0} project configuration file".format(
             colored.cyan("tarbell.py")
         ))
         context = settings.config
@@ -354,7 +354,7 @@ def _copy_config_template(name, title, template, path, settings):
 
         config_template = os.path.join(path, "_base/_config/tarbell.py.template")
         if os.path.exists(config_template):
-            puts("\nCopying configuration file...")
+            puts("\n- Copying configuration file...")
             loader = jinja2.FileSystemLoader(os.path.join(path, '_base/_config'))
             env = jinja2.Environment(loader=loader)
             content = env.get_template('tarbell.py.template').render(context)
