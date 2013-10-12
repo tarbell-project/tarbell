@@ -184,8 +184,7 @@ class TarbellSite:
                 pass
 
         if filepath and mimetype and (mimetype.startswith("text/") or mimetype.startswith("application/")):
-            context = self.project.DEFAULT_CONTEXT
-            context.update(self.get_context())
+            context = self.get_context()
             rendered = render_template(path, **context)
             return Response(rendered, mimetype=mimetype)
 
@@ -203,16 +202,23 @@ class TarbellSite:
 
         Can be an http|https url or local file. Supports csv and excel files.
         """
+        context = self.project.DEFAULT_CONTEXT
         try:
             file = self.project.CONTEXT_SOURCE_FILE
             # CSV
             if re.search(r'(csv|CSV)$', file):
-                return self.get_context_from_csv()
+                context.update(self.get_context_from_csv())
             # Excel
             if re.search(r'(xlsx|XLSX|xls|XLS)$', file):
                 pass
         except AttributeError:
-            return self.get_context_from_gdoc()
+            context.update(self.get_context_from_gdoc())
+
+        # Return retrieved context + defaults
+        context.update({
+            "PROJECT_PATH": self.path
+        })
+        return context
 
     def get_context_from_csv(self):
         """
@@ -235,13 +241,16 @@ class TarbellSite:
                 with open(file) as csvfile:
                     reader = csv.reader(csvfile, delimiter=',', quotechar='"')
                     ret = {rows[0]: rows[1] for rows in reader}
+        ret.update({
+            "CONTEXT_SOURCE_FILE": self.project.CONTEXT_SOURCE_FILE,
+        })
         return ret
 
     def get_context_from_gdoc(self):
         """Wrap getting context in a simple caching mechanism."""
         try:
             start = int(time.time())
-            if start > self.expires:
+            if not self.data or start > self.expires:
                 self.data = self._get_context_from_gdoc(self.project.SPREADSHEET_KEY)
                 end = int(time.time())
                 self.expires = end + SPREADSHEET_CACHE_TTL
