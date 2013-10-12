@@ -12,6 +12,7 @@ import sys
 import yaml
 import shutil
 from subprocess import call
+from datetime import datetime
 
 from clint.textui import colored, puts
 
@@ -177,4 +178,16 @@ def _setup_default_templates(path):
 
 
 def _backup(path, filename):
-    pass
+    target = os.path.join(path, filename)
+    if os.path.isfile(target):
+        dt = datetime.now()
+        new_filename = "{0}.{1}.{2}".format(
+            filename, dt.isoformat(), "backup"
+        )
+        destination = os.path.join(path, new_filename)
+        puts("\n-- Backing up {0} to {1}\n".format(
+            colored.cyan(target),
+            colored.cyan(destination)
+        ))
+
+        shutil.copy(target, destination)
