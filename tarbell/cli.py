@@ -451,11 +451,14 @@ def _configure_remotes(name, template, repo):
     puts("\nSetting up git remote repositories")
     puts("\n- Renaming {0} to {1}".format(colored.yellow("master"), colored.yellow("update_project_template")))
     repo.remotes.origin.rename("update_project_template")
+    puts("\n- Add and commit tarbell.py")
+    repo.index.add(["tarbell.py"])
+    repo.index.commit("added generated tarbell.py configuration")
     remote_url = raw_input("\nWhat is the URL of your project repository? (e.g. git@github.com:eads/myproject.git, leave blank to skip) ")
     if remote_url:
         puts("\nCreating new remote 'origin' to track {0}.".format(colored.yellow(remote_url)))
         repo.create_remote("origin", remote_url)
-        puts("\n{0}: Don't forget! It's up to you to create this repository.".format(colored.cyan("Warning")))
+        puts("\n{0}: Don't forget! It's up to you to create this remote and push to it.".format(colored.cyan("Warning")))
     else:
         puts("\n- Not setting up remote repository. Use your own version control!")
 
