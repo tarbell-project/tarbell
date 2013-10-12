@@ -195,6 +195,7 @@ def tarbell_newproject(args):
 def _get_project_name(args):
         """Get project name"""
         name = args.get(0)
+        puts("")
         while not name:
             name = raw_input("No project name specified. Please enter a project name: ")
         return name
@@ -203,6 +204,7 @@ def _get_project_name(args):
 def _get_project_title():
         """Get project title"""
         title = None
+        puts("")
         while not title:
             title = raw_input("Please enter a long name for this project: ")
 
@@ -215,12 +217,12 @@ def _get_path(name, settings):
     path = None
 
     if default_projects_path:
-        path = raw_input("Where would you like to create this project? [{0}/{1}] ".format(default_projects_path, name))
+        path = raw_input("\nWhere would you like to create this project? [{0}/{1}] ".format(default_projects_path, name))
         if not path:
             path = os.path.join(default_projects_path, name)
     else:
         while not path:
-            path = raw_input("Where would you like to create this project? (e.g. ~/tarbell/) ")
+            path = raw_input("\nWhere would you like to create this project? (e.g. ~/tarbell/) ")
 
     try:
         os.mkdir(path)
@@ -257,14 +259,16 @@ def _get_template(settings):
 def _clone_repo(template, path):
     """Clone a template"""
     template_url = template.get("url")
-    puts("\nCloning {0} to {1}".format(template_url, path))
+    puts("\n- Cloning {0} to {1}".format(template_url, path))
     return Repo.clone_from(template_url, path)
 
 
 def _create_spreadsheet(name, title, path, settings):
     """Create Google spreadsheet"""
     if settings.client_secrets:
-        create = raw_input("\nclient_secrets.json found. Would you like to create a Google spreadsheet? [Y/n] ")
+        create = raw_input("\n{0} found. Would you like to create a Google spreadsheet? [Y/n] ".format(
+            colored.cyan("client_secrets")
+        ))
         if create and not create.lower() == "y":
             return puts("Not creating spreadsheet...")
 
@@ -302,10 +306,10 @@ def _create_spreadsheet(name, title, path, settings):
         newfile = service.files()\
             .insert(body=body, media_body=media_body, convert=True).execute()
         _add_user_to_file(newfile['id'], service, user_email=email)
-        puts("Success! View the spreadsheet at {0}".format(
+        puts("\n{0}! View the spreadsheet at {1}".format(
+            colored.green("Success"),
             colored.yellow("https://docs.google.com/spreadsheet/ccc?key={0}"
-                           .format(newfile['id'])
-                          )
+                           .format(newfile['id']))
             ))
         return newfile['id']
     except errors.HttpError, error:
@@ -333,10 +337,7 @@ def _add_user_to_file(file_id, service, user_email,
 
 def _copy_config_template(name, title, template, path, settings):
         """Get and render tarbell.py.template from base"""
-
-        puts("\n- Creating {0} project configuration file".format(
-            colored.cyan("tarbell.py")
-        ))
+        puts("\nCopying configuration file")
         context = settings.config
         context.update({
             "name": name,
@@ -354,11 +355,14 @@ def _copy_config_template(name, title, template, path, settings):
 
         config_template = os.path.join(path, "_base/_config/tarbell.py.template")
         if os.path.exists(config_template):
-            puts("\n- Copying configuration file...")
+            puts("\n- Creating {0} project configuration file".format(
+                colored.cyan("tarbell.py")
+            ))
             loader = jinja2.FileSystemLoader(os.path.join(path, '_base/_config'))
             env = jinja2.Environment(loader=loader)
             content = env.get_template('tarbell.py.template').render(context)
             codecs.open(os.path.join(path, "tarbell.py"), "w", encoding="utf-8").write(content)
+        puts("\n- Done copying configuration file")
 
 
 def _configure_remotes(name, template, repo):
