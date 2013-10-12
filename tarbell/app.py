@@ -24,7 +24,11 @@ from utils import filter_files
 from .oauth import get_drive_api
 
 SPREADSHEET_CACHE_TTL = 2000
-
+TEMPLATE_TYPES = [
+    "text/html",
+    "text/css",
+    "application/javascript",
+]
 
 def split_template_path(template):
     """Split a path into segments and perform a sanity check.  If it detects
@@ -184,7 +188,7 @@ class TarbellSite:
             except IOError:
                 pass
 
-        if filepath and mimetype and (mimetype.startswith("text/") or mimetype.startswith("application/")):
+        if filepath and mimetype and mimetype in TEMPLATE_TYPES:
             context = self.get_context()
             rendered = render_template(path, **context)
             return Response(rendered, mimetype=mimetype)
@@ -271,6 +275,7 @@ class TarbellSite:
             })
             return data
         except BadStatusLine:
+            # Stale connection, reset project and data
             self.project, self.base = self.load_project(path)
             self.data = {}
             return self._get_context_from_gdoc(key)
