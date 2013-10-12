@@ -364,16 +364,15 @@ def _copy_config_template(name, title, template, path, settings):
 def _configure_remotes(name, template, repo):
     """Shuffle remotes"""
     puts("\nSetting up project repository...")
-    puts("\nRenaming {0} to {1}".format(colored.yellow("master"), colored.yellow("update_project_template")))
+    puts("\n- Renaming {0} to {1}".format(colored.yellow("master"), colored.yellow("update_project_template")))
     repo.remotes.origin.rename("update_project_template")
     root_path = "/".join(template.get("url").split("/")[0:-1])
     remote_url_suggestion = "{0}/{1}".format(root_path, name)
-    remote_url = raw_input("What is the URL of your project repository? [{0}] ".format(remote_url_suggestion))
-    if not remote_url:
-        remote_url = remote_url_suggestion
-    puts("\nCreating new remote 'origin' to track {0}.".format(colored.yellow(remote_url)))
-    repo.create_remote("origin", remote_url)
-    puts("\n{0}: It's up to you to create this repository!".format(colored.cyan("Don't forget")))
+    remote_url = raw_input("\nWhat is the URL of your project repository? (e.g. {0}, leave blank to skip) ".format(remote_url_suggestion))
+    if remote_url:
+        puts("\nCreating new remote 'origin' to track {0}.".format(colored.yellow(remote_url)))
+        repo.create_remote("origin", remote_url)
+        puts("\n{0}: Don't forget! It's up to you to create this repository.".format(colored.cyan("Warning:")))
 
 
 def tarbell_serve(args):
