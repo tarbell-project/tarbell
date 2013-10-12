@@ -288,14 +288,16 @@ def _get_path(name, settings):
 
 
 def _get_template(settings):
+    """Prompt user to pick template from a list."""
     puts("\nPick a template\n")
     template = None
     while not template:
         _list_templates(settings)
         index = raw_input("\nWhich template would you like to use? [1] ")
-        if not template:
+        if not index:
             index = "1"
         try:
+            import ipdb; ipdb.set_trace();
             index = int(index) - 1
             return settings.config["project_templates"][index]
         except:
