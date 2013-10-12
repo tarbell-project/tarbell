@@ -168,7 +168,7 @@ def _setup_tarbell_project_path(path):
 
 def _setup_default_templates(path):
     project_templates = [{
-        "name": "Basic template",
+        "name": "Basic Bootstrap 3 template",
         "url": "https://github.com/newsapps/tarbell-template",
     }]
     for project in project_templates:

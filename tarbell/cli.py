@@ -9,18 +9,17 @@ This module provides the CLI interface to tarbell.
 
 import os
 import sys
-from subprocess import call
-
-from clint import args
-from clint.arguments import Args
-from clint.textui import colored, puts
-
+import imp
 import jinja2
 import codecs
 import mimetypes
-
 import tempfile
 import shutil
+
+from subprocess import call
+from clint import args
+from clint.arguments import Args
+from clint.textui import colored, puts
 
 from apiclient import errors
 from apiclient.http import MediaFileUpload as _MediaFileUpload
@@ -136,27 +135,59 @@ def tarbell_generate(args, skip_args=False):
         return output_root
 
 
-def tarbell_get(args):
-    puts("get")
+def tarbell_install(args):
+    with ensure_settings(args) as settings:
+        pass
+    puts("add project")
+    # Clone project from arg
+    # Set up remote
+    # Ask about repo (with default set)
+    # Tell the user about tarbell update
     pass
 
 
-def tarbell_get_project(args):
-    puts("install project")
-    pass
+def tarbell_install_template(args):
+    with ensure_settings(args) as settings:
+        template_url = args.get(0)
 
+        matches = [template for template in settings.config["project_templates"] if template["url"] == template_url]
+        if matches:
+            puts("\n{0} already exists. Nothing more to do.\n".format(
+                colored.yellow(template_url)
+            ))
+            sys.exit()
 
-def tarbell_get_template(args):
-    puts("install template")
-    pass
+        puts("\nInstalling {0}".format(colored.cyan(template_url))) 
+        tempdir = tempfile.mkdtemp()
+        puts("\n- Cloning repo to {0}".format(colored.green(tempdir))) 
+        Repo.clone_from(template_url, tempdir)
+        base_path = os.path.join(tempdir, "_base/")
+        filename, pathname, description = imp.find_module('base', [base_path])
+        base = imp.load_module('base', filename, pathname, description)
+        puts("\n- Found _base/base.py")
+        try:
+            name = base.NAME
+            puts("\n- Name specified in base.py: {0}".format(colored.yellow(name)))
+        except AttributeError:
+            name = base.__name__
+            puts("\n- No name specified in base.py, using '{0}'".format(colored.yellow(name)))
+
+        settings.config["project_templates"].append({"name": name, "url": template_url})
+        settings.save()
+        puts("\n+ Added new project template: {0}".format(colored.yellow(name)))
 
 
 def tarbell_list(args):
     """List tarbell projects."""
     with ensure_settings(args) as settings:
         print "list..."
-        #cmd_branches(path)
 
+
+def tarbell_list_templates(args):
+    with ensure_settings(args) as settings:
+        puts("\nAvailable project templates\n")
+        _list_templates(settings)
+        puts("")
 
 def tarbell_publish(args):
     """Publish a site by calling s3cmd"""
@@ -260,11 +291,7 @@ def _get_template(settings):
     puts("\nPick a template\n")
     template = None
     while not template:
-        for idx, option in enumerate(settings.config.get("project_templates"), start=1):
-            puts("  {0:5} {1:36} {2}".format(colored.yellow("[{0}]".format(idx)),
-                                           colored.green(option.get("name")),
-                                           colored.yellow(option.get("url"))
-                                          ))
+        _list_templates(settings)
         index = raw_input("\nWhich template would you like to use? [1] ")
         if not template:
             index = "1"
@@ -276,6 +303,15 @@ def _get_template(settings):
             pass
 
 
+def _list_templates(settings):
+    """List templates from settings."""
+    for idx, option in enumerate(settings.config.get("project_templates"), start=1):
+        puts("  {0:5} {1:36}\n      {2}\n".format(
+            colored.yellow("[{0}]".format(idx)),
+            colored.cyan(option.get("name")),
+            option.get("url")
+        ))
+
 def _clone_repo(template, path):
     """Clone a template"""
     template_url = template.get("url")
@@ -285,12 +321,14 @@ def _clone_repo(template, path):
 
 def _create_spreadsheet(name, title, path, settings):
     """Create Google spreadsheet"""
-    if settings.client_secrets:
-        create = raw_input("\n{0} found. Would you like to create a Google spreadsheet? [Y/n] ".format(
-            colored.cyan("client_secrets")
-        ))
-        if create and not create.lower() == "y":
-            return puts("Not creating spreadsheet...")
+    if not settings.client_secrets:
+        return None
+
+    create = raw_input("\n{0} found. Would you like to create a Google spreadsheet? [Y/n] ".format(
+        colored.cyan("client_secrets")
+    ))
+    if create and not create.lower() == "y":
+        return puts("Not creating spreadsheet...")
 
     email_message = (
         "\nWhat Google account should have access to this "
@@ -387,12 +425,10 @@ def _copy_config_template(name, title, template, path, settings):
 
 def _configure_remotes(name, template, repo):
     """Shuffle remotes"""
-    puts("\nSetting up project repository...")
+    puts("\nSetting up git remote repositories")
     puts("\n- Renaming {0} to {1}".format(colored.yellow("master"), colored.yellow("update_project_template")))
     repo.remotes.origin.rename("update_project_template")
-    root_path = "/".join(template.get("url").split("/")[0:-1])
-    remote_url_suggestion = "{0}/{1}".format(root_path, name)
-    remote_url = raw_input("\nWhat is the URL of your project repository? (e.g. {0}, leave blank to skip) ".format(remote_url_suggestion))
+    remote_url = raw_input("\nWhat is the URL of your project repository? (e.g. git@github.com:eads/myproject.git, leave blank to skip) ".format(remote_url_suggestion))
     if remote_url:
         puts("\nCreating new remote 'origin' to track {0}.".format(colored.yellow(remote_url)))
         repo.create_remote("origin", remote_url)
@@ -489,16 +525,16 @@ def_cmd(
 
 
 def_cmd(
-    name='get_project',
-    fn=tarbell_get_project,
-    usage='get_project <url to project repository>',
-    help='Install a project')
+    name='install',
+    fn=tarbell_install,
+    usage='install <url to project repository>',
+    help='Install a pre-existing project')
 
 
 def_cmd(
-    name='get_template',
-    fn=tarbell_get_template,
-    usage='get_template <url to template>',
+    name='install-template',
+    fn=tarbell_install_template,
+    usage='install-template <url to template>',
     help='Install a project template')
 
 
@@ -508,6 +544,11 @@ def_cmd(
     usage='list',
     help='List all projects.')
 
+def_cmd(
+    name='list-templates',
+    fn=tarbell_list_templates,
+    usage='list-templates',
+    help='List installed project templates')
 
 def_cmd(
     name='publish',
