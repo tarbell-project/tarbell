@@ -34,14 +34,10 @@ def tarbell_configure(args):
     _get_or_create_config_dir(path)
 
     settings = {}
-    settings.update(
-            _setup_google_spreadsheets(path))
-    settings.update(
-            _setup_s3(path))
-    settings.update(
-            _setup_tarbell_project_path(path))
-    settings.update(
-            _setup_default_templates(path))
+    settings.update(_setup_google_spreadsheets(path))
+    settings.update(_setup_s3(path))
+    settings.update(_setup_tarbell_project_path(path))
+    settings.update(_setup_default_templates(path))
 
     settings_path = os.path.join(path, "settings.yaml")
     _backup(path, "settings.yaml")
@@ -50,7 +46,7 @@ def tarbell_configure(args):
         puts("\nCreating {0}".format(colored.green(settings_path)))
         yaml.dump(settings, f, default_flow_style=False)
 
-    puts("\n- Done configuring Tarbell. Type `{0}` for help."
+    puts("\n- Done configuring Tarbell. Type `{0}` for help.\n"
          .format(colored.green("tarbell")))
 
     return Settings(path)
