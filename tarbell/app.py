@@ -8,6 +8,7 @@ import re
 import requests
 import time
 
+from httplib import BadStatusLine
 from flask import Flask, render_template, send_from_directory, Response
 from jinja2 import FileSystemLoader, ChoiceLoader
 from jinja2.loaders import BaseLoader
@@ -260,11 +261,19 @@ class TarbellSite:
 
     def _get_context_from_gdoc(self, key):
         """Create a Jinja2 context from a Google spreadsheet."""
-        content = self.export_xlsx(key)
-        data = self.process_xlsx(content)
-        if 'values' in data:
-            data = self.copy_global_values(data)
-        return data
+        try:
+            content = self.export_xlsx(key)
+            data = self.process_xlsx(content)
+            if 'values' in data:
+                data = self.copy_global_values(data)
+            data.update({
+                "SPREADSHEET_KEY": key,
+            })
+            return data
+        except BadStatusLine:
+            self.project, self.base = self.load_project(path)
+            self.data = {}
+            return self._get_context_from_gdoc(key)
 
     def export_xlsx(self, key):
         """Download xlsx version of spreadsheet"""
