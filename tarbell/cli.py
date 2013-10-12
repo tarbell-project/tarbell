@@ -76,7 +76,7 @@ def display_info(args):
     for command in Command.all_commands():
         usage = command.usage or command.name
         help = command.help or ''
-        puts('{0:50} {1}\n'.format(
+        puts('{0:50} {1}'.format(
                 colored.green(usage),
                 split_sentences(help)))
 
@@ -105,7 +105,7 @@ def display_info(args):
 
 
     puts('\n{0}'.format(
-        black(u'A Chicago Tribune News Applications project')
+        black(u'Crafted by the Chicago Tribune News Applications team\n')
     ))
 
 
