@@ -513,7 +513,7 @@ def_cmd(
     name='configure',
     fn=tarbell_configure,
     usage='configure',
-    help='Configure Tarbell.')
+    help='Configure Tarbell')
 
 
 def_cmd(
@@ -521,7 +521,7 @@ def_cmd(
     fn=tarbell_generate,
     usage='generate <output dir (optional)>',
     help=('Generate static files for the current project. If no output '
-          'directory is specified, create a temporary directory.'))
+          'directory is specified, create a temporary directory'))
 
 
 def_cmd(
