@@ -535,7 +535,22 @@ def tarbell_serve(args):
 
 def tarbell_switch(args):
     """Switch to a project"""
-    show_error("Not implemented!")
+    with ensure_settings(args) as settings:
+        projects_path = settings.config.get("projects_path")
+        if not projects_path:
+            show_error("{0} does not exist".format(projects_path))
+            sys.exit()
+        project = args.get(0)
+        args.remove(project)
+        project_path = os.path.join(projects_path, project)
+        if os.path.isdir(project_path):
+            os.chdir(project_path)
+            puts("\nSwitching to {0}".format(colored.red(project)))
+            puts("Edit this project's templates at {0}".format(colored.yellow(project_path)))
+            puts("Running preview server...")
+            tarbell_serve(args)
+        else:
+            show_error("{0} isn't a tarbell project".format(project_path))
 
 
 def tarbell_update(args):
