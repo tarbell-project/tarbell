@@ -195,7 +195,49 @@ def tarbell_install_template(args):
 def tarbell_list(args):
     """List tarbell projects."""
     with ensure_settings(args) as settings:
-        print "list..."
+        projects_path = settings.config.get("projects_path")
+        if not projects_path:
+            show_error("{0} does not exist".format(projects_path))
+            sys.exit()
+
+        puts("\nListing projects in {0}\n".format(
+            colored.yellow(projects_path)
+        ))
+
+        for dir in os.listdir(projects_path):
+            project_path = os.path.join(projects_path, dir)
+            try:
+                filename, pathname, description = imp.find_module('tarbell', [project_path])
+                config = imp.load_module(dir, filename, pathname, description)
+
+                puts("{0:37} {1}".format(
+                    colored.red(config.NAME),
+                    colored.cyan(config.TITLE)
+                ))
+
+                puts("- {0:25} {1}".format("Project path:", colored.yellow(project_path))),
+                repo = Repo(project_path)
+
+                try:
+                    origin = repo.remotes.origin.config_reader.get_value("url")
+                    puts("- {0:25} {1}".format("Project repository:", origin))
+                except AttributeError:
+                    pass
+
+                try:
+                    update_project_template = repo.remotes.update_project_template.config_reader.get_value("url")
+                    puts("- {0:25} {1}".format("Base update repository:", update_project_template))
+                except AttributeError:
+                    pass
+
+                puts("")
+
+            except ImportError:
+                pass
+
+        puts("Use {0} to switch to a project\n".format(
+            colored.green("tarbell switch <projectname>")
+            ))
 
 
 def tarbell_list_templates(args):
