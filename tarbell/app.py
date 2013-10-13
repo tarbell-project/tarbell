@@ -25,7 +25,10 @@ from clint.textui import puts
 
 from .oauth import get_drive_api
 
-SPREADSHEET_CACHE_TTL = 2000
+# in seconds
+SPREADSHEET_CACHE_TTL = 4 
+
+# pass template variables to files with these mimetypes
 TEMPLATE_TYPES = [
     "text/html",
     "text/css",
