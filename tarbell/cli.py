@@ -149,8 +149,9 @@ def tarbell_install(args):
         path = _get_path(tarbell.NAME, settings)
         repo = Repo.clone_from(project_url, path)
         repo.create_remote("update_project_template", tarbell.TEMPLATE_REPO_URL)
+        _delete_dir(tempdir)
         puts("\n- Done installing project in {0}".format(path))
-        # @TODO delete tempdir
+
 
 def tarbell_install_template(args):
     with ensure_settings(args) as settings:
@@ -181,7 +182,7 @@ def tarbell_install_template(args):
         settings.config["project_templates"].append({"name": name, "url": template_url})
         settings.save()
 
-        # @TODO delete tempdir
+        _delete_dir(tempdir)
 
         puts("\n+ Added new project template: {0}".format(colored.yellow(name)))
 
@@ -222,15 +223,19 @@ def tarbell_publish(args):
         except KeyboardInterrupt:
             show_error("ctrl-c pressed, bailing out!")
         finally:
-            # Delete tempdir
-            try:
-                shutil.rmtree(tempdir)  # delete directory
-                puts("\nDeleted {0}!".format(tempdir))
-            except OSError as exc:
-                if exc.errno != 2:  # code 2 - no such file or directory
-                    raise  # re-raise exception
-            except UnboundLocalError:
-                pass
+            _delete_dir(tempdir)
+
+
+def _delete_dir(dir):
+    """Delete tempdir"""
+    try:
+        shutil.rmtree(dir)  # delete directory
+        puts("\nDeleted {0}!".format(dir))
+    except OSError as exc:
+        if exc.errno != 2:  # code 2 - no such file or directory
+            raise  # re-raise exception
+    except UnboundLocalError:
+        pass
 
 
 def tarbell_newproject(args):
