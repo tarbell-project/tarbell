@@ -27,12 +27,20 @@ class EnsureSettings():
         if (os.path.isdir(self.path)):
             return Settings(self.path)
         else:
-            puts(colored.red("-- No Tarbell configuration found, configuring Tarbell. --\n"))
+            puts("\n{0}: {1}".format(
+                colored.red("Warning:"),
+                "No Tarbell configuration found, running {0}.".format(
+                    colored.green("tarbell configure")
+                )
+            ))
             settings = tarbell_configure(self.args)
-            puts(colored.red("\n\n-- Trying to run tarbell {0} again --\n\n".format(self.args.get(0))))
+            puts("\n\n Trying to run {0} again".format(
+                colored.yellow("tarbell {0}".format(self.args.get(0)))
+            ))
             return settings
 
     def __exit__(self, type, value, traceback):
+        # @TODO This isn't quite right, __enter__ does too much work.
         pass
 
 
@@ -58,16 +66,11 @@ class EnsureProject():
 
         if not os.path.exists(os.path.join(path, 'tarbell.py')):
             path = os.path.realpath(os.path.join(path, '..'))
-            return self.ensure_project(path)
+            return self.ensure_site(path)
         else:
             os.chdir(path)
-            with ensure_settings(self.args) as settings:
-                site = TarbellSite(path, settings.path)
-                puts("Activating {0} ({1})\n".format(
-                        colored.green(site.project.TITLE),
-                        colored.yellow(site.project.NAME)
-                    ))
-                return site
+            site = TarbellSite(path)
+            return site
 
 # Lowercase aliases
 ensure_settings = EnsureSettings

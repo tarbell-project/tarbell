@@ -11,8 +11,9 @@ import os
 import sys
 import yaml
 import shutil
-from subprocess import call
 
+from subprocess import call
+from datetime import datetime
 from clint.textui import colored, puts
 
 from .app import TarbellSite
@@ -20,22 +21,24 @@ from .settings import Settings
 from .oauth import get_drive_api
 from .utils import show_error, get_config_from_args
 
+try:
+    import readline
+except ImportError:
+    pass
+
 def tarbell_configure(args):
-    puts("Configuring Tarbell")
+    """Tarbell configuration routine"""
+    puts("Configuring Tarbell. Press ctrl-c to bail out!")
 
     path = get_config_from_args(args)
 
     _get_or_create_config_dir(path)
 
     settings = {}
-    settings.update(
-            _setup_google_spreadsheets(path))
-    settings.update(
-            _setup_s3(path))
-    settings.update(
-            _setup_tarbell_project_path(path))
-    settings.update(
-            _setup_default_templates(path))
+    settings.update(_setup_google_spreadsheets(path))
+    settings.update(_setup_s3(path))
+    settings.update(_setup_tarbell_project_path(path))
+    settings.update(_setup_default_templates(path))
 
     settings_path = os.path.join(path, "settings.yaml")
     _backup(path, "settings.yaml")
@@ -44,7 +47,7 @@ def tarbell_configure(args):
         puts("\nCreating {0}".format(colored.green(settings_path)))
         yaml.dump(settings, f, default_flow_style=False)
 
-    puts("\n- Done configuring Tarbell. Type `{0}` for help."
+    puts("\n- Done configuring Tarbell. Type `{0}` for help.\n"
          .format(colored.green("tarbell")))
 
     return Settings(path)
@@ -72,6 +75,7 @@ def _get_or_create_config_dir(path):
 
 
 def _setup_google_spreadsheets(path):
+    """Set up a Google spreadsheet"""
     settings = {}
 
     use = raw_input("\nWould you like to use Google spreadsheets [Y/n]? ")
@@ -121,6 +125,7 @@ def _setup_google_spreadsheets(path):
 
 
 def _setup_s3(path, access_key=None, access_key_id=None):
+    """Prompt user to set up Amazon S3"""
     use = raw_input("\nWould you like to set up Amazon S3? [Y/n] ")
     if use.lower() != "y" and use != "":
         puts("\n- Not configuring Amazon S3.")
@@ -144,6 +149,7 @@ def _setup_s3(path, access_key=None, access_key_id=None):
 
 
 def _setup_tarbell_project_path(path):
+    """Prompt user to set up project path."""
     default_path = os.path.expanduser(os.path.join("~", "tarbell"))
     projects_path = raw_input("\nWhat is your Tarbell projects path? [Default: {0}, 'none' to skip] ".format(colored.green(default_path)))
     if projects_path == "":
@@ -165,9 +171,13 @@ def _setup_tarbell_project_path(path):
 
 
 def _setup_default_templates(path):
+    """Add some (hardcoded) default templates."""
     project_templates = [{
-        "name": "Basic template",
+        "name": "Basic Bootstrap 3 template",
         "url": "https://github.com/newsapps/tarbell-template",
+    }, {
+        "name": "Searchable map template",
+        "url": "https://github.com/eads/tarbell-map-template",
     }]
     for project in project_templates:
         puts("+ Adding {0} ({1})".format(project["name"], project["url"]))
@@ -177,4 +187,17 @@ def _setup_default_templates(path):
 
 
 def _backup(path, filename):
-    pass
+    """Backup a file."""
+    target = os.path.join(path, filename)
+    if os.path.isfile(target):
+        dt = datetime.now()
+        new_filename = "{0}.{1}.{2}".format(
+            filename, dt.isoformat(), "backup"
+        )
+        destination = os.path.join(path, new_filename)
+        puts("\n-- Backing up {0} to {1}\n".format(
+            colored.cyan(target),
+            colored.cyan(destination)
+        ))
+
+        shutil.copy(target, destination)

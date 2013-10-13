@@ -6,11 +6,11 @@ import unicodedata
 
 def slugify(value):
     """
-    Normalizes string, converts to lowercase, removes non-alpha characters,
-    and converts spaces to hyphens.
+    Normalizes string, removes non-alpha characters, and converts hyphens 
+    and spaces to underscores.
     """
     value = unicodedata.normalize('NFKD', value).encode('ascii', 'ignore')
-    value = unicode(re.sub('[^\w\s-]', '', value).strip().lower())
+    value = unicode(re.sub('[^\w\s-]', '', value).strip())
     return re.sub('[-\s]+', '_', value)
 
 # default unicode character mapping ( you may not see some chars, leave as is )

@@ -47,6 +47,7 @@ settings.update(
         "GitPython==0.3.2.RC1",
         "Jinja2==2.7.1",
         "MarkupSafe==0.18",
+        "PyYAML==3.10",
         "Werkzeug==0.9.4",
         "async==0.6.1",
         "clint==0.3.1",
