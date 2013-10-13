@@ -220,11 +220,11 @@ class TarbellSite:
         base_dir = os.path.join(path, "_base/")
 
         # Get the base as register it as a blueprint
-        try:
+        if os.path.exists(os.path.join(base_dir, "base.py")):
             filename, pathname, description = imp.find_module('base', [base_dir])
             base = imp.load_module('base', filename, pathname, description)
             self.app.register_blueprint(base.blueprint)
-        except ImportError:
+        else:
             puts("No _base/base.py file found")
 
         filename, pathname, description = imp.find_module('tarbell', [path])

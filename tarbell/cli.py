@@ -144,16 +144,21 @@ def tarbell_install(args):
         tempdir = tempfile.mkdtemp()
         Repo.clone_from(project_url, tempdir)
         filename, pathname, description = imp.find_module('tarbell', [tempdir])
-        tarbell = imp.load_module('tarbell', filename, pathname, description)
-        puts("\n- Found tarbell.py")
-        path = _get_path(tarbell.NAME, settings)
+        config = imp.load_module('tarbell', filename, pathname, description)
+        puts("\n- Found config.py")
+        path = _get_path(config.NAME, settings)
         repo = Repo.clone_from(project_url, path)
-        repo.create_remote("update_project_template", tarbell.TEMPLATE_REPO_URL)
+        try:
+            puts("\n- Adding remote 'updated_project_template' using {0}".format(config.TEMPLATE_REPO_URL))
+            repo.create_remote("update_project_template", config.TEMPLATE_REPO_URL)
+        except AttributeError:
+            pass
         _delete_dir(tempdir)
         puts("\n- Done installing project in {0}".format(path))
 
 
 def tarbell_install_template(args):
+    """Install a project template."""
     with ensure_settings(args) as settings:
         template_url = args.get(0)
 
@@ -176,7 +181,7 @@ def tarbell_install_template(args):
             name = base.NAME
             puts("\n- Name specified in base.py: {0}".format(colored.yellow(name)))
         except AttributeError:
-            name = base.__name__
+            name = template_url.split("/")[-1]
             puts("\n- No name specified in base.py, using '{0}'".format(colored.yellow(name)))
 
         settings.config["project_templates"].append({"name": name, "url": template_url})
@@ -205,9 +210,9 @@ def tarbell_publish(args):
         bucket_name = list_get(args, 0, "staging")
         bucket_uri = site.project.S3_BUCKETS.get(bucket_name, False)
 
+        tempdir = "%s/" % tarbell_generate(args, skip_args=True)
         try:
             if bucket_uri:
-                tempdir = "%s/" % tarbell_generate(args, skip_args=True)
                 puts("\nDeploying {0} to {1} ({2})".format(
                       colored.yellow(site.project.TITLE),
                       colored.red(bucket_name),
@@ -482,7 +487,7 @@ def tarbell_serve(args):
         address = list_get(args, 0, "").split(":")
         ip = list_get(address, 0, '127.0.0.1')
         port = list_get(address, 1, 5000)
-        puts("\nPress {0} to stop the server".format(colored.cyan("ctrl-c")))
+        puts("\nPress {0} to stop the server".format(colored.red("ctrl-c")))
         site.app.run(ip, port=int(port))
 
 
