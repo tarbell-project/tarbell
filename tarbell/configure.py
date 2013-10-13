@@ -27,6 +27,7 @@ except ImportError:
     pass
 
 def tarbell_configure(args):
+    """Tarbell configuration routine"""
     puts("Configuring Tarbell. Press ctrl-c to bail out!")
 
     path = get_config_from_args(args)
@@ -74,6 +75,7 @@ def _get_or_create_config_dir(path):
 
 
 def _setup_google_spreadsheets(path):
+    """Set up a Google spreadsheet"""
     settings = {}
 
     use = raw_input("\nWould you like to use Google spreadsheets [Y/n]? ")
@@ -123,6 +125,7 @@ def _setup_google_spreadsheets(path):
 
 
 def _setup_s3(path, access_key=None, access_key_id=None):
+    """Prompt user to set up Amazon S3"""
     use = raw_input("\nWould you like to set up Amazon S3? [Y/n] ")
     if use.lower() != "y" and use != "":
         puts("\n- Not configuring Amazon S3.")
@@ -146,6 +149,7 @@ def _setup_s3(path, access_key=None, access_key_id=None):
 
 
 def _setup_tarbell_project_path(path):
+    """Prompt user to set up project path."""
     default_path = os.path.expanduser(os.path.join("~", "tarbell"))
     projects_path = raw_input("\nWhat is your Tarbell projects path? [Default: {0}, 'none' to skip] ".format(colored.green(default_path)))
     if projects_path == "":
@@ -167,6 +171,7 @@ def _setup_tarbell_project_path(path):
 
 
 def _setup_default_templates(path):
+    """Add some (hardcoded) default templates."""
     project_templates = [{
         "name": "Basic Bootstrap 3 template",
         "url": "https://github.com/newsapps/tarbell-template",
@@ -182,6 +187,7 @@ def _setup_default_templates(path):
 
 
 def _backup(path, filename):
+    """Backup a file."""
     target = os.path.join(path, filename)
     if os.path.isfile(target):
         dt = datetime.now()
