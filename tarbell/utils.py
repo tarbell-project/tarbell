@@ -36,7 +36,7 @@ def split_sentences(s):
     for index, sentence in enumerate(s.split('. ')):
         pad = ''
         if index > 0:
-            pad = ' ' * 39
+            pad = ' ' * 41
         if sentence.endswith('.'):
             sentence = sentence[:-1]
         sentences.append('%s %s.' % (pad, sentence.strip()))
@@ -51,18 +51,20 @@ def show_error(msg):
 
 def get_config_from_args(args):
     """Get config directory from arguments."""
-
     if args.contains('--settings'):
-        # @TODO handle
-        return "settingsdir"
-
+        path = args.value_after("--settings")
+        if not os.path.isdir(path):
+            show_error("{0} does not exist. Exiting...".format(
+                colored.cyan(path)
+            ))
+            sys.exit()
+        return path
     elif sys.platform == 'win32':
         return os.path.join(os.environ['APPDATA'], "Tarbell")
-
     else:
-        return os.path.expanduser(os.path.join("~",
-                                               ".{0}".format("tarbell")
-                                               ))
+        return os.path.expanduser(
+            os.path.join("~", ".{0}".format("tarbell"))
+        )
 
 def filter_files(path):
     for dirpath, dirnames, filenames in os.walk(path):
