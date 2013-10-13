@@ -300,8 +300,11 @@ def tarbell_newproject(args):
         _configure_remotes(repo)
 
         puts("\nAll done! To preview your new project, type:\n")
-        puts("    {0}".format(colored.green("cd %s" % path)))
-        puts("    {0}".format(colored.green("tarbell serve\n")))
+        if settings.config.get("projects_path"):
+            puts("tarbell switch {0}".format(colored.green(name)))
+        else:
+            puts("{0}".format(colored.green("cd %s" % path)))
+            puts("{0}".format(colored.green("tarbell serve\n")))
 
 
 def _get_project_name(args):
