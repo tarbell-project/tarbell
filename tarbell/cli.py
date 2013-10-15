@@ -313,7 +313,7 @@ def _get_project_name(args):
         name = args.get(0)
         puts("")
         while not name:
-            name = raw_input("No project name specified. Please enter a project name: ")
+            name = raw_input("What is the project's short directory name? (e.g. my_project) ")
         return name
 
 
@@ -322,7 +322,7 @@ def _get_project_title():
         title = None
         puts("")
         while not title:
-            title = raw_input("Please enter a long name for this project: ")
+            title = raw_input("What is the project's full title? (e.g. My awesome project) ")
 
         return title
 
