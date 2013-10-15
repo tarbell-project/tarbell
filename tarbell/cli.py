@@ -412,11 +412,10 @@ def _create_spreadsheet(name, title, path, settings):
             email = raw_input(email_message)
 
     try:
-        media_body = _MediaFileUpload(os.path.join(path, '_base/_config/'
-                                      'spreadsheet_values.xlsx'),
+        media_body = _MediaFileUpload(os.path.join(path, '_base/_spreadsheet.xlsx'),
                                       mimetype='application/vnd.ms-excel')
     except IOError:
-        show_error("_base/_config/spreadsheet_values.xlsx doesn't exist!")
+        show_error("_base/_spreadsheet.xlsx doesn't exist!")
         return None
 
     service = get_drive_api(settings.path)
@@ -476,10 +475,10 @@ def _copy_config_template(name, title, template, path, key, settings):
 
         # @TODO refactor this a bit
         if not key:
-            spreadsheet_path = os.path.join(path, '_base/_config/', 'spreadsheet_values.xlsx')
+            spreadsheet_path = os.path.join(path, '_base/', '_spreadsheet.xlsx')
             with open(spreadsheet_path, "rb") as f:
                 try:
-                    puts("Copying _base/_config/spreadsheet_values.xlsx to tarbell.py's DEFAULT_CONTEXT") 
+                    puts("Copying _base/_spreadsheet.xlsx to tarbell.py's DEFAULT_CONTEXT") 
                     data = process_xlsx(f.read())
                     if 'values' in data:
                         data = copy_global_values(data)
@@ -496,16 +495,14 @@ def _copy_config_template(name, title, template, path, key, settings):
                         colored.yellow("{0}/{1}".format(url, name))
                     ))
 
-        config_template = os.path.join(path, "_base/_config/tarbell.py.template")
-        if os.path.exists(config_template):
-            puts("\n- Creating {0} project configuration file".format(
-                colored.cyan("tarbell.py")
-            ))
-            loader = jinja2.FileSystemLoader(os.path.join(path, '_base/_config'))
-            env = jinja2.Environment(loader=loader)
-            env.filters["pprint_lines"] = pprint_lines
-            content = env.get_template('tarbell.py.template').render(context)
-            codecs.open(os.path.join(path, "tarbell.py"), "w", encoding="utf-8").write(content)
+        puts("\n- Creating {0} project configuration file".format(
+            colored.cyan("tarbell.py")
+        ))
+        loader = jinja2.FileSystemLoader(os.path.dirname(__file__), "templates/")
+        env = jinja2.Environment(loader=loader)
+        env.filters["pprint_lines"] = pprint_lines # For dumping context
+        content = env.get_template('tarbell.py.template').render(context)
+        codecs.open(os.path.join(path, "tarbell.py"), "w", encoding="utf-8").write(content)
         puts("\n- Done copying configuration file")
 
 
