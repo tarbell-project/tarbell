@@ -498,7 +498,7 @@ def _copy_config_template(name, title, template, path, key, settings):
         puts("\n- Creating {0} project configuration file".format(
             colored.cyan("tarbell.py")
         ))
-        loader = jinja2.FileSystemLoader(os.path.dirname(__file__), "templates/")
+        loader = jinja2.FileSystemLoader(os.path.join(os.path.dirname(__file__), "templates/"))
         env = jinja2.Environment(loader=loader)
         env.filters["pprint_lines"] = pprint_lines # For dumping context
         content = env.get_template('tarbell.py.template').render(context)
