@@ -306,6 +306,7 @@ def tarbell_newproject(args):
             puts("{0}".format(colored.green("cd %s" % path)))
             puts("{0}".format(colored.green("tarbell serve\n")))
 
+        puts("\nYou got this!\n")
 
 def _get_project_name(args):
         """Get project name"""
