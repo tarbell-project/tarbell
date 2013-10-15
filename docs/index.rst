@@ -13,6 +13,7 @@ Using Tarbell
 =============
 
 .. toctree::
+   tutorial
    install
    create
    build
