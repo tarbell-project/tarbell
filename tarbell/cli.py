@@ -671,7 +671,7 @@ def_cmd(
     usage='serve <address (optional)>',
     help=('Run a preview server (typically handled by `switch`). '
           'Supply an optional address for the preview server such as '
-          '`127.0.0.2:8000`'))
+          '`192.168.56.1:8080`'))
 
 
 def_cmd(
@@ -680,7 +680,7 @@ def_cmd(
     usage='switch <project> <address (optional)>',
     help=('Switch to the project named <project> and start a preview server. '
           'Supply an optional address for the preview server such as '
-          '`127.0.0.2:8000`'))
+          '`192.168.56.1:8080`'))
 
 
 def_cmd(
