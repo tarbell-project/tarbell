@@ -1,30 +1,24 @@
-.. Tarbell documentation master file, created by
-   sphinx-quickstart on Fri Sep 27 12:40:21 2013.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+.. This file should at least contain the root `toctree` directive.
 
 Welcome to Tarbell!
 ===================
 
-The Tarbell template uses Python Flask and Google Spreadsheets to create
-simple, static sites that can be baked out to Amazon S3 or your local
-filesystem.
+Tarbell is a simple content management system that makes it easy to collaboratively
+build and publish static websites. Tarbell is designed to help smart, technically
+inclined people learn to build beautiful websites and publish them with ease.
 
-Tarbell is named after Ida Tarbell, a distinguished muckraking journalist whose
-1904 The History of the Standard Oil Company is a masterpiece of investigative
-reporting. `Read more about her on Wikipedia
-<http://en.wikipedia.org/wiki/Ida_Tarbell>`_.
+Read the Tarbell tutorial to get started.
 
 Using Tarbell
 =============
 
 .. toctree::
+   tutorial
    install
    create
    build
    publish
    managingprojects
-
 
 Reference
 =========
@@ -33,4 +27,9 @@ Reference
     contributing
     reference
     configuring
+
+Tarbell is named after Ida Tarbell, a distinguished muckraking journalist whose
+1904 The History of the Standard Oil Company is a masterpiece of investigative
+reporting. `Read more about her on Wikipedia
+<http://en.wikipedia.org/wiki/Ida_Tarbell>`_.
 

@@ -15,7 +15,6 @@ from jinja2.loaders import BaseLoader
 from jinja2.utils import open_if_exists
 from jinja2.exceptions import TemplateNotFound
 from jinja2._compat import string_types, iteritems
-from ordereddict import OrderedDict
 from pprint import pformat
 from slughifi import slughifi
 from string import uppercase
@@ -155,7 +154,7 @@ def make_worksheet_data(headers, worksheet):
     row_idx = 1
     while row_idx < worksheet.nrows:
         cell_idx = 0
-        row_dict = OrderedDict()
+        row_dict = {}
         while cell_idx < worksheet.ncols:
             cell_type = worksheet.cell_type(row_idx, cell_idx)
             if cell_type > 0 and cell_type < 5:
@@ -176,7 +175,7 @@ def make_worksheet_data(headers, worksheet):
 
     # Magic key handling
     if 'key' in headers.values():
-        keyed_data = OrderedDict()
+        keyed_data = {}
         for row in data:
             key = slughifi(row['key'])
             if keyed_data.get(key):

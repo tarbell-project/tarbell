@@ -306,13 +306,14 @@ def tarbell_newproject(args):
             puts("{0}".format(colored.green("cd %s" % path)))
             puts("{0}".format(colored.green("tarbell serve\n")))
 
+        puts("\nYou got this!\n")
 
 def _get_project_name(args):
         """Get project name"""
         name = args.get(0)
         puts("")
         while not name:
-            name = raw_input("No project name specified. Please enter a project name: ")
+            name = raw_input("What is the project's short directory name? (e.g. my_project) ")
         return name
 
 
@@ -321,7 +322,7 @@ def _get_project_title():
         title = None
         puts("")
         while not title:
-            title = raw_input("Please enter a long name for this project: ")
+            title = raw_input("What is the project's full title? (e.g. My awesome project) ")
 
         return title
 
@@ -412,11 +413,10 @@ def _create_spreadsheet(name, title, path, settings):
             email = raw_input(email_message)
 
     try:
-        media_body = _MediaFileUpload(os.path.join(path, '_base/_config/'
-                                      'spreadsheet_values.xlsx'),
+        media_body = _MediaFileUpload(os.path.join(path, '_base/_spreadsheet.xlsx'),
                                       mimetype='application/vnd.ms-excel')
     except IOError:
-        show_error("_base/_config/spreadsheet_values.xlsx doesn't exist!")
+        show_error("_base/_spreadsheet.xlsx doesn't exist!")
         return None
 
     service = get_drive_api(settings.path)
@@ -476,10 +476,10 @@ def _copy_config_template(name, title, template, path, key, settings):
 
         # @TODO refactor this a bit
         if not key:
-            spreadsheet_path = os.path.join(path, '_base/_config/', 'spreadsheet_values.xlsx')
+            spreadsheet_path = os.path.join(path, '_base/', '_spreadsheet.xlsx')
             with open(spreadsheet_path, "rb") as f:
                 try:
-                    puts("Copying _base/_config/spreadsheet_values.xlsx to tarbell.py's DEFAULT_CONTEXT") 
+                    puts("Copying _base/_spreadsheet.xlsx to tarbell.py's DEFAULT_CONTEXT") 
                     data = process_xlsx(f.read())
                     if 'values' in data:
                         data = copy_global_values(data)
@@ -496,16 +496,14 @@ def _copy_config_template(name, title, template, path, key, settings):
                         colored.yellow("{0}/{1}".format(url, name))
                     ))
 
-        config_template = os.path.join(path, "_base/_config/tarbell.py.template")
-        if os.path.exists(config_template):
-            puts("\n- Creating {0} project configuration file".format(
-                colored.cyan("tarbell.py")
-            ))
-            loader = jinja2.FileSystemLoader(os.path.join(path, '_base/_config'))
-            env = jinja2.Environment(loader=loader)
-            env.filters["pprint_lines"] = pprint_lines
-            content = env.get_template('tarbell.py.template').render(context)
-            codecs.open(os.path.join(path, "tarbell.py"), "w", encoding="utf-8").write(content)
+        puts("\n- Creating {0} project configuration file".format(
+            colored.cyan("tarbell.py")
+        ))
+        loader = jinja2.FileSystemLoader(os.path.join(os.path.dirname(__file__), "templates/"))
+        env = jinja2.Environment(loader=loader)
+        env.filters["pprint_lines"] = pprint_lines # For dumping context
+        content = env.get_template('tarbell.py.template').render(context)
+        codecs.open(os.path.join(path, "tarbell.py"), "w", encoding="utf-8").write(content)
         puts("\n- Done copying configuration file")
 
 
@@ -674,7 +672,7 @@ def_cmd(
     usage='serve <address (optional)>',
     help=('Run a preview server (typically handled by `switch`). '
           'Supply an optional address for the preview server such as '
-          '`127.0.0.2:8000`'))
+          '`192.168.56.1:8080`'))
 
 
 def_cmd(
@@ -683,7 +681,7 @@ def_cmd(
     usage='switch <project> <address (optional)>',
     help=('Switch to the project named <project> and start a preview server. '
           'Supply an optional address for the preview server such as '
-          '`127.0.0.2:8000`'))
+          '`192.168.56.1:8080`'))
 
 
 def_cmd(
