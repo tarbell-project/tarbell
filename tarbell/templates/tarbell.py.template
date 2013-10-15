@@ -1,0 +1,35 @@
+# -*- coding: utf-8 -*-
+
+"""
+Tarbell project configuration
+"""
+
+# Short project name
+NAME = "{{ name }}"
+
+# Descriptive title of project
+TITLE = "{{ title|escape }}"
+
+# Google spreadsheet key
+{% if not key %}#{% endif %}SPREADSHEET_KEY = "{{ key }}"
+
+# S3 bucket configuration
+{% if not s3_buckets %}#{% endif %}S3_BUCKETS = {
+    # Provide target -> s3 url pairs, such as:
+    # "mytarget": "s3://mys3url.bucket.url/some/path"{% if s3_buckets %}
+{% if not s3_buckets.staging %}#{% endif %}    "staging": "{% if s3_buckets.staging %}{{ s3_buckets.staging }}{{ name }}/{% endif %}",
+{% if not s3_buckets.production %}#{% endif %}    "production": "{% if s3_buckets.production %}{{ s3_buckets.production }}{{ name }}/{% endif %}",{% endif %}
+{% if not s3_buckets %}#{% endif %}}
+
+# Repository this project is based on (used for updates)
+TEMPLATE_REPO_URL = "{{ template_repo_url }}"
+
+# Import ordered dict, necessary for setting default context without
+# Google spreadsheet.
+try:
+    OrderedDict()
+except NameError:
+    from ordereddict import OrderedDict
+
+# Default template variables
+DEFAULT_CONTEXT = {{ default_context|pprint_lines }}
