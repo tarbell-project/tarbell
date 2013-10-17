@@ -160,7 +160,7 @@ class TarbellSite:
                 "pagename": pagename,
                 "project": project.__name__,
                 "preview_mode": preview_mode,
-                "TARBELL_PROJECTS": self.projects,
+                "tarbell_projects": self.projects,
             }
 
             ## Get context from config
@@ -171,6 +171,7 @@ class TarbellSite:
 
             ## Get context from google doc
             try:
+                template_context['spreadsheet_key'] = project.GOOGLE_DOC['key']
                 if not context:
                     context = self.get_context_from_gdoc(key_mode=key_mode,
                                                          **project.GOOGLE_DOC)
@@ -211,8 +212,9 @@ class TarbellSite:
 
             if global_values is True and entry.title.text == 'values':
                 for row in data_feed.entry:
-                    text = self.parse_text_for_numbers(row.custom['value'].text)
-                    context[row.custom['key'].text] = text
+                    _key = slughifi(row.custom['key'].text)
+                    if not _key.startswith('_'):
+                        context[_key] = self.parse_text_for_numbers(row.custom['value'].text)
             elif len(data_feed.entry):
                 headers = self._get_headers_from_worksheet(client, key,
                                                            worksheet_id,
@@ -268,7 +270,8 @@ class TarbellSite:
                                         visibility=visibility,
                                         projection='values')
         for cell in cell_feed.entry:
-            headers.append(cell.cell.text)
+            if not cell.cell.text.startswith('_'):
+                headers.append(cell.cell.text)
         return headers
 
     def render_templates(self, output_root, project_name=None):
