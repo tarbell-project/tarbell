@@ -18,7 +18,7 @@ The settings file uses a simple YAML-based format::
     production: s3://projects.coolorg.net/
     staging: s3://projects.beta.coolorg.net/
 
-Google SDK client secrets (``~/.tarbell/client_secrets.json`)
+Google SDK client secrets (`~/.tarbell/client_secrets.json`)
 -----------------------------------------------------------------
 
 Place the client secrets file in `~/.tarbell`.
