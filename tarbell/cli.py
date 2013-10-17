@@ -271,7 +271,7 @@ def tarbell_publish(args):
                 call(command)
             else:
                 show_error(("\nThere's no bucket configuration called '{0}' "
-                            "in tarbell.py.".format(colored.yellow(bucket_name))))
+                            "in tarbell_config.py.".format(colored.yellow(bucket_name))))
         except KeyboardInterrupt:
             show_error("ctrl-c pressed, bailing out!")
         finally:
@@ -467,7 +467,7 @@ def _add_user_to_file(file_id, service, user_email,
 
 
 def _copy_config_template(name, title, template, path, key, settings):
-        """Get and render tarbell.py.template from base"""
+        """Get and render tarbell_config.py.template from base"""
         puts("\nCopying configuration file")
         context = settings.config
         context.update({
@@ -486,7 +486,7 @@ def _copy_config_template(name, title, template, path, key, settings):
             spreadsheet_path = os.path.join(path, '_base/', '_spreadsheet.xlsx')
             with open(spreadsheet_path, "rb") as f:
                 try:
-                    puts("Copying _base/_spreadsheet.xlsx to tarbell.py's DEFAULT_CONTEXT") 
+                    puts("Copying _base/_spreadsheet.xlsx to tarbell_config.py's DEFAULT_CONTEXT") 
                     data = process_xlsx(f.read())
                     if 'values' in data:
                         data = copy_global_values(data)
@@ -504,13 +504,13 @@ def _copy_config_template(name, title, template, path, key, settings):
                     ))
 
         puts("\n- Creating {0} project configuration file".format(
-            colored.cyan("tarbell.py")
+            colored.cyan("tarbell_config.py")
         ))
         loader = jinja2.FileSystemLoader(os.path.join(os.path.dirname(__file__), "templates/"))
         env = jinja2.Environment(loader=loader)
         env.filters["pprint_lines"] = pprint_lines # For dumping context
-        content = env.get_template('tarbell.py.template').render(context)
-        codecs.open(os.path.join(path, "tarbell.py"), "w", encoding="utf-8").write(content)
+        content = env.get_template('tarbell_config.py.template').render(context)
+        codecs.open(os.path.join(path, "tarbell_config.py"), "w", encoding="utf-8").write(content)
         puts("\n- Done copying configuration file")
 
 
@@ -519,9 +519,9 @@ def _configure_remotes(repo):
     puts("\nSetting up git remote repositories")
     puts("\n- Renaming {0} to {1}".format(colored.yellow("master"), colored.yellow("update_project_template")))
     repo.remotes.origin.rename("update_project_template")
-    puts("\n- Add and commit tarbell.py")
-    repo.index.add(["tarbell.py"])
-    repo.index.commit("added generated tarbell.py configuration")
+    puts("\n- Add and commit tarbell_config.py")
+    repo.index.add(["tarbell_config.py"])
+    repo.index.commit("added generated tarbell_config.py configuration")
     remote_url = raw_input("\nWhat is the URL of your project repository? (e.g. git@github.com:eads/myproject.git, leave blank to skip) ")
     if remote_url:
         puts("\nCreating new remote 'origin' to track {0}.".format(colored.yellow(remote_url)))

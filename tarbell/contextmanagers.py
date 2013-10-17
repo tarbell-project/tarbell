@@ -64,7 +64,7 @@ class EnsureProject():
                         "project"))
             sys.exit(1)
 
-        if not os.path.exists(os.path.join(path, 'tarbell.py')):
+        if not os.path.exists(os.path.join(path, 'tarbell_config.py')):
             path = os.path.realpath(os.path.join(path, '..'))
             return self.ensure_site(path)
         else:
