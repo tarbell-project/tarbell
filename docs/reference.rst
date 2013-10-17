@@ -40,5 +40,11 @@ Command line reference
 `tarbell list`
 --------------
 
+`tarbell install`
+-----------------
+
+`tarbell install-template`
+--------------------------
+
 
 

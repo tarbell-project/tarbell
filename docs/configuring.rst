@@ -2,38 +2,23 @@
 Configuration reference
 =======================
 
-Simple configuration with the `tarbell configure` command
----------------------------------------------------------
-
-Manually configure Tarbell settings in `~/.tarbell/config.yaml`
+Tarbell settings (`~/.tarbell/settings.yaml`)
 --------------------------------------------------------------
 
-::
+The settings file uses a simple YAML-based format::
 
-    projects_dir: /path/to/tarbell/projects
-    google_account: googleaccount@gmail.com
-    s3:
-      access_key: accesskey
-      access_key_id: accesskeyid
-      staging_bucket: s3://s3bucketurl
-      production_bucket: s3://s3bucketurl
-    templates:
-      - ['Basic Bootstrap 3.x Tarbell project', 'https://github.com/newsapps/tarbell-template']
-      - ['Searchable map with Fusion Tables', 'https://github.com/eads/tarbell-searchable-map'] 
+  google_account: googleaccount@gmail.com
+  projects_path: /Users/davideads/tarbell
+  project_templates:
+  - name: Basic Bootstrap 3 template
+    url: https://github.com/newsapps/tarbell-template
+  - name: Searchable map template
+    url: https://github.com/eads/tarbell-map-template
+  s3_buckets:
+    production: s3://projects.coolorg.net/
+    staging: s3://projects.beta.coolorg.net/
 
-
-Use Google Drive SDK by creating `~/.tarbell/client_secrets.json`
+Google SDK client secrets (``~/.tarbell/client_secrets.json`)
 -----------------------------------------------------------------
 
-Configure new project creation and installation with `~/.tarbell/hooks.py`
---------------------------------------------------------------------------
-
-`after_install_template()`
-==========================
-
-`after_install_project()`
-=========================
-
-
-
-
+Place the client secrets file in `~/.tarbell`.

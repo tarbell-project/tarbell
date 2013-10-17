@@ -1,56 +1,66 @@
-====================
-Create a new project
-====================
+===========================
+Create or install a project
+===========================
 
 Create a new project with `tarbell newproject <projectname>`
 ------------------------------------------------------------
 
-Run:
-
-::
+Run::
 
     tarbell newproject mynewproject
 
-You'll be asked a few questions:
+You'll be asked a few questions::
 
-::
+  Creating nellie-bly
 
-    This will create a new project in /path/to/current/dir.
-    Would you like to continue? [Y/n]
+  Where would you like to create this project? [/Users/davideads/tarbell/nellie-bly] 
 
-    Available projects:
+  What is the project's full title? (e.g. My awesome project) The Story of Nellie Bly
 
-    [1] Simple page
-    [2] Long-form story
-    [3] Photo essay
-    [4] Searchable map
+  Pick a template
 
-    Which project would you like to use? [Default: 1] 2
+    [1] Basic Bootstrap 3 template
+        https://github.com/newsapps/tarbell-template
 
-    <<pre-install hooks run here!>>
-
-    Would you like to create a Google spreadsheet for this project? [Y/n]
-
-    <if n>
-    Default context data will be copied into config.py
-
-    <if y>
-    What Google account should have access to this spreadsheet? [somebody@gmail.com] 
-
-    Generating Google spreadsheet...
-    View and edit this spreadsheet at <spreadsheet URL>
-
-    Installing Long-form story template into /path/to/current/dir
-
-    - Copying index.html to /path/to/current/dir/mynewproject/index.html
-    ...
+    [2] Searchable map template   
+        https://github.com/eads/tarbell-map-template
 
 
-    <<post-install hooks run here!>>
+  Which template would you like to use? [1] 1
 
-    To preview your project, run:
+  - Cloning https://github.com/newsapps/tarbell-template to /Users/davideads/tarbell/nellie-bly
 
-        cd mynewproject
-        tarbell serve
+  Copying configuration file
+  Copying _base/_spreadsheet.xlsx to tarbell.py's DEFAULT_CONTEXT
+
+  - Creating tarbell.py project configuration file
+
+  - Done copying configuration file
+
+  Setting up git remote repositories
+
+  - Renaming master to update_project_template
+
+  - Add and commit tarbell.py
+
+  What is the URL of your project repository? (e.g. git@github.com:eads/myproject.git, leave blank to skip) git@github.com:eads/nellie-bly.git
+
+  Creating new remote 'origin' to track git@github.com:eads/nellie-bly.git.
+
+  Warning: Don't forget! It's up to you to create this remote and push to it.
+
+  All done! To preview your new project, type:
+
+  tarbell switch nellie-bly
+
+  You got this!
 
 
+You can now open up ` /Users/davideads/tarbell/nellie-bly` and start editing the "index.html"
+file.
+
+
+Install an existing project with `tarbell install <repository-url>`
+-------------------------------------------------------------------
+
+The project must include a `tarbell.py` file and be able to be cloned with Git.

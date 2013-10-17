@@ -161,62 +161,81 @@ Open the file in your favorite editor. It should look like this::
 Edit the last section to include a new variable::
 
   DEFAULT_CONTEXT = {
-      ...
+      # ...
       'title': u'Ethel Payne: A life in journalism',
       'payne_quote': u'I stick to my firm, unshakeable belief that the black press is an advocacy press, and that I, as a part of that press, can’t afford the luxury of being unbiased ... when it come to issues that really affect my people, and I plead guilty, because I think that I am an instrument of change.',
+      'payne_quote_author': u'Ethel Payne',
   }
 
 Now edit your project's `index.html`. ::
 
-{% extends "_base.html" %}
+  {% extends "_base.html" %}
 
-{% block content %}
+  {% block content %}
 
-{% if PREVIEW_SERVER %}
-<div class="alert alert-warning">
-  <p>Edit this <a href="https://docs.google.com/spreadsheet/ccc?key={{ SPREADSHEET_KEY }}" target="_blank">project's Google spreadsheet</a>.</p> 
+  {% if PREVIEW_SERVER %}
+  <div class="alert alert-warning">
+    <p>Edit this <a href="https://docs.google.com/spreadsheet/ccc?key={{ SPREADSHEET_KEY }}" target="_blank">project's Google spreadsheet</a>.</p> 
 
-  <p>You can modify this file by editing <code>{{ PROJECT_PATH }}/index.html</code>.</p>
+    <p>You can modify this file by editing <code>{{ PROJECT_PATH }}/index.html</code>.</p>
 
-  <p>This block will not publish when <code>tarbell publish</code> is invoked.</p>
-</div>
-{% endif %}
+    <p>This block will not publish when <code>tarbell publish</code> is invoked.</p>
+  </div>
+  {% endif %}
 
-<div class="jumbotron">
-  <h1>{{ headline }}</h1>
-  <p>{{ intro }}</p>
-</div>
-
-<div class="row">
-  <div class="col-md-8">
-    <blockquote>
-      {{ quote|markdown }}
-      <small>{{ quote_author }}</small>
-    </blockquote>
+  <div class="jumbotron">
+    <h1>{{ headline }}</h1>
+    <p>{{ intro }}</p>
   </div>
 
-  <div class="col-md-4">
-    <table class="table">
-      <thead>
+  <div class="row">
+    <div class="col-md-8">
+      <blockquote>
+        {{ quote|markdown }}
+        <small>{{ quote_author }}</small>
+      </blockquote>
+    </div>
+
+    <div class="col-md-4">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Born</th>
+            <th>Died</th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for row in data %}
         <tr>
-          <th>Name</th>
-          <th>Born</th>
-          <th>Died</th>
+          <td>{{ row.name }}</td>
+          <td>{{ row.born|format_date }}</td>
+          <td>{{ row.died|format_date }}</td>
         </tr>
-      </thead>
-      <tbody>
-      {% for row in data %}
-      <tr>
-        <td>{{ row.name }}</td>
-        <td>{{ row.born|format_date }}</td>
-        <td>{{ row.died|format_date }}</td>
-      </tr>
-      {% endfor %}
-      </tbody>
-    </table>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
   </div>
-</div>
-{% endblock content %}
+  {% endblock content %}
 
 
+Change the quote section to use your new variables. Change this::
 
+    <div class="col-md-8">
+      <blockquote>
+        {{ quote|markdown }}
+        <small>{{ quote_author }}</small>
+      </blockquote>
+    </div>
+
+to this::
+
+    <div class="col-md-8">
+      <blockquote>
+        {{ payne_quote|markdown }}
+        <small>{{ payne_quote_author }}</small>
+      </blockquote>
+    </div>
+
+Reload the server at http://127.0.0.1:5000 in your web browser to see your changes!
