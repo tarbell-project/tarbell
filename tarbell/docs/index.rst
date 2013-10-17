@@ -7,7 +7,7 @@ Tarbell is a simple content management system that makes it easy to collaborativ
 build and publish static websites. Tarbell is designed to help smart, technically
 inclined people learn to build beautiful websites and publish them with ease.
 
-Read the Tarbell tutorial_ to get started.
+Read the `Tarbell tutorial <tutorial.html>`_ to get started.
 
 Tarbell is named after Ida Tarbell, a distinguished muckraking journalist whose
 1904 The History of the Standard Oil Company is a masterpiece of investigative
