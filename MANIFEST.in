@@ -1,0 +1,2 @@
+include tarbell/templates/*
+include tarbell/docs/*

@@ -1,16 +1,94 @@
-from flask import Flask, render_template, request, send_from_directory, Response
-import time
 import os
-from jinja2 import Markup, PrefixLoader, FileSystemLoader, ChoiceLoader
-from ordereddict import OrderedDict
-from gdata.spreadsheet.service import SpreadsheetsService
-from gdata.spreadsheet.service import CellQuery
 import json
 import imp
-import shutil
-import codecs
-from scrubber import Scrubber
+import mimetypes
+import xlrd
+import csv
+import re
+import requests
+import time
+
+from httplib import BadStatusLine
+from flask import Flask, render_template, send_from_directory, Response
+from jinja2 import FileSystemLoader, ChoiceLoader, Markup
+from jinja2.loaders import BaseLoader
+from jinja2.utils import open_if_exists
+from jinja2.exceptions import TemplateNotFound
+from jinja2._compat import string_types, iteritems
+from pprint import pformat
 from slughifi import slughifi
+from string import uppercase
+from werkzeug.wsgi import FileWrapper
+from utils import filter_files
+from clint.textui import puts
+
+from .oauth import get_drive_api
+
+# in seconds
+SPREADSHEET_CACHE_TTL = 4 
+
+# pass template variables to files with these mimetypes
+TEMPLATE_TYPES = [
+    "text/html",
+    "text/css",
+    "application/javascript",
+]
+
+def split_template_path(template):
+    """Split a path into segments and perform a sanity check.  If it detects
+    '..' in the path it will raise a `TemplateNotFound` error.
+    """
+    pieces = []
+    for piece in template.split('/'):
+        if os.path.sep in piece \
+           or (os.path.altsep and os.path.altsep in piece) or \
+           piece == os.path.pardir:
+            raise TemplateNotFound(template)
+        elif piece and piece != '.':
+            pieces.append(piece)
+    return pieces
+
+class TarbellFileSystemLoader(BaseLoader):
+    def __init__(self, searchpath, encoding='utf-8'):
+        if isinstance(searchpath, string_types):
+            searchpath = [searchpath]
+        self.searchpath = list(searchpath)
+        self.encoding = encoding
+
+    def get_source(self, environment, template):
+        pieces = split_template_path(template)
+        for searchpath in self.searchpath:
+            filename = os.path.join(searchpath, *pieces)
+            f = open_if_exists(filename)
+            if f is None:
+                continue
+            try:
+                contents = f.read().decode(self.encoding)
+            finally:
+                f.close()
+
+            mtime = os.path.getmtime(filename)
+            def uptodate():
+                try:
+                    return os.path.getmtime(filename) == mtime
+                except OSError:
+                    return False
+            return contents, filename, uptodate
+        raise TemplateNotFound(template)
+
+    def list_templates(self):
+        found = set()
+        for searchpath in self.searchpath:
+            for dirpath, dirnames, filenames in filter_files(searchpath):
+                for filename in filenames:
+                    template = os.path.join(dirpath, filename) \
+                        [len(searchpath):].strip(os.path.sep) \
+                                          .replace(os.path.sep, '/')
+                    if template[:2] == './':
+                        template = template[2:]
+                    if template not in found:
+                        found.add(template)
+        return sorted(found)
 
 
 def silent_none(value):
@@ -19,327 +97,334 @@ def silent_none(value):
     return value
 
 
-class TarbellScrubber(Scrubber):
-    disallowed_tags_save_content = set((
-        'blink', 'body', 'html', 'runtime:topic'
-    ))
+def pprint_lines(value):
+    pformatted = pformat(value, width=1, indent=4)
+    formatted = "{0}\n {1}\n{2}".format(
+        pformatted[0],
+        pformatted[1:-1],
+        pformatted[-1]
+    )
+    return Markup(formatted)
+
+
+def process_xlsx(content):
+    """Turn Excel file contents into Tarbell worksheet data"""
+    data = {}
+    workbook = xlrd.open_workbook(file_contents=content)
+    worksheets = workbook.sheet_names()
+    for worksheet_name in worksheets:
+        worksheet = workbook.sheet_by_name(worksheet_name)
+        worksheet.name = slughifi(worksheet.name)
+        headers = make_headers(worksheet)
+        worksheet_data = make_worksheet_data(headers, worksheet)
+        data[worksheet.name] = worksheet_data
+    return data
+
+
+def copy_global_values(data):
+    """Copy values worksheet into global namespace."""
+    for k, v in data['values'].items():
+        if not data.get(k):
+            data[k] = v
+        else:
+            puts("There is both a worksheet and a "
+                 "value named '{0}'. The worksheet data "
+                 "will be preserved.".format(k))
+    data.pop("values", None)
+    return data
+
+
+def make_headers(worksheet):
+    """Make headers"""
+    headers = {}
+    cell_idx = 0
+    while cell_idx < worksheet.ncols:
+        cell_type = worksheet.cell_type(0, cell_idx)
+        if cell_type == 1:
+            header = slughifi(worksheet.cell_value(0, cell_idx))
+            if not header.startswith("_"):
+                headers[cell_idx] = header
+        cell_idx += 1
+    return headers
+
+
+def make_worksheet_data(headers, worksheet):
+    # Make data
+    data = []
+    row_idx = 1
+    while row_idx < worksheet.nrows:
+        cell_idx = 0
+        row_dict = {}
+        while cell_idx < worksheet.ncols:
+            cell_type = worksheet.cell_type(row_idx, cell_idx)
+            if cell_type > 0 and cell_type < 5:
+                cell_value = worksheet.cell_value(row_idx, cell_idx)
+                try:
+                    row_dict[headers[cell_idx]] = cell_value
+                except KeyError:
+                    try:
+                        column = uppercase[cell_idx]
+                    except IndexError:
+                        column = cell_idx
+                        puts("There is no header for cell with value '{0}' in column '{1}' of '{2}'" .format(
+                            cell_value, column, worksheet.name
+                        ))
+            cell_idx += 1
+        data.append(row_dict)
+        row_idx += 1
+
+    # Magic key handling
+    if 'key' in headers.values():
+        keyed_data = {}
+        for row in data:
+            key = slughifi(row['key'])
+            if keyed_data.get(key):
+                puts("There is already a key named '{0}' with value "
+                       "'{1}' in '{2}'. It is being overwritten with "
+                       "value '{3}'.".format(key,
+                               keyed_data.get(key),
+                               worksheet.name,
+                               row))
+
+            # Magic values worksheet
+            if worksheet.name == "values":
+                value = row.get('value')
+                if value:
+                    keyed_data[key] = value
+            else:
+                keyed_data[key] = row
+        data = keyed_data
+
+    return data
+
 
 
 class TarbellSite:
-    def __init__(self, projects_path):
+    def __init__(self, path, client_secrets_path=None):
         self.app = Flask(__name__)
 
         self.app.jinja_env.finalize = silent_none  # Don't print "None"
         self.app.debug = True  # Always debug
 
-        self.projects_path = projects_path
-        self.projects = self.load_projects()
+        self.path = path
+        self.project, self.base = self.load_project(path)
 
-        self.app.add_url_rule('/<path:template>', view_func=self.preview)
-        self.app.add_template_filter(self.process_text, 'process_text')
+        self.data = {}
+        self.expires = 0
+
+        self.app.add_url_rule('/', view_func=self.preview)
+        self.app.add_url_rule('/<path:path>', view_func=self.preview)
         self.app.add_template_filter(slughifi, 'slugify')
+        self.app.add_template_filter(pprint_lines, 'pprint_lines')
 
-    def walk_projects(self):
-        for dirpath, dirnames, filenames in os.walk(self.projects_path):
-            dirnames[:] = [
-                dn for dn in dirnames
-                if not dn.startswith('.') and not dn.startswith('_')]
-            yield dirpath, dirnames, filenames
+    def load_project(self, path):
+        base = None
+        base_dir = os.path.join(path, "_base/")
 
-    def load_projects(self):
-        projects = {}
-        prefix_loaders = []
-        loaders = []
+        # Get the base as register it as a blueprint
+        if os.path.exists(os.path.join(base_dir, "base.py")):
+            filename, pathname, description = imp.find_module('base', [base_dir])
+            base = imp.load_module('base', filename, pathname, description)
+            self.app.register_blueprint(base.blueprint)
+        else:
+            puts("No _base/base.py file found")
 
-        for root, dirs, files in self.walk_projects():
-            if 'config.py' in files:
-                # Load configuration
-                name = root.split('/')[-1]
-                filename, pathname, description = imp.find_module('config', [root])
-                project = imp.load_module(name, filename, pathname, description)
+        filename, pathname, description = imp.find_module('tarbell_config', [path])
+        project = imp.load_module('project', filename, pathname, description)
 
-                # Get root path or just use pathname
-                try:
-                    path = project.URL_ROOT
-                except AttributeError:
-                    project.URL_ROOT = name
-                    path = name
-
-                try:
-                    project.DONT_PUBLISH
-                except AttributeError:
-                    project.DONT_PUBLISH = False
-
-                try:
-                    project.CREATE_JSON
-                except AttributeError:
-                    project.CREATE_JSON = True
-
-                # Register with microcopy
-                projects[path] = project
-
-                # Register as flask blueprint
-                try:
-                    url_prefix = None
-                    if path:
-                        url_prefix = '/' + path
-                    self.app.register_blueprint(project.blueprint,
-                                                url_prefix=url_prefix)
-                except AttributeError:
-                    pass
-
-                # Get template dirs
-                if path == '' and 'templates' in dirs:
-                    loader = FileSystemLoader(os.path.join(root, 'templates'))
-                    loaders.append(loader)
-                if 'templates' in dirs:
-                    loader = FileSystemLoader(os.path.join(root, 'templates'))
-                    prefix_loaders.append((path, loader))
-
-        if len(prefix_loaders):
-            loaders.append(PrefixLoader(dict(prefix_loaders)))
-
-        self.app.jinja_loader = ChoiceLoader(loaders)
-
-        return projects
-
-    def process_text(self, text, scrub=True):
         try:
-            if scrub:
-                text = TarbellScrubber().scrub(text)
-            return Markup(text)
-        except TypeError:
-            return ""
+            self.key = project.SPREADSHEET_KEY
+            self.client = get_drive_api(self.path)
+        except AttributeError:
+            self.key = None
+            self.client = None
 
-    def preview(self, template, context=None, preview_mode=1, key_mode=False):
-        """ Preview a template/path """
-        path_parts = template.split('/')
+        try:
+            project.CREATE_JSON
+        except AttributeError:
+            project.CREATE_JSON = True
 
-        if path_parts[0] in self.projects.keys():
-            project = self.projects[path_parts[0]]
-            root = path_parts[0]
-        else:
-            project = self.projects.get('')
-            root = ''
+        try:
+            project.DEFAULT_CONTEXT
+        except AttributeError:
+            project.DEFAULT_CONTEXT = {}
 
-        if project:
-            pagename = path_parts[-1][:-5]
-            if template.endswith('/'):
-                template += 'index.html'
-                pagename = 'index'
-            if template in self.projects.keys():
-                template += '/index.html'
-                pagename = 'index'
+        try:
+            self.app.register_blueprint(project.blueprint)
+        except AttributeError:
+            pass
 
-            ## Serve JSON
-            if project.CREATE_JSON and len(path_parts) > 2 and path_parts[-2] == 'json' and template.endswith('.json'):
-                try:
-                    if not context:
-                        context = self.get_context_from_gdoc(key_mode=key_mode,
-                            global_values=False,**project.GOOGLE_DOC)
-                    worksheet = path_parts[-1][:-5]
-                    return Response(json.dumps(context[worksheet]),
-                                    mimetype="application/json")
-                except:
-                    return 'error!', 404
+        # Set up template loaders
+        template_dirs = [path]
+        if os.path.isdir(base_dir):
+            template_dirs.append(base_dir)
 
-            ## Serve static
-            if not template.endswith('.html'):
-                path = os.path.join(self.projects_path, project.__name__, 'static')
-                if root != '':
-                    template = '/'.join(path_parts[1:])
-                return send_from_directory(path, template)
+        self.app.jinja_loader = TarbellFileSystemLoader(template_dirs)
 
-            if not key_mode:
-                key_mode = request.values.has_key('keys')
+        return project, base
 
-            template_context = {
-                "pageroot": project.URL_ROOT,
-                "cache_buster": time.time(),
-                "filename": template,
-                "pagename": pagename,
-                "project": project.__name__,
-                "preview_mode": preview_mode,
-                "tarbell_projects": self.projects,
-            }
+    def preview(self, path=None, extra_context=None, publish=False):
+        """ Preview a project path """
+        if path is None:
+            path = 'index.html'
 
-            ## Get context from config
+        ## Serve JSON
+        if self.project.CREATE_JSON and path == 'data.json':
+            context = self.get_context(publish)
+            return Response(json.dumps(context), mimetype="application/json")
+
+        ## Detect files
+        filepath = None
+        for root, dirs, files in filter_files(self.path):
+            # Does it exist under _base?
+            basepath = os.path.join(root, "_base", path)
             try:
-                template_context.update(project.DEFAULT_CONTEXT)
-            except AttributeError:
+                with open(basepath):
+                    mimetype, encoding = mimetypes.guess_type(basepath)
+                    filepath = basepath
+            except IOError:
                 pass
 
-            ## Get context from google doc
+            # Does it exist under regular path?
+            fullpath = os.path.join(root, path)
             try:
-                template_context['spreadsheet_key'] = project.GOOGLE_DOC['key']
-                if not context:
-                    context = self.get_context_from_gdoc(key_mode=key_mode,
-                                                         **project.GOOGLE_DOC)
-                template_context.update(context)
-            except AttributeError: 
+                with open(fullpath):
+                    mimetype, encoding = mimetypes.guess_type(fullpath)
+                    filepath = fullpath
+            except IOError:
                 pass
 
-            return render_template("%s" % template, **template_context)
-        else:
-            return 'error!', 404
+        if filepath and mimetype and mimetype in TEMPLATE_TYPES:
+            context = self.get_context(publish)
+            if extra_context:
+                context.update(extra_context)
+            rendered = render_template(path, **context)
+            return Response(rendered, mimetype=mimetype)
 
-    def get_context_from_gdoc(self, key, account=None, password=None,
-                              key_mode=False, global_values=True):
+        elif filepath:
+            dir, filename = os.path.split(filepath)
+            return send_from_directory(dir, filename)
+
+        return Response(status=404)
+
+
+    def get_context(self, publish=False):
         """
-        Turn a google doc into a Flask template context. The 'values' worksheet
-        name is reserved for top-level of context namespace.
+        Use optional CONTEXT_SOURCE_FILE setting to determine data source.
+        Return the parsed data.
+
+        Can be an http|https url or local file. Supports csv and excel files.
         """
-        client = SpreadsheetsService()
+        context = self.project.DEFAULT_CONTEXT
+        try:
+            file = self.project.CONTEXT_SOURCE_FILE
+            # CSV
+            if re.search(r'(csv|CSV)$', file):
+                context.update(self.get_context_from_csv())
+            # Excel
+            if re.search(r'(xlsx|XLSX|xls|XLS)$', file):
+                pass
+        except AttributeError:
+            context.update(self.get_context_from_gdoc())
 
-        if account or password:
-            client.email = account
-            client.password = password
-            client.ProgrammaticLogin()
-            visibility = "private"
-        else:
-            visibility = "public"
-
-        feed = client.GetWorksheetsFeed(key,
-                                        visibility=visibility,
-                                        projection='values')
-        context = {'last_updated': feed.updated.text}
-        for entry in feed.entry:
-            worksheet_id = entry.id.text.rsplit('/',1)[1]
-
-            data_feed = client.GetListFeed(key, worksheet_id,
-                                           visibility=visibility,
-                                           projection="values")
-
-            if global_values is True and entry.title.text == 'values':
-                for row in data_feed.entry:
-                    _key = slughifi(row.custom['key'].text)
-                    if not _key.startswith('_'):
-                        context[_key] = self.parse_text_for_numbers(row.custom['value'].text)
-            elif len(data_feed.entry):
-                headers = self._get_headers_from_worksheet(client, key,
-                                                           worksheet_id,
-                                                           visibility)
-                worksheet_key = slughifi(entry.title.text)
-                if 'key' in headers:
-                    context[worksheet_key] = OrderedDict()
-                    is_dict = True
-                else:
-                    is_dict = False
-                    context[worksheet_key] = []
-
-                for i, row in enumerate(data_feed.entry):
-                    row_dict = OrderedDict()
-                    for header in headers:
-                        try:
-                            header_key = slughifi(header)
-                            value = row.custom[header_key.replace('_', '')].text
-                            row_dict[header_key] = self.parse_text_for_numbers(value)
-                        except KeyError:
-                            pass
-                    if is_dict:
-                        k = slughifi(row.custom['key'].text)
-                        context[worksheet_key][k] = row_dict
-                    else:
-                        context[worksheet_key].append(row_dict)
+        # Return retrieved context + defaults
+        context.update({
+            "PROJECT_PATH": self.path,
+            "PREVIEW_SERVER": not publish,
+            "ROOT_URL": "127.0.0.1:5000",
+        })
         return context
 
-    def parse_text_for_numbers(self, value):
-        if value is not None:
-            try:
-                value = int(value)
-                return value
-            except ValueError:
-                pass
-
-            try:
-                value = float(value)
-                return value
-            except ValueError:
-                pass
-
-        return value
-
-    def _get_headers_from_worksheet(self, client, key, worksheet_id,
-                                    visibility):
-        """Get headers in correct order."""
-        headers = []
-        query = CellQuery()
-        query.max_row = '1'
-        query.min_row = '1'
-        cell_feed = client.GetCellsFeed(key, worksheet_id, query=query,
-                                        visibility=visibility,
-                                        projection='values')
-        for cell in cell_feed.entry:
-            if not cell.cell.text.startswith('_'):
-                headers.append(cell.cell.text)
-        return headers
-
-    def render_templates(self, output_root, project_name=None):
-        shutil.rmtree(output_root, ignore_errors=True)
-        print "Rendering templates."
-        print
-
-        if project_name:
-            projects = [self.projects[project_name]]
-            if '' in self.projects.keys():
-                projects.insert(0, self.projects.get(''))
+    def get_context_from_csv(self):
+        """
+        Open CONTEXT_SOURCE_FILE, parse and return a context
+        """
+        if re.search('^(http|https)://', self.project.CONTEXT_SOURCE_FILE):
+            data = requests.get(self.project.CONTEXT_SOURCE_FILE)
+            reader = csv.reader(
+                data.iter_lines(), delimiter=',', quotechar='"')
+            ret = {rows[0]: rows[1] for rows in reader}
         else:
-            projects = self.projects.values()
+            try:
+                with open(self.project.CONTEXT_SOURCE_FILE) as csvfile:
+                    reader = csv.reader(csvfile, delimiter=',', quotechar='"')
+                    ret = {rows[0]: rows[1] for rows in reader}
+            except IOError:
+                file = "%s/%s" % (
+                    os.path.abspath(self.path),
+                    self.project.CONTEXT_SOURCE_FILE)
+                with open(file) as csvfile:
+                    reader = csv.reader(csvfile, delimiter=',', quotechar='"')
+                    ret = {rows[0]: rows[1] for rows in reader}
+        ret.update({
+            "CONTEXT_SOURCE_FILE": self.project.CONTEXT_SOURCE_FILE,
+        })
+        return ret
 
-        for project in projects:
-            if project_name or not project.DONT_PUBLISH:
-                output_dir = os.path.join(output_root, project.URL_ROOT)
-
-                print "Generating project '%s' in %s" % (project.__name__, output_dir)
-                if not self.copy_static(project, output_dir):
-                    os.mkdir(output_dir)
-                if project.CREATE_JSON is True:
-                    self.copy_json(project, output_dir)
-                self.copy_pages(project, output_dir)
-                print
-            else:
-                print "Skipping %s" % project.__name__
-                print
-
-        return True
-
-    def copy_static(self, project, output_dir):
-        # Copy static or make directory for project
-        static_dir = os.path.join(self.projects_path, project.__name__, 'static')
-        if os.path.exists(static_dir):
-            shutil.copytree(static_dir, output_dir)
-            return True
-            print '-- Static dir copied to %s.' % os.path.join(output_dir, 'static')
-
-    def copy_pages(self, project, output_dir):
-        templates_dir = os.path.join(self.projects_path, project.__name__, 'templates')
+    def get_context_from_gdoc(self):
+        """Wrap getting context in a simple caching mechanism."""
         try:
-            context = self.get_context_from_gdoc(**project.GOOGLE_DOC)
+            start = int(time.time())
+            if not self.data or start > self.expires:
+                self.data = self._get_context_from_gdoc(self.project.SPREADSHEET_KEY)
+                end = int(time.time())
+                self.expires = end + SPREADSHEET_CACHE_TTL
+            return self.data
         except AttributeError:
-            context = {}
-        for path, dirnames, filenames in os.walk(templates_dir):
-            for fn in filenames:
-                if fn[0] != '_' and fn[0] != '.':
-                    tpath = "%s/%s" % (project.URL_ROOT, fn)
-                    with self.app.test_request_context('%s' % tpath):
-                        try:
-                            content = self.preview(tpath, context,
-                                                   preview_mode=0)
-                            codecs.open(os.path.join(output_dir, fn), "w",
-                                        encoding='utf-8').write(content)
-                            print "-- Created page %s" % os.path.join(output_dir, fn)
-                        except Exception, e:
-                            print "Exception (%s) for %s" % (e, tpath)
+            return {}
 
-    def copy_json(self, project, output_dir):
-        ## Get context from google doc
+    def _get_context_from_gdoc(self, key):
+        """Create a Jinja2 context from a Google spreadsheet."""
         try:
-            context = self.get_context_from_gdoc(global_values=False,
-                                                 **project.GOOGLE_DOC)
-            os.makedirs(os.path.join(output_dir, 'json'))
-            for k, v in context.items():
-                codecs.open(os.path.join(output_dir, "json/%s.json" % k),
-                            "w", encoding='utf-8').write(json.dumps(v))
-                print "-- Created JSON %s" % os.path.join(output_dir, "json/%s.json" % k)
-        except AttributeError:
-            print "-- No Google doc configured for %s." % project.__name__
+            content = self.export_xlsx(key)
+            data = process_xlsx(content)
+            if 'values' in data:
+                data = copy_global_values(data)
+            data.update({
+                "SPREADSHEET_KEY": key,
+            })
+            return data
+        except BadStatusLine:
+            # Stale connection, reset project and data
+            self.project, self.base = self.load_project(path)
+            self.data = {}
+            return self._get_context_from_gdoc(key)
+
+    def export_xlsx(self, key):
+        """Download xlsx version of spreadsheet"""
+        spreadsheet_file = self.client.files().get(fileId=key).execute()
+        links = spreadsheet_file.get('exportLinks')
+        downloadurl = links.get('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        resp, content = self.client._http.request(downloadurl)
+        return content
+
+    def generate_static_site(self, output_root, extra_context):
+        base_dir = os.path.join(self.path, "_base/")
+
+        for root, dirs, files in filter_files(base_dir):
+            for filename in files:
+                self._copy_file(root.replace("_base/", ""), filename, output_root, extra_context)
+
+        for root, dirs, files in filter_files(self.path):
+            for filename in files:
+                self._copy_file(root, filename, output_root, extra_context)
+
+    def _copy_file(self, root, filename, output_root, extra_context=None):
+        # Strip out full filesystem paths
+        path = os.path.join(root, filename)
+        rel_path = os.path.join(root.replace(self.path, ""), filename)
+        if rel_path.startswith("/"):
+            rel_path = rel_path[1:]
+        output_path = os.path.join(output_root, rel_path)
+        output_dir = os.path.dirname(output_path)
+
+        puts("Writing {0}".format(output_path))
+        with self.app.test_request_context():
+            preview = self.preview(rel_path, extra_context=extra_context, publish=True)
+            if not os.path.exists(output_dir):
+                os.makedirs(output_dir)
+            with open(output_path, "wb") as f:
+                if isinstance(preview.response, FileWrapper):
+                    f.write(preview.response.file.read())
+                else:
+                    f.write(preview.data)
