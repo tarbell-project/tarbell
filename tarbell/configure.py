@@ -105,7 +105,7 @@ def _setup_google_spreadsheets(path):
         shutil.copy(secrets_path, path)
 
         # Now, try and obtain the API for the first time
-        get_drive_api(path) #, reset_creds=True)
+        get_drive_api(path, reset_creds=True)
 
         account = raw_input(("What Google account should have access to new spreadsheets? "
                              "(e.g. somebody@gmail.com, leave blank to specify for each new "
