@@ -65,6 +65,7 @@ settings.update(
         "keyring==3.0.2",
         "xlrd==0.9.2",
         "python-dateutil==2.1",
+        "docutils==0.11",
         "Markdown==2.3.1"],
     entry_points={
         'console_scripts': [

@@ -118,7 +118,7 @@ def display_version():
     ))
 
 
-def tarbell_generate(args, skip_args=False):
+def tarbell_generate(args, skip_args=False, extra_context=None):
     """Generate static files."""
 
     output_root = None
@@ -131,7 +131,7 @@ def tarbell_generate(args, skip_args=False):
         if args.contains('--context'):
             site.project.CONTEXT_SOURCE_FILE = args.value_after('--context')
 
-        site.generate_static_site(output_root)
+        site.generate_static_site(output_root, extra_context)
         puts("\nCreated site in {0}".format(output_root))
         return output_root
 
@@ -246,13 +246,19 @@ def tarbell_list_templates(args):
         _list_templates(settings)
         puts("")
 
+
 def tarbell_publish(args):
     """Publish a site by calling s3cmd"""
     with ensure_settings(args) as settings, ensure_project(args) as site:
         bucket_name = list_get(args, 0, "staging")
         bucket_uri = site.project.S3_BUCKETS.get(bucket_name, False)
 
-        tempdir = "%s/" % tarbell_generate(args, skip_args=True)
+        root_url = bucket_uri[5:]
+        extra_context = {
+            "ROOT_URL": root_url,
+        }
+
+        tempdir = "{0}/".format(tarbell_generate(args, extra_context=extra_context, skip_args=True))
         try:
             if bucket_uri:
                 puts("\nDeploying {0} to {1} ({2})".format(
@@ -260,8 +266,7 @@ def tarbell_publish(args):
                       colored.red(bucket_name),
                       colored.green(bucket_uri)
                      ))
-                command = ['s3cmd', 'sync', '--acl-public', '--delete-removed',
-                           '--verbose', tempdir, bucket_uri]
+                command = ['s3cmd', 'sync', '--acl-public', '--verbose', tempdir, bucket_uri]
                 puts("\nCalling {0}".format(colored.yellow(" ".join(command))))
                 call(command)
             else:
@@ -270,6 +275,8 @@ def tarbell_publish(args):
         except KeyboardInterrupt:
             show_error("ctrl-c pressed, bailing out!")
         finally:
+            puts("\nIf you have website hosting enabled, you can see your project at http://{0}".format(root_url))
+            puts("\n- Done publishing")
             _delete_dir(tempdir)
 
 

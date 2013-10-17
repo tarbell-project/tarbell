@@ -263,7 +263,7 @@ class TarbellSite:
 
         return project, base
 
-    def preview(self, path=None, publish=False):
+    def preview(self, path=None, extra_context=None, publish=False):
         """ Preview a project path """
         if path is None:
             path = 'index.html'
@@ -296,6 +296,8 @@ class TarbellSite:
 
         if filepath and mimetype and mimetype in TEMPLATE_TYPES:
             context = self.get_context(publish)
+            if extra_context:
+                context.update(extra_context)
             rendered = render_template(path, **context)
             return Response(rendered, mimetype=mimetype)
 
@@ -329,6 +331,7 @@ class TarbellSite:
         context.update({
             "PROJECT_PATH": self.path,
             "PREVIEW_SERVER": not publish,
+            "ROOT_URL": "127.0.0.1:5000",
         })
         return context
 
@@ -395,18 +398,18 @@ class TarbellSite:
         resp, content = self.client._http.request(downloadurl)
         return content
 
-    def generate_static_site(self, output_root):
+    def generate_static_site(self, output_root, extra_context):
         base_dir = os.path.join(self.path, "_base/")
 
         for root, dirs, files in filter_files(base_dir):
             for filename in files:
-                self._copy_file(root.replace("_base/", ""), filename, output_root)
+                self._copy_file(root.replace("_base/", ""), filename, output_root, extra_context)
 
         for root, dirs, files in filter_files(self.path):
             for filename in files:
-                self._copy_file(root, filename, output_root)
+                self._copy_file(root, filename, output_root, extra_context)
 
-    def _copy_file(self, root, filename, output_root):
+    def _copy_file(self, root, filename, output_root, extra_context=None):
         # Strip out full filesystem paths
         path = os.path.join(root, filename)
         rel_path = os.path.join(root.replace(self.path, ""), filename)
@@ -417,7 +420,7 @@ class TarbellSite:
 
         puts("Writing {0}".format(output_path))
         with self.app.test_request_context():
-            preview = self.preview(rel_path, publish=True)
+            preview = self.preview(rel_path, extra_context=extra_context, publish=True)
             if not os.path.exists(output_dir):
                 os.makedirs(output_dir)
             with open(output_path, "wb") as f:
