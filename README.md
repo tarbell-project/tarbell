@@ -7,3 +7,5 @@ Tarbell is a Chicago Tribune News Applications Team project.
 To install Tarbell run:
 
     pip install tarbell
+
+Check out the [tutorial](http://tarbell.readthedocs.org/en/latest/tutorial.html) to get started.
