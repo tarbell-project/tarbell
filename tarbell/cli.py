@@ -15,6 +15,7 @@ import codecs
 import mimetypes
 import tempfile
 import shutil
+import pkg_resources
 
 from subprocess import call
 from clint import args
@@ -506,7 +507,8 @@ def _copy_config_template(name, title, template, path, key, settings):
         puts("\n- Creating {0} project configuration file".format(
             colored.cyan("tarbell_config.py")
         ))
-        loader = jinja2.FileSystemLoader(os.path.join(os.path.dirname(__file__), "templates/"))
+        template_dir = os.path.dirname(pkg_resources.resource_filename("tarbell", "tarbell_config.py.template"))
+        loader = jinja2.FileSystemLoader(template_dir)
         env = jinja2.Environment(loader=loader)
         env.filters["pprint_lines"] = pprint_lines # For dumping context
         content = env.get_template('tarbell_config.py.template').render(context)
