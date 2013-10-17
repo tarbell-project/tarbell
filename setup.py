@@ -24,7 +24,7 @@ settings.update(
     url='http://github.com/newsapps/tarbell',
     license='MIT',
     description='A very simple content management system',
-    long_description=open('README.md').read(),
+    long_description='',
     zip_safe=False,
     packages=find_packages(),
     data_files=[
