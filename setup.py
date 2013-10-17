@@ -21,16 +21,13 @@ settings.update(
     version=VERSION,
     author=u'Chicago Tribune News Applications Team',
     author_email='newsapps@tribune.com',
-    url='http://github.com/newsapps/tarbell',
+    url='http://github.com/newsapps/flask-tarbell',
     license='MIT',
     description='A very simple content management system',
     long_description='',
     zip_safe=False,
     packages=find_packages(),
-    data_files=[
-        ('tarbell/templates',
-            ['tarbell/templates/tarbell_config.py.template']),
-    ],
+    include_package_data=True,
     install_requires=[
         "BeautifulSoup==3.2.1",
         "Flask==0.10.1",
