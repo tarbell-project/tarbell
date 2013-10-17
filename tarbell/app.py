@@ -229,7 +229,7 @@ class TarbellSite:
         else:
             puts("No _base/base.py file found")
 
-        filename, pathname, description = imp.find_module('tarbell', [path])
+        filename, pathname, description = imp.find_module('tarbell_config', [path])
         project = imp.load_module('project', filename, pathname, description)
 
         try:
