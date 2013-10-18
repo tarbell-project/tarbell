@@ -296,6 +296,13 @@ class TarbellSite:
 
         if filepath and mimetype and mimetype in TEMPLATE_TYPES:
             context = self.get_context(publish)
+            # Mix in defaults
+            context.update({
+                "PROJECT_PATH": self.path,
+                "PREVIEW_SERVER": not publish,
+                "ROOT_URL": "127.0.0.1:5000",
+                "PATH": path,
+            })
             if extra_context:
                 context.update(extra_context)
             rendered = render_template(path, **context)
@@ -327,12 +334,6 @@ class TarbellSite:
         except AttributeError:
             context.update(self.get_context_from_gdoc())
 
-        # Return retrieved context + defaults
-        context.update({
-            "PROJECT_PATH": self.path,
-            "PREVIEW_SERVER": not publish,
-            "ROOT_URL": "127.0.0.1:5000",
-        })
         return context
 
     def get_context_from_csv(self):
