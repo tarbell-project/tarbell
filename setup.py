@@ -43,7 +43,7 @@ settings.update(
         "itsdangerous==0.23",
         "legit==0.1.1",
         "ordereddict==1.1",
-        "requests==1.2.3",
+        "requests==2.0.0",
         "scrubber==1.6.1",
         "smmap==0.8.2",
         "unicodecsv==0.9.4",
