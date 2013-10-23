@@ -389,7 +389,7 @@ class TarbellSite:
             return data
         except BadStatusLine:
             # Stale connection, reset project and data
-            self.project, self.base = self.load_project(path)
+            self.project, self.base = self.load_project(self.path)
             self.data = {}
             return self._get_context_from_gdoc(key)
 
