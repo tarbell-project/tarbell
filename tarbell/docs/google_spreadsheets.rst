@@ -84,6 +84,7 @@ Names that will not be transformed:
 - `mycolumn` remains `mycolumn`
 - `my_column` remains `my_column`
 
+
 Worksheets, columns, and keys names preceded by `_` (underscore) are ignored
 ----------------------------------------------------------------------------
 
