@@ -24,6 +24,7 @@ Using Tarbell
    install
    create
    build
+   google_spreadsheets
    publish
    managingprojects
 
