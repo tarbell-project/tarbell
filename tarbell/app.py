@@ -10,7 +10,7 @@ import time
 
 from httplib import BadStatusLine
 from flask import Flask, render_template, send_from_directory, Response
-from jinja2 import FileSystemLoader, ChoiceLoader, Markup
+from jinja2 import FileSystemLoader, ChoiceLoader, Markup, TemplateSyntaxError
 from jinja2.loaders import BaseLoader
 from jinja2.utils import open_if_exists
 from jinja2.exceptions import TemplateNotFound
@@ -20,7 +20,7 @@ from slughifi import slughifi
 from string import uppercase
 from werkzeug.wsgi import FileWrapper
 from utils import filter_files
-from clint.textui import puts
+from clint.textui import puts, colored
 
 from .oauth import get_drive_api
 
@@ -306,10 +306,13 @@ class TarbellSite:
             })
             if extra_context:
                 context.update(extra_context)
-            rendered = render_template(path, **context)
-            return Response(rendered, mimetype=mimetype)
+            try:
+                rendered = render_template(path, **context)
+                return Response(rendered, mimetype=mimetype)
+            except TemplateSyntaxError:
+                puts("{0} can't be parsed by Jinja, serving static".format(colored.yellow(filepath)))
 
-        elif filepath:
+        if filepath:
             dir, filename = os.path.split(filepath)
             return send_from_directory(dir, filename)
 
