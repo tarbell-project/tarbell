@@ -28,6 +28,7 @@ from oauth2client.clientsecrets import InvalidClientSecretsError
 
 from git import Repo
 
+from .app import TarbellSite
 from .app import pprint_lines, process_xlsx, copy_global_values
 from .oauth import get_drive_api
 from .contextmanagers import ensure_settings, ensure_project
@@ -535,12 +536,17 @@ def _configure_remotes(repo):
 
 def tarbell_serve(args):
     """Serve the current Tarbell project."""
-    with ensure_settings(args) as settings, ensure_project(args) as site:
+    with ensure_project(args) as site:
         address = list_get(args, 0, "").split(":")
         ip = list_get(address, 0, '127.0.0.1')
-        port = list_get(address, 1, 5000)
-        puts("\nPress {0} to stop the server".format(colored.red("ctrl-c")))
-        site.app.run(ip, port=int(port))
+        port = list_get(address, 1, '5000')
+        puts("Press {0} to stop the server".format(colored.red("ctrl-c")))
+        script = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'scripts/runserver.py')
+        command = ['python', script, site.path, ip, port]
+        try:
+            call(command)
+        except KeyboardInterrupt:
+            puts(colored.red("Quitting with ctrl-c..."))
 
 
 def tarbell_switch(args):
