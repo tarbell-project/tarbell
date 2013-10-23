@@ -13,6 +13,9 @@ TITLE = "{{ title|escape }}"
 # Google spreadsheet key
 {% if not key %}#{% endif %}SPREADSHEET_KEY = "{{ key }}"
 
+# Create JSON data at ./data.json, disabled by default
+# CREATE_JSON = True
+
 # S3 bucket configuration
 {% if not s3_buckets %}#{% endif %}S3_BUCKETS = {
     # Provide target -> s3 url pairs, such as:

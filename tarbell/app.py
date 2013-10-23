@@ -303,6 +303,7 @@ class TarbellSite:
                 "PREVIEW_SERVER": not publish,
                 "ROOT_URL": "127.0.0.1:5000",
                 "PATH": path,
+                "SPREADSHEET_KEY": self.project.SPREADSHEET_KEY,
             })
             if extra_context:
                 context.update(extra_context)
@@ -385,9 +386,6 @@ class TarbellSite:
             data = process_xlsx(content)
             if 'values' in data:
                 data = copy_global_values(data)
-            data.update({
-                "SPREADSHEET_KEY": key,
-            })
             return data
         except BadStatusLine:
             # Stale connection, reset project and data
