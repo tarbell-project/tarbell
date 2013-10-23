@@ -7,7 +7,7 @@ Install Tarbell with `pip install tarbell`
 
 ::
 
-    pip install tarbell
+    pip install --pre tarbell==0.9-beta1
 
 
 Configure Tarbell with `tarbell configure`
