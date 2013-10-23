@@ -177,26 +177,27 @@ def make_worksheet_data(headers, worksheet):
     if 'key' in headers.values():
         keyed_data = {}
         for row in data:
-            key = slughifi(row['key'])
-            if keyed_data.get(key):
-                puts("There is already a key named '{0}' with value "
-                       "'{1}' in '{2}'. It is being overwritten with "
-                       "value '{3}'.".format(key,
-                               keyed_data.get(key),
-                               worksheet.name,
-                               row))
+            if 'key' in row.keys():
+                key = slughifi(row['key'])
+                if keyed_data.get(key):
+                    puts("There is already a key named '{0}' with value "
+                           "'{1}' in '{2}'. It is being overwritten with "
+                           "value '{3}'.".format(key,
+                                   keyed_data.get(key),
+                                   worksheet.name,
+                                   row))
 
-            # Magic values worksheet
-            if worksheet.name == "values":
-                value = row.get('value')
-                if value:
-                    keyed_data[key] = value
-            else:
-                keyed_data[key] = row
+                # Magic values worksheet
+                if worksheet.name == "values":
+                    value = row.get('value')
+                    if value:
+                        keyed_data[key] = value
+                else:
+                    keyed_data[key] = row
+
         data = keyed_data
 
     return data
-
 
 
 class TarbellSite:
