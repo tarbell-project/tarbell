@@ -303,7 +303,7 @@ class TarbellSite:
                 "PREVIEW_SERVER": not publish,
                 "ROOT_URL": "127.0.0.1:5000",
                 "PATH": path,
-                "SPREADSHEET_KEY": self.project.SPREADSHEET_KEY,
+                "SPREADSHEET_KEY": self.key,
             })
             if extra_context:
                 context.update(extra_context)
