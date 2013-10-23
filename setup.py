@@ -38,7 +38,6 @@ settings.update(
         "Werkzeug==0.9.4",
         "async==0.6.1",
         "clint==0.3.1",
-        "gdata==2.0.18",
         "gitdb==0.5.4",
         "itsdangerous==0.23",
         "legit==0.1.1",
