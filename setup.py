@@ -5,9 +5,8 @@ import sys
 
 from setuptools import setup, find_packages
 
-
 APP_NAME = 'tarbell'
-VERSION = '0.9-beta1'
+VERSION = '0.9b1'
 
 settings = dict()
 
@@ -58,12 +57,13 @@ settings.update(
             'tarbell = tarbell.cli:main',
         ],
     },
-    keywords=['Development Status :: 3 - alpha',
-          'License :: OSI Approved :: MIT License',
-          'Operating System :: OS Independent',
-          'Programming Language :: Python',
-          'Topic :: Internet',
-          ],
+    classifiers=[
+        'Development Status :: 4 - Beta',
+        'License :: OSI Approved :: MIT License',
+        'Operating System :: OS Independent',
+        'Programming Language :: Python',
+        'Topic :: Internet',
+    ],
 )
 
 
