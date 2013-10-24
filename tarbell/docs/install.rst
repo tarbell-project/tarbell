@@ -2,12 +2,14 @@
 Install Tarbell
 ===============
 
-Install Tarbell with `pip install tarbell`
-------------------------------------------
+Install Tarbell with `pip install tarbell==0.9b1`
+-------------------------------------------------
 
 ::
 
-    pip install --pre tarbell==0.9-beta1
+    pip install tarbell==0.9b1
+
+*You must specify the version for compatibility with pip 1.4+ until the Tarbell 0.9 stable release.*
 
 
 Configure Tarbell with `tarbell configure`
