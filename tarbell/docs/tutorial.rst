@@ -4,12 +4,18 @@ Tarbell tutorial
 
 Let's build a website about celebrated Chicago journalist Ethel Payne! 
 
+Install Tarbell
+---------------
+
 First you need Tarbell. Fair warning, you're going to have to run these commands in
 a terminal::
 
     pip install tarbell==0.9b1
 
 (Don't know how to install pip? <resource-tk> can help!)
+
+Configure Tarbell
+-----------------
 
 Got it? Now configure Tarbell::
 
@@ -45,6 +51,9 @@ For our tutorial, say no to configuring Amazon and Google docs. It's optional!::
   Creating /Users/davideads/.tarbell/settings.yaml
 
   - Done configuring Tarbell. Type `tarbell` for help.
+
+Create a new project
+--------------------
 
 Now that you've got Tarbell configured, create a new project::
 
@@ -95,6 +104,10 @@ You'll need to answer a few questions::
 
   You got this!
 
+
+Previewing your project locally
+-------------------------------
+
 Well, you heard the machine, you got this. Run the switch command to fire up a preview server::
 
   tarbell switch ethelpayne
@@ -111,9 +124,14 @@ Well, you heard the machine, you got this. Run the switch command to fire up a p
 
 Now visit http://127.0.0.1:5000/ in a browser.
 
-You're ready to start editing your template.
+.. image:: preview_1.png
+   :width: 700px
 
-First, set some project data in `/path/to/project` (in this case `/Users/davideads/tarbell/ethelpayne/tarbell.py`). 
+
+Add some context variables
+--------------------------
+
+First, set some project data in `/path/to/project/tarbell_config.py` (in this case `/Users/davideads/tarbell/ethelpayne/tarbell_config.py`). 
 Open the file in your favorite editor. It should look like this::
 
   # -*- coding: utf-8 -*-
@@ -171,11 +189,12 @@ Edit the last section to include a new variable::
   DEFAULT_CONTEXT = {
       # ...
       'title': u'Ethel Payne: A life in journalism',
+      'twitter_description': None,
       'quote': u'I stick to my firm, unshakeable belief that the black press is an advocacy press, and that I, as a part of that press, can’t afford the luxury of being unbiased ... when it come to issues that really affect my people, and I plead guilty, because I think that I am an instrument of change.',
       'quote_author': u'Ethel Payne',
   }
 
-Now copy `_base/index.html` to your project's root directory and start editing. ::
+Now copy `_base/index.html` to your project's root directory. It should look like::
 
   {% extends "_base.html" %}
 
@@ -259,3 +278,77 @@ Let's put your quote right at the top. Add a snippet right after `<div class="co
     {% endblock content %}
 
 Reload the server at http://127.0.0.1:5000 in your web browser to see your changes!
+
+.. image:: preview2.png
+   :width: 700px
+
+Building a page
+---------------
+
+The default `index.html` sure has a lot of stuff in it. Let's replace it with a simplified version::
+
+  {% extends "_base.html" %}
+
+  {% block content %}
+  <div class="container">
+    {# All your content, Bootstrap columns... #}
+  </div>
+  {% endblock content %}
+
+  {% block css %}
+  {{ super() }} {# Calls base css block to include Bootstrap and base css #}
+  <script src="css/style.css"></script>
+  {% endblock scripts %}
+
+  {% block scripts %}
+  {{ super() }} {# Calls base scripts block to include jQuery and Bootstrap #}
+  <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.2.1/moment.min.js"></script>
+  {% endblock scripts %}
+
+There are a couple of key points to note in this simple template...
+
+- This is a Jinja template -- you can do anything that Jinja templates can do. `Learn more about Jinja <http://jinja.pocoo.org/docs/>`_.
+- The template extends the template defined in `_base/_base.html`. All files in `_base` are available as if they were on the project root. Base templates provide a way to keep boilerplate code to a minimum. Build a base template for your team or organization 
+- The base template defines *blocks* to be customized.
+- Comments can use Jinja syntax (`{# ... #}`)
+- To get the default block behavior *and* extend a block, use `{{ super() }}`.
+
+Now start editing the content block and scripts blocks. We're just doing some silly stuff here to show off how you can start using DEFAULT_CONTEXT and some of the common blocks::
+
+  {% extends "_base.html" %}
+
+  {% block content %}
+  <div id="#content" class="container">
+    <table class="table">
+      <tbody>
+        {% for row in data %}
+        <tr>
+          <td>{{ row.column1 }}</td>
+          <td>{{ row.column2 }}</td>
+        </tr>
+        {% endfor %}
+      </tbdoy>
+    </table>
+  </div>
+  {% endblock content %}
+
+  {% block css %}
+  {{ super() }} {# Calls base css block to include Bootstrap and base css #}
+  <script src="css/style.css"></script>
+  {% endblock scripts %}
+
+  {% block scripts %}
+  {{ super() }} {# Calls base scripts block to include jQuery and Bootstrap #}
+  <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.2.1/moment.min.js"></script>
+  <script type="text/javascript">
+    $(document).ready(function() {
+      $('#content').append(moment().format("MMMM Do YYYY, h:mm:ss"));
+    });
+  </script>
+  {% endblock scripts %}
+
+
+Customizing page elements
+-------------------------
+
+You'll notice there's a nav bar at the top of the page. Instead of overriding a block, complex elements like the nav can be included in the base template as template snippets. In `_base` you'll see a file called `_nav.html`. Copy that file to your root directory and start editing. Your version of the `_nav.html` will take precedence over the version defined in `_base.html`.
