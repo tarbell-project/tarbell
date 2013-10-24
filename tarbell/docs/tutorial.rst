@@ -8,20 +8,28 @@ Install Tarbell
 ---------------
 
 First you need Tarbell. Fair warning, you're going to have to run these commands in
-a terminal::
+a terminal:
+
+.. code-block:: bash
 
     pip install tarbell==0.9b1
+
 
 (Don't know how to install pip? <resource-tk> can help!)
 
 Configure Tarbell
 -----------------
 
-Got it? Now configure Tarbell::
+Got it? Now configure Tarbell:
+
+.. code-block:: bash
 
     tarbell configure
 
-For our tutorial, say no to configuring Amazon and Google docs. It's optional!::
+
+For our tutorial, say no to configuring Amazon and Google docs. It's optional!:
+
+.. code-block:: bash
 
   Configuring Tarbell. Press ctrl-c to bail out!
 
@@ -52,14 +60,20 @@ For our tutorial, say no to configuring Amazon and Google docs. It's optional!::
 
   - Done configuring Tarbell. Type `tarbell` for help.
 
+
 Create a new project
 --------------------
 
-Now that you've got Tarbell configured, create a new project::
+Now that you've got Tarbell configured, create a new project:
+
+.. code-block:: bash
 
   tarbell newproject
 
-You'll need to answer a few questions::
+
+You'll need to answer a few questions:
+
+.. code-block:: bash
 
   tarbell newproject
 
@@ -108,11 +122,16 @@ You'll need to answer a few questions::
 Previewing your project locally
 -------------------------------
 
-Well, you heard the machine, you got this. Run the switch command to fire up a preview server::
+Well, you heard the machine, you got this. Run the switch command to fire up a preview server:
+
+.. code-block:: bash
 
   tarbell switch ethelpayne
 
-::
+
+After running switch, a local server will run on your system.
+
+.. code-block:: bash
 
   Switching to ethelpayne
   Edit this project's templates at /Users/davideads/tarbell/ethelpayne
@@ -132,7 +151,9 @@ Add some context variables
 --------------------------
 
 First, set some project data in `/path/to/project/tarbell_config.py` (in this case `/Users/davideads/tarbell/ethelpayne/tarbell_config.py`). 
-Open the file in your favorite editor. It should look like this::
+Open the file in your favorite editor. It should look like this:
+
+.. code-block:: python
 
   # -*- coding: utf-8 -*-
 
@@ -184,23 +205,36 @@ Open the file in your favorite editor. It should look like this::
       'twitter_description': None
   }
  
-Edit the last section to include a new variable::
+Edit the last section to include a new variable:
+
+.. code-block:: python
 
   DEFAULT_CONTEXT = {
       # ...
       'title': u'Ethel Payne: A life in journalism',
       'twitter_description': None,
-      'quote': u'I stick to my firm, unshakeable belief that the black press is an advocacy press, and that I, as a part of that press, can’t afford the luxury of being unbiased ... when it come to issues that really affect my people, and I plead guilty, because I think that I am an instrument of change.',
+      'quote': ("I stick to my firm, unshakeable belief that the black "
+                "press is an advocacy press, and that I, as a part of that "
+                "press, can’t afford the luxury of being unbiased ... when "
+                "it come to issues that really affect my people, and I plead "
+                "guilty, because I think that I am an instrument of change."),
       'quote_author': u'Ethel Payne',
   }
 
-Now copy `_base/index.html` to your project's root directory. It should look like::
+
+Now copy `_base/index.html` to your project's root directory. It should look like:
+
+.. code-block:: jinja
 
   {% extends "_base.html" %}
 
   {% block content %}
   <div class="container">
-    <p><em>Get rid of this sample content by creating <code>{{ PROJECT_PATH }}/{{ PATH }}</code>.</em> Take a look at <code>{{ PROJECT_PATH }}/_base/index.html</code> to see source code for the default page.</p>
+    <p><em>Get rid of this sample content by creating 
+       <code>{{ PROJECT_PATH }}/{{ PATH }}</code>.</em> Take a look at 
+       <code>{{ PROJECT_PATH }}/_base/index.html</code> to see source 
+       code for the default page.
+    </p>
     
     <h1>Values</h1>
 
@@ -261,7 +295,9 @@ Now copy `_base/index.html` to your project's root directory. It should look lik
   </div>
   {% endblock content %}
 
-Let's put your quote right at the top. Add a snippet right after `<div class="container">`::
+Let's put your quote right at the top. Add a snippet right after `<div class="container">`:
+
+.. code-block:: jinja
 
     {% block content %}
     <div class="container">
@@ -277,15 +313,18 @@ Let's put your quote right at the top. Add a snippet right after `<div class="co
     </div>
     {% endblock content %}
 
+
 Reload the server at http://127.0.0.1:5000 in your web browser to see your changes!
 
-.. image:: preview2.png
+.. image:: preview_2.png
    :width: 700px
 
 Building a page
 ---------------
 
-The default `index.html` sure has a lot of stuff in it. Let's replace it with a simplified version::
+The default `index.html` sure has a lot of stuff in it. Let's replace it with a simplified version:
+
+.. code-block:: jinja
 
   {% extends "_base.html" %}
 
@@ -313,7 +352,9 @@ There are a couple of key points to note in this simple template...
 - Comments can use Jinja syntax (`{# ... #}`)
 - To get the default block behavior *and* extend a block, use `{{ super() }}`.
 
-Now start editing the content block and scripts blocks. We're just doing some silly stuff here to show off how you can start using DEFAULT_CONTEXT and some of the common blocks::
+Now start editing the content block and scripts blocks. We're just doing some silly stuff here to show off how you can start using `DEFAULT_CONTEXT` and some of the common blocks:
+
+.. code-block:: jinja
 
   {% extends "_base.html" %}
 
