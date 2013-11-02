@@ -388,8 +388,9 @@ class TarbellSite:
                 data = copy_global_values(data)
             return data
         except BadStatusLine:
-            # Stale connection, reset project and data
-            self.project, self.base = self.load_project(self.path)
+            # Stale connection, reset API and data
+            puts("Connection rest, reloading drive API")
+            self.client = get_drive_api(self.path)
             self.data = {}
             return self._get_context_from_gdoc(key)
 
