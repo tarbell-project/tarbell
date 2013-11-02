@@ -1,3 +1,12 @@
 # Authors
 
-Heather Billings, Alex Bordens, Brian Boyer, David Eads, Abe Epton, Joe Germuska
+* Heather Billings
+* Andy Boyle
+* Alex Bordens
+* Brian Boyer
+* David Eads
+* Abe Epton
+* Joe Germuska
+* Ryan Mark
+* Wilberto Morales
+* Ryan Nagle
