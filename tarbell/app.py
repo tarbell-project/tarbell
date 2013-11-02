@@ -389,7 +389,7 @@ class TarbellSite:
             return data
         except BadStatusLine:
             # Stale connection, reset API and data
-            puts("Connection rest, reloading drive API")
+            puts("Connection reset, reloading drive API")
             self.client = get_drive_api(self.path)
             self.data = {}
             return self._get_context_from_gdoc(key)
