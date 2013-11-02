@@ -94,12 +94,14 @@ def _setup_google_spreadsheets(path):
                                 ))
 
         if secrets_path == "":
-            secrets_path = os.path.expanduser(os.path.join("~",
-                                              "Downloads/client_secrets.json"
-                                             ))
-        puts("\nCopying {0} to {1}\n".format(colored.green("client_secrets.json"),
-                                         colored.green(path))
-            )
+            secrets_path = os.path.join("~", "Downloads/client_secrets.json")
+
+        secrets_path = os.path.expanduser(secrets_path)
+
+        puts("\nCopying {0} to {1}\n"
+             .format(colored.green(secrets_path),
+                     colored.green(path))
+        )
 
         _backup(path, "client_secrets.json")
         shutil.copy(secrets_path, path)
