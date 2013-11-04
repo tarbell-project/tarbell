@@ -17,6 +17,7 @@ from .settings import Settings
 from .utils import show_error, get_config_from_args
 from .configure import tarbell_configure
 
+
 class EnsureSettings():
     """Ensure the user has a Tarbell configuration."""
     def __init__(self, args):

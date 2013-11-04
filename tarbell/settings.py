@@ -1,5 +1,7 @@
+# -*- coding: utf-8 -*-
 import yaml
 import os
+
 
 class Settings:
     """Simple object representation of Tarbell settings."""

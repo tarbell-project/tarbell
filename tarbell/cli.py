@@ -12,23 +12,19 @@ import sys
 import imp
 import jinja2
 import codecs
-import mimetypes
 import tempfile
 import shutil
 import pkg_resources
 
 from subprocess import call
 from clint import args
-from clint.arguments import Args
 from clint.textui import colored, puts
 
 from apiclient import errors
 from apiclient.http import MediaFileUpload as _MediaFileUpload
-from oauth2client.clientsecrets import InvalidClientSecretsError
 
 from git import Repo
 
-from .app import TarbellSite
 from .app import pprint_lines, process_xlsx, copy_global_values
 from .oauth import get_drive_api
 from .contextmanagers import ensure_settings, ensure_project
@@ -104,7 +100,6 @@ def display_info(args):
         puts('\n{0}'.format(
             "to configure Tarbell."
         ))
-
 
     puts('\n{0}'.format(
         black(u'Crafted by the Chicago Tribune News Applications team\n')
@@ -317,6 +312,7 @@ def tarbell_newproject(args):
 
         puts("\nYou got this!\n")
 
+
 def _get_project_name(args):
         """Get project name"""
         name = args.get(0)
@@ -386,6 +382,7 @@ def _list_templates(settings):
             colored.cyan(option.get("name")),
             option.get("url")
         ))
+
 
 def _clone_repo(template, path):
     """Clone a template"""
@@ -511,7 +508,7 @@ def _copy_config_template(name, title, template, path, key, settings):
         template_dir = os.path.dirname(pkg_resources.resource_filename("tarbell", "templates/tarbell_config.py.template"))
         loader = jinja2.FileSystemLoader(template_dir)
         env = jinja2.Environment(loader=loader)
-        env.filters["pprint_lines"] = pprint_lines # For dumping context
+        env.filters["pprint_lines"] = pprint_lines  # For dumping context
         content = env.get_template('tarbell_config.py.template').render(context)
         codecs.open(os.path.join(path, "tarbell_config.py"), "w", encoding="utf-8").write(content)
         puts("\n- Done copying configuration file")
@@ -576,6 +573,7 @@ def tarbell_update(args):
         repo.remotes.update_project_template.fetch()
         repo.remotes.update_project_template.pull("master")
         # @TODO make this chatty
+
 
 def tarbell_unpublish(args):
     with ensure_settings(args) as settings, ensure_project(args) as site:

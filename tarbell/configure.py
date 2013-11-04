@@ -16,10 +16,9 @@ from subprocess import call
 from datetime import datetime
 from clint.textui import colored, puts
 
-from .app import TarbellSite
 from .settings import Settings
 from .oauth import get_drive_api
-from .utils import show_error, get_config_from_args
+from .utils import get_config_from_args
 
 try:
     import readline
