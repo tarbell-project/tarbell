@@ -7,7 +7,7 @@ from setuptools import setup, find_packages
 
 
 APP_NAME = 'tarbell'
-VERSION = '0.9-beta1'
+VERSION = '0.9b2'
 
 settings = dict()
 
@@ -29,7 +29,6 @@ settings.update(
     packages=find_packages(),
     include_package_data=True,
     install_requires=[
-        "BeautifulSoup==3.2.1",
         "Flask==0.10.1",
         "GitPython==0.3.2.RC1",
         "Jinja2==2.7.1",
@@ -40,18 +39,17 @@ settings.update(
         "clint==0.3.1",
         "gitdb==0.5.4",
         "itsdangerous==0.23",
-        "legit==0.1.1",
         "ordereddict==1.1",
-        "requests==2.0.0",
-        "scrubber==1.6.1",
+        "requests==1.2.3",
         "smmap==0.8.2",
         "unicodecsv==0.9.4",
         "wsgiref==0.1.2",
         "google-api-python-client==1.2",
         "keyring==3.0.2",
         "xlrd==0.9.2",
-        "python-dateutil==2.1",
+        "python-dateutil==2.2",
         "docutils==0.11",
+        "sh==1.09",
         "Markdown==2.3.1"],
     entry_points={
         'console_scripts': [
