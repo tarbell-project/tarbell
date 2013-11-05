@@ -306,7 +306,6 @@ def tarbell_newproject(args):
         # Init repo
         git = sh.git.bake(_cwd=path)
         puts(git.init())
-        open(os.path.join(path, 'README.md'), 'w+')
 
         # Create submodule
         puts(git.submodule.add(template['url'], '_base'))
