@@ -27,14 +27,14 @@ from apiclient.http import MediaFileUpload as _MediaFileUpload
 
 from git import Repo
 
+from tarbell import __VERSION__ as VERSION
+
 from .app import pprint_lines, process_xlsx, copy_global_values
 from .oauth import get_drive_api
 from .contextmanagers import ensure_settings, ensure_project
 from .configure import tarbell_configure
 from .utils import list_get, black, split_sentences, show_error, get_config_from_args
-from tarbell import __VERSION__ as VERSION
-
-__version__ = '0.9'
+from .s3 import S3Sync
 
 
 # --------
@@ -110,7 +110,7 @@ def display_info(args):
 
 
 def display_version():
-    """Displays Legit version/release."""
+    """Displays Tarbell version/release."""
 
     puts('{0} v{1}'.format(
         colored.yellow('Tarbell'),
@@ -252,6 +252,7 @@ def tarbell_publish(args):
     with ensure_settings(args) as settings, ensure_project(args) as site:
         bucket_name = list_get(args, 0, "staging")
         bucket_uri = site.project.S3_BUCKETS.get(bucket_name, False)
+        creds = settings.config.get('s3_creds')
 
         root_url = bucket_uri[5:]
         extra_context = {
@@ -260,31 +261,31 @@ def tarbell_publish(args):
 
         tempdir = "{0}/".format(tarbell_generate(args, extra_context=extra_context, skip_args=True))
         try:
-            if bucket_uri:
-                puts("\nDeploying {0} to {1} ({2})".format(
+            if bucket_uri and creds:
+                puts("\nDeploying {0} to {1} ({2})\n".format(
                       colored.yellow(site.project.TITLE),
                       colored.red(bucket_name),
                       colored.green(bucket_uri)
                      ))
-                command = ['s3cmd', 'sync', '--acl-public', '--verbose', tempdir, bucket_uri]
-                puts("\nCalling {0}".format(colored.yellow(" ".join(command))))
-                call(command)
+                if creds:
+                    s3 = S3Sync(tempdir, bucket_uri, creds['default']['key_id'], creds['default']['key'])
+                    s3.deploy_to_s3()
             else:
                 show_error(("\nThere's no bucket configuration called '{0}' "
                             "in tarbell_config.py.".format(colored.yellow(bucket_name))))
         except KeyboardInterrupt:
             show_error("ctrl-c pressed, bailing out!")
         finally:
-            puts("\nIf you have website hosting enabled, you can see your project at http://{0}".format(root_url))
-            puts("\n- Done publishing")
             _delete_dir(tempdir)
+            puts("\nIf you have website hosting enabled, you can see your project at:")
+            puts(colored.green("http://{0}\n".format(root_url)))
 
 
 def _delete_dir(dir):
     """Delete tempdir"""
     try:
         shutil.rmtree(dir)  # delete directory
-        puts("\nDeleted {0}!".format(dir))
+        puts("\nDeleted {0}".format(dir))
     except OSError as exc:
         if exc.errno != 2:  # code 2 - no such file or directory
             raise  # re-raise exception
