@@ -6,7 +6,7 @@ import unicodedata
 
 def slugify(value):
     """
-    Normalizes string, removes non-alpha characters, and converts hyphens 
+    Normalizes string, removes non-alpha characters, and converts hyphens
     and spaces to underscores.
     """
     value = unicodedata.normalize('NFKD', value).encode('ascii', 'ignore')

@@ -11,6 +11,7 @@ import os
 import sys
 from clint.textui import colored
 
+
 def list_get(l, idx, default=None):
     """Get from a list with an optional default value."""
     try:
@@ -66,6 +67,7 @@ def get_config_from_args(args):
             os.path.join("~", ".{0}".format("tarbell"))
         )
 
+
 def filter_files(path):
     for dirpath, dirnames, filenames in os.walk(path):
         dirnames[:] = [
@@ -77,4 +79,3 @@ def filter_files(path):
             if not fn.endswith('.py') and not fn.endswith('.pyc') and not fn.startswith('.') and not fn.startswith('_')
         ]
         yield dirpath, dirnames, filenames
-

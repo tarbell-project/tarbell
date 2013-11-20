@@ -16,10 +16,9 @@ from subprocess import call
 from datetime import datetime
 from clint.textui import colored, puts
 
-from .app import TarbellSite
 from .settings import Settings
 from .oauth import get_drive_api
-from .utils import show_error, get_config_from_args
+from .utils import get_config_from_args
 
 try:
     import readline
@@ -94,12 +93,14 @@ def _setup_google_spreadsheets(path):
                                 ))
 
         if secrets_path == "":
-            secrets_path = os.path.expanduser(os.path.join("~",
-                                              "Downloads/client_secrets.json"
-                                             ))
-        puts("\nCopying {0} to {1}\n".format(colored.green("client_secrets.json"),
-                                         colored.green(path))
-            )
+            secrets_path = os.path.join("~", "Downloads/client_secrets.json")
+
+        secrets_path = os.path.expanduser(secrets_path)
+
+        puts("\nCopying {0} to {1}\n"
+             .format(colored.green(secrets_path),
+                     colored.green(path))
+        )
 
         _backup(path, "client_secrets.json")
         shutil.copy(secrets_path, path)

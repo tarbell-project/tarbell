@@ -10,11 +10,11 @@ import time
 
 from httplib import BadStatusLine
 from flask import Flask, render_template, send_from_directory, Response
-from jinja2 import FileSystemLoader, ChoiceLoader, Markup, TemplateSyntaxError
+from jinja2 import Markup, TemplateSyntaxError
 from jinja2.loaders import BaseLoader
 from jinja2.utils import open_if_exists
 from jinja2.exceptions import TemplateNotFound
-from jinja2._compat import string_types, iteritems
+from jinja2._compat import string_types
 from pprint import pformat
 from slughifi import slughifi
 from string import uppercase
@@ -68,6 +68,7 @@ class TarbellFileSystemLoader(BaseLoader):
                 f.close()
 
             mtime = os.path.getmtime(filename)
+
             def uptodate():
                 try:
                     return os.path.getmtime(filename) == mtime
@@ -319,7 +320,6 @@ class TarbellSite:
 
         return Response(status=404)
 
-
     def get_context(self, publish=False):
         """
         Use optional CONTEXT_SOURCE_FILE setting to determine data source.
@@ -415,7 +415,6 @@ class TarbellSite:
 
     def _copy_file(self, root, filename, output_root, extra_context=None):
         # Strip out full filesystem paths
-        path = os.path.join(root, filename)
         rel_path = os.path.join(root.replace(self.path, ""), filename)
         if rel_path.startswith("/"):
             rel_path = rel_path[1:]
