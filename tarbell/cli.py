@@ -270,9 +270,14 @@ def tarbell_publish(args):
                       colored.red(bucket_name),
                       colored.green(bucket_uri)
                      ))
-                if creds:
-                    s3 = S3Sync(tempdir, bucket_uri, creds['default']['key_id'], creds['default']['key'])
-                    s3.deploy_to_s3()
+                if creds.get(s3_bucket):
+                    key_id = creds[s3_bucket]['key_id']
+                    key = creds[s3_bucket]['key']
+                else:
+                    key_id = creds['default']['key_id']
+                    key = creds['default']['key']
+                s3 = S3Sync(tempdir, bucket_uri, key_id, key)
+                s3.deploy_to_s3()
             else:
                 show_error(("\nThere's no bucket configuration called '{0}' "
                             "in tarbell_config.py.".format(colored.yellow(bucket_name))))
