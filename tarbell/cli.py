@@ -255,8 +255,11 @@ def tarbell_publish(args):
         creds = settings.config.get('s3_creds')
 
         root_url = bucket_uri[5:]
+        s3_bucket = root_url.split("/")[0]
         extra_context = {
             "ROOT_URL": root_url,
+            "S3_BUCKET": s3_bucket,
+            "BUCKET_NAME": bucket_name,
         }
 
         tempdir = "{0}/".format(tarbell_generate(args, extra_context=extra_context, skip_args=True))
