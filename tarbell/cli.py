@@ -25,8 +25,6 @@ from clint.textui import colored, puts
 from apiclient import errors
 from apiclient.http import MediaFileUpload as _MediaFileUpload
 
-from git import Repo
-
 from tarbell import __VERSION__ as VERSION
 
 from .app import pprint_lines, process_xlsx, copy_global_values
@@ -140,19 +138,22 @@ def tarbell_install(args):
     """Install a project."""
     with ensure_settings(args) as settings:
         project_url = args.get(0)
-        puts("\n- Getting project information for {0}".format(project_url)) 
+        puts("\n- Getting project information for {0}".format(project_url))
+
+        # Create a tempdir and clone
         tempdir = tempfile.mkdtemp()
-        Repo.clone_from(project_url, tempdir)
-        filename, pathname, description = imp.find_module('tarbell', [tempdir])
-        config = imp.load_module('tarbell', filename, pathname, description)
-        puts("\n- Found config.py")
-        path = _get_path(config.NAME, settings)
-        repo = Repo.clone_from(project_url, path)
-        try:
-            puts("\n- Adding remote 'updated_project_template' using {0}".format(config.TEMPLATE_REPO_URL))
-            repo.create_remote("update_project_template", config.TEMPLATE_REPO_URL)
-        except AttributeError:
-            pass
+        git = sh.git.bake(_cwd=tempdir)
+        puts(git.clone(project_url, '.'))
+        puts(git.submodule.update(*['--init', '--recursive']))
+
+        # Load tarbell config
+        filename, pathname, description = imp.find_module('tarbell_config', [tempdir])
+        config = imp.load_module('tarbell_config', filename, pathname, description)
+        puts("\n- Found tarbell_config.py")
+
+        # Copy over files and clean up
+        path = _get_path(config.NAME, settings, mkdir=False)
+        shutil.copytree(tempdir, path)
         _delete_dir(tempdir)
         puts("\n- Done installing project in {0}".format(path))
 
@@ -172,9 +173,12 @@ def tarbell_install_template(args):
         puts("\nInstalling {0}".format(colored.cyan(template_url))) 
         tempdir = tempfile.mkdtemp()
         puts("\n- Cloning repo to {0}".format(colored.green(tempdir))) 
-        Repo.clone_from(template_url, tempdir)
-        base_path = os.path.join(tempdir, "_base/")
-        filename, pathname, description = imp.find_module('base', [base_path])
+        tempdir = tempfile.mkdtemp()
+        git = sh.git.bake(_cwd=tempdir)
+        puts(git.clone(template_url, '.'))
+        puts(git.fetch())
+        puts(git.checkout(VERSION))
+        filename, pathname, description = imp.find_module('base', [tempdir])
         base = imp.load_module('base', filename, pathname, description)
         puts("\n- Found _base/base.py")
         try:
@@ -216,20 +220,6 @@ def tarbell_list(args):
                 ))
 
                 puts("- {0:25} {1}".format("Project path:", colored.yellow(project_path))),
-                repo = Repo(project_path)
-
-                try:
-                    origin = repo.remotes.origin.config_reader.get_value("url")
-                    puts("- {0:25} {1}".format("Project repository:", origin))
-                except AttributeError:
-                    pass
-
-                try:
-                    update_project_template = repo.remotes.update_project_template.config_reader.get_value("url")
-                    puts("- {0:25} {1}".format("Base update repository:", update_project_template))
-                except AttributeError:
-                    pass
-
                 puts("")
 
             except ImportError:
@@ -385,7 +375,7 @@ def _get_project_title():
         return title
 
 
-def _get_path(name, settings):
+def _get_path(name, settings, mkdir=True):
     """Generate a project path."""
     default_projects_path = settings.config.get("projects_path")
     path = None
@@ -398,14 +388,15 @@ def _get_path(name, settings):
         while not path:
             path = raw_input("\nWhere would you like to create this project? (e.g. ~/tarbell/) ")
 
-    try:
-        os.mkdir(path)
-    except OSError, e:
-        if e.errno == 17:
-            show_error("ABORTING: Directory {0} already exists.".format(path))
-        else:
-            show_error("ABORTING: OSError {0}".format(e))
-        sys.exit()
+    if mkdir:
+        try:
+            os.mkdir(path)
+        except OSError, e:
+            if e.errno == 17:
+                show_error("ABORTING: Directory {0} already exists.".format(path))
+            else:
+                show_error("ABORTING: OSError {0}".format(e))
+            sys.exit()
 
     return path
 
