@@ -584,10 +584,16 @@ def tarbell_switch(args):
 def tarbell_update(args):
     """Update the current tarbell project."""
     with ensure_settings(args) as settings, ensure_project(args) as site:
-        repo = Repo(site.path)
-        repo.remotes.update_project_template.fetch()
-        repo.remotes.update_project_template.pull("master")
-        # @TODO make this chatty
+        puts("Updating to latest base template\n")
+        git = sh.git.bake(_cwd=os.path.join(site.path, '_base'))
+        git.fetch()
+        puts(colored.yellow("Checking out {0}".format(VERSION)))
+        puts(git.checkout(VERSION))
+        puts(colored.yellow("Stashing local changes"))
+        puts(git.stash())
+        puts(colored.yellow("Pull latest changes"))
+        puts(git.pull('origin', VERSION))
+
 
 
 def tarbell_unpublish(args):
