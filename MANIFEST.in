@@ -1,3 +1,2 @@
 include tarbell/templates/*
 include tarbell/docs/*
-include tarbell/scripts/*
