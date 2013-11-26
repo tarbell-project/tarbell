@@ -36,6 +36,7 @@ settings.update(
         "PyYAML==3.10",
         "Werkzeug==0.9.4",
         "async==0.6.1",
+        "boto==2.18.0",
         "clint==0.3.1",
         "gitdb==0.5.4",
         "itsdangerous==0.23",
