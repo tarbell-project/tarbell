@@ -241,7 +241,16 @@ def tarbell_publish(args):
     """Publish a site by calling s3cmd"""
     with ensure_settings(args) as settings, ensure_project(args) as site:
         bucket_name = list_get(args, 0, "staging")
-        bucket_uri = site.project.S3_BUCKETS.get(bucket_name, False)
+
+        try:
+            bucket = site.project.S3_BUCKETS[bucket_name]
+        except KeyError:
+            show_error(
+                "\nThere's no bucket configuration called '{0}' in "
+                "tarbell_config.py.".format(colored.yellow(bucket_name)))
+            sys.exit(1)
+
+        bucket_uri = bucket['uri']
         creds = settings.config.get('s3_creds')
 
         root_url = bucket_uri[5:]
@@ -533,11 +542,11 @@ def _copy_config_template(name, title, template, path, key, settings):
         s3_buckets = settings.config.get("s3_buckets")
         if s3_buckets:
             puts("")
-            for bucket, url in s3_buckets.items():
+            for bucket, bucket_conf in s3_buckets.items():
                 puts("Configuring {0} bucket at {1}\n".format(
-                        colored.green(bucket),
-                        colored.yellow("{0}/{1}".format(url, name))
-                    ))
+                    colored.green(bucket),
+                    colored.yellow("{0}/{1}".format(bucket_conf['uri'], name))
+                ))
 
         puts("\n- Creating {0} project configuration file".format(
             colored.cyan("tarbell_config.py")
