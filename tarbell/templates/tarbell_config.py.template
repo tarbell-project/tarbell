@@ -19,9 +19,10 @@ TITLE = "{{ title|escape }}"
 # S3 bucket configuration
 {% if not s3_buckets %}#{% endif %}S3_BUCKETS = {
     # Provide target -> s3 url pairs, such as:
-    # "mytarget": "s3://mys3url.bucket.url/some/path"{% if s3_buckets %}
-{% if not s3_buckets.staging %}#{% endif %}    "staging": "{% if s3_buckets.staging %}{{ s3_buckets.staging }}{{ name }}/{% endif %}",
-{% if not s3_buckets.production %}#{% endif %}    "production": "{% if s3_buckets.production %}{{ s3_buckets.production }}{{ name }}/{% endif %}",{% endif %}
+    # "mytarget": "s3://mys3url.bucket.url/some/path"
+    {%- for bucket_name, config in s3_buckets.iteritems() %}
+      "{{ bucket_name }}": {{ config|pprint_lines }}
+    {%- endfor %}
 {% if not s3_buckets %}#{% endif %}}
 
 # Repository this project is based on (used for updates)
