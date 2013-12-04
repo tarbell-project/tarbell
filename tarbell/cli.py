@@ -251,7 +251,6 @@ def tarbell_publish(args):
             sys.exit(1)
 
         bucket_uri = bucket['uri']
-        creds = settings.config.get('s3_creds')
 
         root_url = bucket_uri[5:]
         s3_bucket = root_url.split("/")[0]
@@ -261,21 +260,16 @@ def tarbell_publish(args):
             "BUCKET_NAME": bucket_name,
         }
 
-        tempdir = "{0}/".format(tarbell_generate(args, extra_context=extra_context, skip_args=True))
+        tempdir = "{0}/".format(tarbell_generate(
+            args, extra_context=extra_context, skip_args=True))
         try:
-            if bucket_uri and creds:
+            if bucket_uri:
                 puts("\nDeploying {0} to {1} ({2})\n".format(
-                      colored.yellow(site.project.TITLE),
-                      colored.red(bucket_name),
-                      colored.green(bucket_uri)
-                     ))
-                if creds.get(s3_bucket):
-                    key_id = creds[s3_bucket]['key_id']
-                    key = creds[s3_bucket]['key']
-                else:
-                    key_id = creds['default']['key_id']
-                    key = creds['default']['key']
-                s3 = S3Sync(tempdir, bucket_uri, key_id, key)
+                    colored.yellow(site.project.TITLE),
+                    colored.red(bucket_name),
+                    colored.green(bucket_uri)
+                ))
+                s3 = S3Sync(tempdir, bucket_uri, bucket['access_key_id'], bucket['secret_access_key'])
                 s3.deploy_to_s3()
             else:
                 show_error(("\nThere's no bucket configuration called '{0}' "

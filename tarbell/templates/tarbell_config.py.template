@@ -21,7 +21,11 @@ TITLE = "{{ title|escape }}"
     # Provide target -> s3 url pairs, such as:
     # "mytarget": "s3://mys3url.bucket.url/some/path"
     {%- for bucket_name, config in s3_buckets.iteritems() %}
-      "{{ bucket_name }}": {{ config|pprint_lines }}
+      "{{ bucket_name }}": {
+          "uri": "{{ config.uri }}/{{ name }}",
+          "access_key_id": "{{ config.access_key_id }}",
+          "secret_access_key": "{{ config.secret_access_key }}"
+      },
     {%- endfor %}
 {% if not s3_buckets %}#{% endif %}}
 
