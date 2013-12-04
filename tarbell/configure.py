@@ -125,25 +125,121 @@ def _setup_google_spreadsheets(path):
     return settings
 
 
-def _setup_s3(path, access_key=None, access_key_id=None):
+def _setup_s3(path):
     """Prompt user to set up Amazon S3"""
     use = raw_input("\nWould you like to set up Amazon S3? [Y/n] ")
     if use.lower() != "y" and use != "":
         puts("\n- Not configuring Amazon S3.")
         return {}
 
-    puts("\nCalling s3cmd --configure\n")
-    call(['s3cmd', '--configure'])
-
     buckets = {}
 
-    staging = raw_input("\nWhat is your default staging bucket? (e.g. s3://apps.beta.myorg.com/, leave blank to skip) ")
-    if staging != "":
-        buckets.update({"staging": staging})
+    existing_access_key = os.environ.get('AWS_ACCESS_KEY_ID', None)
+    existing_secret_key = os.environ.get('AWS_SECRET_ACCESS_KEY', None)
 
-    production = raw_input("\nWhat is your default production bucket? (e.g. s3://apps.myorg.com/, leave blank to skip) ")
-    if production != "":
-        buckets.update({"production": production})
+    access_key_prompt = "\nPlease enter your default Amazon Access Key ID:"
+    if existing_access_key:
+        access_key_prompt += ' [%s]' % existing_access_key
+    else:
+        access_key_prompt += ' (leave blank to skip)'
+    default_aws_access_key_id = raw_input(access_key_prompt)
+
+    if default_aws_access_key_id == '' and existing_access_key:
+        default_aws_access_key_id = existing_access_key
+
+    if default_aws_access_key_id:
+        secret_key_prompt = "\nPlease enter your default Amazon Secret Access Key:"
+        if existing_secret_key:
+            secret_key_prompt += ' [%s]' % existing_secret_key
+        else:
+            secret_key_prompt += ' (leave blank to skip)'
+        default_aws_secret_access_key = raw_input(secret_key_prompt)
+
+        if default_aws_secret_access_key == '' and existing_secret_key:
+            default_aws_secret_access_key = existing_secret_key
+
+    # If we're all set with AWS creds, we can setup our default
+    # staging and production buckets
+    if default_aws_access_key_id and default_aws_secret_access_key:
+        staging = raw_input(
+            "\nWhat is your default staging bucket? (e.g. "
+            "s3://apps.beta.myorg.com/, leave blank to skip) ")
+        if staging != "":
+            buckets.update({
+                "staging": {
+                    'uri': staging,
+                    'access_key_id': default_aws_access_key_id,
+                    'secret_access_key': default_aws_secret_access_key
+                }
+            })
+
+        production = raw_input(
+            "\nWhat is your default production bucket? (e.g. "
+            "s3://apps.myorg.com/, leave blank to skip) ")
+        if production != "":
+            buckets.update({
+                "production": {
+                    'uri': production,
+                    'access_key_id': default_aws_access_key_id,
+                    'secret_access_key': default_aws_secret_access_key
+                }
+            })
+
+    more_prompt = "\nWould you like to specify an additional bucket? [Y/n] "
+    while raw_input(more_prompt).lower() == 'y':
+        # Ask for a label
+        additional_s3_bucket_label = raw_input(
+            "\nPlease specify a label for this bucket (e.g. "
+            "'alternate_staging', 'project_name' or 'special_bucket', "
+            "etc. leave blank to skip) ")
+        if additional_s3_bucket_label == '':
+            continue
+
+        # Ask for a uri
+        additional_s3_bucket = raw_input(
+            "\nPlease specify an additional bucket (e.g. "
+            "s3://additional.bucket.myorg.com/, leave blank to skip adding bucket) ")
+        if additional_s3_bucket == "":
+            continue
+
+        # Ask for an access key, if it differs from the default
+        additional_access_key_prompt = "\nPlease specify an AWS Access Key ID for this bucket:"
+
+        if default_aws_access_key_id:
+            additional_access_key_prompt += ' [%s]' % default_aws_access_key_id
+        else:
+            additional_access_key_prompt += ' (leave blank to skip adding bucket)'
+
+        additional_aws_access_key_id = raw_input(additional_access_key_prompt)
+
+        if additional_aws_access_key_id == "" and default_aws_access_key_id:
+            additional_aws_access_key_id = default_aws_access_key_id
+        elif additional_aws_access_key_id == "":
+            continue
+
+        # Ask for a secret key, if it differs from default
+        additional_secret_key_prompt = "\nPlease specify an AWS Secret Access Key for this bucket: "
+
+        if default_aws_secret_access_key:
+            additional_secret_key_prompt += ' [%s]' % default_aws_secret_access_key
+        else:
+            additional_secret_key_prompt += ' (leave blank to skip adding bucket)'
+
+        additional_aws_secret_access_key = raw_input(
+            additional_secret_key_prompt)
+
+        if additional_aws_secret_access_key == "" and default_aws_secret_access_key:
+            additional_aws_secret_access_key = default_aws_secret_access_key
+        elif additional_aws_secret_access_key == "":
+            continue
+
+        buckets.update({
+            additional_s3_bucket_label: {
+                'uri': additional_s3_bucket,
+                'access_key_id': additional_aws_access_key_id,
+                'secret_access_key': additional_aws_secret_access_key
+            }
+        })
 
     puts("\n- Done configuring Amazon S3.")
     return {"s3_buckets": buckets}
