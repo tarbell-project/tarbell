@@ -21,4 +21,6 @@ The settings file uses a simple YAML-based format::
 Google SDK client secrets (`~/.tarbell/client_secrets.json`)
 -----------------------------------------------------------------
 
-Place the client secrets file in `~/.tarbell`.
+Place the client secrets file in `~/.tarbell`. (See `Configure Google Spreadsheet Access`_ for more details.)
+
+.. _Configure Google Spreadsheet Access: install.html#configure-google-spreadsheet-access-optional

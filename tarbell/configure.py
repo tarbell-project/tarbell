@@ -84,7 +84,7 @@ def _setup_google_spreadsheets(path):
               "\n{2} for more information."
               .format(colored.red("https://code.google.com/apis/console/"),
                       colored.yellow("client_secrets.json"),
-                      colored.red("http://tarbell.readthedocs.org/#correctlink")
+                      colored.red("http://tarbell.readthedocs.org/en/latest/configuring.html#google-sdk-client-secrets-tarbell-client-secrets-json")
                      )
             ))
 
