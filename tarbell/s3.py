@@ -15,12 +15,23 @@ from urllib2 import urlopen
 excludes = r'|'.join([r'.*\.git$'])
 
 
+class S3Url(str):
+    def __new__(self, content):
+        # Parse
+        if not content.endswith("/"):
+            content = "{0}/".format(content)
+        if content.startswith("s3://"):
+            content = content[5:]
+        self.root, self.path = content.split("/", 1)
+        return str.__new__(self, content.rstrip("/"))
+
+
 class S3Sync:
-    def __init__(self, directory, bucket, key_id, key, force=False):
+    def __init__(self, directory, bucket, access_key_id, secret_access_key, force=False):
+        connection = S3Connection(access_key_id, secret_access_key)
         self.force = force
-        self.connection = S3Connection(key_id, key)
-        self.bucketname, self.prefix = bucket[5:].split('/', 1)
-        self.bucket = self.connection.get_bucket(self.bucketname)
+        self.bucket = bucket
+        self.connection = connection.get_bucket(bucket.root)
         self.directory = directory.rstrip('/')
 
     def deploy_to_s3(self):
@@ -54,22 +65,16 @@ class S3Sync:
             absolute_path = temp_path
 
         size = os.path.getsize(absolute_path)
-        key = "{0}/{1}".format(self.prefix, keyname)
-        existing = self.bucket.get_key(key)
+        key = "{0}/{1}".format(self.bucket.path, keyname)
+        existing = self.connection.get_key(key)
 
         if self.force or not existing or (existing.size != size):
-            k = Key(self.bucket)
+            k = Key(self.connection)
             k.key = key
-            puts("Uploading {0}/{1}".format(self.bucketname, k.key))
+            puts("+ Uploading {0}/{1}".format(self.bucket, keyname))
             k.set_contents_from_filename(absolute_path, options, policy='public-read')
-
-            if key.endswith('.html'):
-                param = "http://{0}/{1}?fbrefresh=CANBEANYTHING".format(self.bucketname, key)
-                puts("Refreshing Facebook info for: {0}".format(param))
-                fb_url = "http://developers.facebook.com/tools/debug/og/object?q={0}".format(quote_plus(param))
-                urlopen(fb_url)
         else:
-            puts("Skipping {0}, file sizes match".format(keyname))
+            puts("- Skipping  {0}/{1}, file sizes match".format(self.bucket, keyname))
 
 
     def find_file_paths(self):

@@ -202,8 +202,10 @@ def make_worksheet_data(headers, worksheet):
 
 
 class TarbellSite:
-    def __init__(self, path, client_secrets_path=None):
+    def __init__(self, path, client_secrets_path=None, quiet=False):
         self.app = Flask(__name__)
+
+        self.quiet = quiet
 
         self.app.jinja_env.finalize = silent_none  # Don't print "None"
         self.app.debug = True  # Always debug
@@ -421,7 +423,8 @@ class TarbellSite:
         output_path = os.path.join(output_root, rel_path)
         output_dir = os.path.dirname(output_path)
 
-        puts("Writing {0}".format(output_path))
+        if not self.quiet:
+            puts("Writing {0}".format(output_path))
         with self.app.test_request_context():
             preview = self.preview(rel_path, extra_context=extra_context, publish=True)
             if not os.path.exists(output_dir):

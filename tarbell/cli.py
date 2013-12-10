@@ -32,7 +32,7 @@ from .oauth import get_drive_api
 from .contextmanagers import ensure_settings, ensure_project
 from .configure import tarbell_configure
 from .utils import list_get, black, split_sentences, show_error, get_config_from_args
-from .s3 import S3Sync
+from .s3 import S3Url, S3Sync
 
 
 # --------
@@ -116,13 +116,15 @@ def display_version():
     ))
 
 
-def tarbell_generate(args, skip_args=False, extra_context=None):
+def tarbell_generate(args, skip_args=False, extra_context=None, quiet=False):
     """Generate static files."""
 
     output_root = None
     with ensure_settings(args) as settings, ensure_project(args) as site:
         if not skip_args:
             output_root = list_get(args, 0, False)
+        if quiet:
+            site.quiet = True
         if not output_root:
             output_root = tempfile.mkdtemp(prefix="{0}-".format(site.project.__name__))
 
@@ -130,7 +132,8 @@ def tarbell_generate(args, skip_args=False, extra_context=None):
             site.project.CONTEXT_SOURCE_FILE = args.value_after('--context')
 
         site.generate_static_site(output_root, extra_context)
-        puts("\nCreated site in {0}".format(output_root))
+        if not quiet:
+            puts("\nCreated site in {0}".format(output_root))
         return output_root
 
 
@@ -243,50 +246,47 @@ def tarbell_publish(args):
         bucket_name = list_get(args, 0, "staging")
 
         try:
-            bucket = site.project.S3_BUCKETS[bucket_name]
+            bucket_url = S3Url(site.project.S3_BUCKETS[bucket_name])
         except KeyError:
             show_error(
                 "\nThere's no bucket configuration called '{0}' in "
                 "tarbell_config.py.".format(colored.yellow(bucket_name)))
             sys.exit(1)
 
-        bucket_uri = bucket['uri']
-
-        root_url = bucket_uri[5:]
-        s3_bucket = root_url.split("/")[0]
         extra_context = {
-            "ROOT_URL": root_url,
-            "S3_BUCKET": s3_bucket,
+            "ROOT_URL": bucket_url,
+            "S3_BUCKET": bucket_url.root,
             "BUCKET_NAME": bucket_name,
         }
 
         tempdir = "{0}/".format(tarbell_generate(
-            args, extra_context=extra_context, skip_args=True))
+            args, extra_context=extra_context, skip_args=True, quiet=True))
         try:
-            if bucket_uri:
-                puts("\nDeploying {0} to {1} ({2})\n".format(
-                    colored.yellow(site.project.TITLE),
-                    colored.red(bucket_name),
-                    colored.green(bucket_uri)
-                ))
-                s3 = S3Sync(tempdir, bucket_uri, bucket['access_key_id'], bucket['secret_access_key'])
-                s3.deploy_to_s3()
-            else:
-                show_error(("\nThere's no bucket configuration called '{0}' "
-                            "in tarbell_config.py.".format(colored.yellow(bucket_name))))
+            puts("\nDeploying {0} to {1} ({2})\n".format(
+                colored.yellow(site.project.TITLE),
+                colored.red(bucket_name),
+                colored.green(bucket_url)
+            ))
+            # Get creds
+            bucket_creds = settings.config['s3_credentials'].get(bucket_url.root)
+            if not bucket_creds:
+                bucket_creds = settings.config['default_s3_credentials']
+
+            #import ipdb; ipdb.set_trace();
+            s3 = S3Sync(tempdir, bucket_url, **bucket_creds)
+            s3.deploy_to_s3()
+            puts("\nIf you have website hosting enabled, you can see your project at:")
+            puts(colored.green("http://{0}\n".format(bucket_url)))
         except KeyboardInterrupt:
             show_error("ctrl-c pressed, bailing out!")
         finally:
             _delete_dir(tempdir)
-            puts("\nIf you have website hosting enabled, you can see your project at:")
-            puts(colored.green("http://{0}\n".format(root_url)))
 
 
 def _delete_dir(dir):
     """Delete tempdir"""
     try:
         shutil.rmtree(dir)  # delete directory
-        puts("\nDeleted {0}".format(dir))
     except OSError as exc:
         if exc.errno != 2:  # code 2 - no such file or directory
             raise  # re-raise exception
