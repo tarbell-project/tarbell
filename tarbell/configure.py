@@ -210,7 +210,7 @@ def _setup_s3(settings, path, prompt=True):
             })
 
 
-    more_prompt = "\nWould you like to add bucket credentials? [Y/n] "
+    more_prompt = "\nWould you like to add bucket credentials? [y/N] "
     while raw_input(more_prompt).lower() == 'y':
         ## Ask for a uri
         additional_s3_bucket = raw_input(
@@ -223,9 +223,9 @@ def _setup_s3(settings, path, prompt=True):
         additional_access_key_prompt = "\nPlease specify an AWS Access Key ID for this bucket:"
 
         if default_aws_access_key_id:
-            additional_access_key_prompt += ' [%s]' % default_aws_access_key_id
+            additional_access_key_prompt += ' [%s] ' % default_aws_access_key_id
         else:
-            additional_access_key_prompt += ' (leave blank to skip adding bucket)'
+            additional_access_key_prompt += ' (leave blank to skip adding bucket) '
 
         additional_aws_access_key_id = raw_input(additional_access_key_prompt)
 
@@ -235,12 +235,12 @@ def _setup_s3(settings, path, prompt=True):
             continue
 
         # Ask for a secret key, if it differs from default
-        additional_secret_key_prompt = "\nPlease specify an AWS Secret Access Key for this bucket: "
+        additional_secret_key_prompt = "\nPlease specify an AWS Secret Access Key for this bucket:"
 
         if default_aws_secret_access_key:
-            additional_secret_key_prompt += ' [%s]' % default_aws_secret_access_key
+            additional_secret_key_prompt += ' [%s] ' % default_aws_secret_access_key
         else:
-            additional_secret_key_prompt += ' (leave blank to skip adding bucket)'
+            additional_secret_key_prompt += ' (leave blank to skip adding bucket) '
 
         additional_aws_secret_access_key = raw_input(
             additional_secret_key_prompt)
