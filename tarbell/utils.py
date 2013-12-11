@@ -54,18 +54,15 @@ def get_config_from_args(args):
     """Get config directory from arguments."""
     if args.contains('--settings'):
         path = args.value_after("--settings")
-        if not os.path.isdir(path):
-            show_error("{0} does not exist. Exiting...".format(
-                colored.cyan(path)
-            ))
-            sys.exit()
-        return path
+        args.remove("--settings")
+        args.remove(path)
     elif sys.platform == 'win32':
-        return os.path.join(os.environ['APPDATA'], "Tarbell")
+        path = os.path.join(os.environ['APPDATA'], "Tarbell", "settings.yaml")
     else:
-        return os.path.expanduser(
-            os.path.join("~", ".{0}".format("tarbell"))
+        path = os.path.expanduser(
+            os.path.join("~", ".{0}".format("tarbell"), "settings.yaml")
         )
+    return path
 
 
 def filter_files(path):
