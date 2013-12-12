@@ -90,7 +90,7 @@ def display_info(args):
     ))
 
     config = get_config_from_args(args)
-    if not os.path.isdir(config):
+    if not os.path.isfile(config):
         puts('\n---\n\n{0}: {1}'.format(
             colored.red("Warning"),
             "No Tarbell configuration found. Run:"
@@ -161,7 +161,7 @@ def tarbell_install(command, args):
         puts("\n- Done installing project in {0}".format(path))
 
 
-def tarbell_install_template(comment, args):
+def tarbell_install_template(command, args):
     """Install a project template."""
     with ensure_settings(command, args) as settings:
         template_url = args.get(0)
@@ -211,18 +211,17 @@ def tarbell_list(command, args):
             colored.yellow(projects_path)
         ))
 
-        for dir in os.listdir(projects_path):
-            project_path = os.path.join(projects_path, dir)
+        for directory in os.listdir(projects_path):
+            project_path = os.path.join(projects_path, directory)
             try:
-                filename, pathname, description = imp.find_module('tarbell', [project_path])
-                config = imp.load_module(dir, filename, pathname, description)
-
-                puts("{0:37} {1}".format(
+                filename, pathname, description = imp.find_module('tarbell_config', [project_path])
+                config = imp.load_module(directory, filename, pathname, description)
+                puts("{0:30} {1}".format(
                     colored.red(config.NAME),
                     colored.cyan(config.TITLE)
                 ))
 
-                puts("- {0:25} {1}".format("Project path:", colored.yellow(project_path))),
+                puts("{0}".format(colored.yellow(project_path))),
                 puts("")
 
             except ImportError:
@@ -658,8 +657,8 @@ def def_cmd(name=None, short=None, fn=None, usage=None, help=None):
 def_cmd(
     name='configure',
     fn=tarbell_configure,
-    usage='configure <optional sub-command: drive, s3, path, or templates>',
-    help='Configure Tarbell')
+    usage='configure <subcommand (optional)>',
+    help="Configure Tarbell. Subcommand can be one of 'drive', 's3', 'path', or 'templates'.")
 
 
 def_cmd(
