@@ -19,7 +19,8 @@ TITLE = "{{ title|escape }}"
 # S3 bucket configuration
 {% if not default_s3_buckets %}#{% endif %}S3_BUCKETS = {
     # Provide target -> s3 url pairs, such as:
-    # "mytarget": "s3://mys3url.bucket.url/some/path"
+    #     "mytarget": "mys3url.bucket.url/some/path"
+    # then use tarbell publish mytarget to publish to it
     {%- for bucket_name, uri in default_s3_buckets.iteritems() %}
     "{{ bucket_name }}": "{{ uri }}/{{ name }}",
     {%- endfor %}
