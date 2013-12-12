@@ -25,7 +25,7 @@ try:
 except ImportError:
     pass
 
-def tarbell_configure(args):
+def tarbell_configure(command, args):
     """Tarbell configuration routine"""
     puts("Configuring Tarbell. Press ctrl-c to bail out!")
 
@@ -73,6 +73,10 @@ def _get_or_create_config(path, prompt=True):
 
     with open(path, 'rw') as f:
         settings = yaml.load(f)
+        if settings.get('s3_buckets') and not settings.get('default_s3_buckets'):
+            puts("- Automatically updating default bucket configuration from `s3_buckets` to `default_s3_buckets`")
+            settings['default_s3_buckets'] = settings['s3_buckets']
+            del settings['s3_buckets']
 
     return settings or {}
 

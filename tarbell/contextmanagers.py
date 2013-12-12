@@ -14,19 +14,38 @@ from clint.textui import colored, puts
 
 from .app import TarbellSite
 from .settings import Settings
-from .utils import show_error, get_config_from_args
+from .utils import show_error, get_config_from_args, list_get
 from .configure import tarbell_configure
 
 
 class EnsureSettings():
     """Ensure the user has a Tarbell configuration."""
-    def __init__(self, args):
+    def __init__(self, command, args):
         self.args = args
+        self.command = command
         self.path = get_config_from_args(args)
 
     def __enter__(self):
         if (os.path.isfile(self.path)):
-            return Settings(self.path)
+            settings = Settings(self.path)
+
+            # beta2 and older check
+            if settings.config.get('s3_buckets'):
+                #from pprint import pprint as pp
+                #pp(self.command)
+                #import ipdb; ipdb.set_trace();
+                puts(colored.red("--- Warning! ---\n"))
+                puts("Your configuration file is out of date. Amazon S3 publishing will not work.")
+                puts("Run {0} to update your Amazon S3 configuration.".format(
+                    colored.yellow('tarbell configure s3')
+                    ))
+                puts(colored.red("\n----------------\n"))
+                if self.command.name == "publish":
+                    show_error("publish called, exiting.")
+                    sys.exit(1)
+
+            return settings
+
         else:
             puts("\n{0}: {1}".format(
                 colored.red("Warning:"),
@@ -47,7 +66,8 @@ class EnsureSettings():
 
 class EnsureProject():
     """Context manager to ensure the user is in a Tarbell site environment."""
-    def __init__(self, args):
+    def __init__(self, command, args):
+        self.command = command
         self.args = args
 
     def __enter__(self):

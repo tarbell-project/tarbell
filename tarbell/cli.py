@@ -54,7 +54,7 @@ def main():
     elif command:
         arg = args.get(0)
         args.remove(arg)
-        command.__call__(args)
+        command.__call__(command, args)
         sys.exit()
 
     else:
@@ -116,11 +116,11 @@ def display_version():
     ))
 
 
-def tarbell_generate(args, skip_args=False, extra_context=None, quiet=False):
+def tarbell_generate(command, args, skip_args=False, extra_context=None, quiet=False):
     """Generate static files."""
 
     output_root = None
-    with ensure_settings(args) as settings, ensure_project(args) as site:
+    with ensure_settings(command, args) as settings, ensure_project(command, args) as site:
         if not skip_args:
             output_root = list_get(args, 0, False)
         if quiet:
@@ -137,9 +137,9 @@ def tarbell_generate(args, skip_args=False, extra_context=None, quiet=False):
         return output_root
 
 
-def tarbell_install(args):
+def tarbell_install(command, args):
     """Install a project."""
-    with ensure_settings(args) as settings:
+    with ensure_settings(command, args) as settings:
         project_url = args.get(0)
         puts("\n- Getting project information for {0}".format(project_url))
 
@@ -161,9 +161,9 @@ def tarbell_install(args):
         puts("\n- Done installing project in {0}".format(path))
 
 
-def tarbell_install_template(args):
+def tarbell_install_template(comment, args):
     """Install a project template."""
-    with ensure_settings(args) as settings:
+    with ensure_settings(command, args) as settings:
         template_url = args.get(0)
 
         matches = [template for template in settings.config["project_templates"] if template["url"] == template_url]
@@ -199,9 +199,9 @@ def tarbell_install_template(args):
         puts("\n+ Added new project template: {0}".format(colored.yellow(name)))
 
 
-def tarbell_list(args):
+def tarbell_list(command, args):
     """List tarbell projects."""
-    with ensure_settings(args) as settings:
+    with ensure_settings(command, args) as settings:
         projects_path = settings.config.get("projects_path")
         if not projects_path:
             show_error("{0} does not exist".format(projects_path))
@@ -233,16 +233,16 @@ def tarbell_list(args):
             ))
 
 
-def tarbell_list_templates(args):
-    with ensure_settings(args) as settings:
+def tarbell_list_templates(command, args):
+    with ensure_settings(command, args) as settings:
         puts("\nAvailable project templates\n")
         _list_templates(settings)
         puts("")
 
 
-def tarbell_publish(args):
+def tarbell_publish(command, args):
     """Publish a site by calling s3cmd"""
-    with ensure_settings(args) as settings, ensure_project(args) as site:
+    with ensure_settings(command, args) as settings, ensure_project(command, args) as site:
         bucket_name = list_get(args, 0, "staging")
 
         try:
@@ -259,7 +259,7 @@ def tarbell_publish(args):
             "BUCKET_NAME": bucket_name,
         }
 
-        tempdir = "{0}/".format(tarbell_generate(
+        tempdir = "{0}/".format(tarbell_generate(command,
             args, extra_context=extra_context, skip_args=True, quiet=True))
         try:
             puts("\nDeploying {0} to {1} ({2})\n".format(
@@ -299,9 +299,9 @@ def _delete_dir(dir):
         pass
 
 
-def tarbell_newproject(args):
+def tarbell_newproject(command, args):
     """Create new Tarbell project."""
-    with ensure_settings(args) as settings:
+    with ensure_settings(command, args) as settings:
 
         # Create directory or bail
         name = _get_project_name(args)
@@ -561,9 +561,9 @@ def _copy_config_template(name, title, template, path, key, settings):
         puts("\n- Done copying configuration file")
 
 
-def tarbell_serve(args):
+def tarbell_serve(command, args):
     """Serve the current Tarbell project."""
-    with ensure_project(args) as site:
+    with ensure_project(command, args) as site:
         address = list_get(args, 0, "").split(":")
         ip = list_get(address, 0, '127.0.0.1')
         port = list_get(address, 1, '5000')
@@ -571,9 +571,9 @@ def tarbell_serve(args):
         site.app.run(ip, port=int(port))
 
 
-def tarbell_switch(args):
+def tarbell_switch(command, args):
     """Switch to a project"""
-    with ensure_settings(args) as settings:
+    with ensure_settings(command, args) as settings:
         projects_path = settings.config.get("projects_path")
         if not projects_path:
             show_error("{0} does not exist".format(projects_path))
@@ -586,14 +586,14 @@ def tarbell_switch(args):
             puts("\nSwitching to {0}".format(colored.red(project)))
             puts("Edit this project's templates at {0}".format(colored.yellow(project_path)))
             puts("Running preview server...")
-            tarbell_serve(args)
+            tarbell_serve(command, args)
         else:
             show_error("{0} isn't a tarbell project".format(project_path))
 
 
-def tarbell_update(args):
+def tarbell_update(command, args):
     """Update the current tarbell project."""
-    with ensure_settings(args) as settings, ensure_project(args) as site:
+    with ensure_settings(command, args) as settings, ensure_project(command, args) as site:
         puts("Updating to latest base template\n")
         git = sh.git.bake(_cwd=os.path.join(site.path, '_base'))
         git.fetch()
@@ -606,8 +606,8 @@ def tarbell_update(args):
 
 
 
-def tarbell_unpublish(args):
-    with ensure_settings(args) as settings, ensure_project(args) as site:
+def tarbell_unpublish(command, args):
+    with ensure_settings(command, args) as settings, ensure_project(command, args) as site:
         """Delete a project."""
         show_error("Not implemented!")
 
@@ -658,7 +658,7 @@ def def_cmd(name=None, short=None, fn=None, usage=None, help=None):
 def_cmd(
     name='configure',
     fn=tarbell_configure,
-    usage='configure',
+    usage='configure <optional sub-command: drive, s3, path, or templates>',
     help='Configure Tarbell')
 
 
