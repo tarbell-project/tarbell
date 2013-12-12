@@ -25,7 +25,7 @@ class EnsureSettings():
         self.path = get_config_from_args(args)
 
     def __enter__(self):
-        if (os.path.isdir(self.path)):
+        if (os.path.isfile(self.path)):
             return Settings(self.path)
         else:
             puts("\n{0}: {1}".format(

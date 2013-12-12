@@ -9,9 +9,8 @@ class Settings:
         self.path = path
 
         self.config = {}
-        self.config_path = os.path.join(self.path, "settings.yaml")
         try:
-            with open(self.config_path) as f:
+            with open(self.path) as f:
                 self.config = yaml.load(f)
         except IOError:
             pass
@@ -25,5 +24,5 @@ class Settings:
             pass
 
     def save(self):
-        with open(self.config_path, "w") as f:
+        with open(self.path, "w") as f:
             yaml.dump(self.config, f, default_flow_style=False)

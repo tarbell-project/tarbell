@@ -391,6 +391,8 @@ def _get_path(name, settings, mkdir=True):
         while not path:
             path = raw_input("\nWhere would you like to create this project? (e.g. ~/tarbell/) ")
 
+    path = os.path.expanduser(path)
+
     if mkdir:
         try:
             os.mkdir(path)
