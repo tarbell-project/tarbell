@@ -31,20 +31,20 @@ def tarbell_configure(args):
 
     # Check if there's settings configured
     path = get_config_from_args(args)
-    all = True
+    prompt = True
     if len(args):
-        all = False
+        prompt = False
 
     settings = _get_or_create_config(path)
 
-    if all or "drive" in args:
-        settings.update(_setup_google_spreadsheets(settings, path, all))
-    if all or "s3" in args:
-        settings.update(_setup_s3(settings, path, all))
-    if all or "path" in args:
-        settings.update(_setup_tarbell_project_path(settings, path))
-    if all or "templates" in args:
-        settings.update(_setup_default_templates(settings, path))
+    if prompt or "drive" in args:
+        settings.update(_setup_google_spreadsheets(settings, path, prompt))
+    if prompt or "s3" in args:
+        settings.update(_setup_s3(settings, path, prompt))
+    if prompt or "path" in args:
+        settings.update(_setup_tarbell_project_path(settings, path, prompt))
+    if prompt or "templates" in args:
+        settings.update(_setup_default_templates(settings, path, prompt))
 
     with open(path, 'w') as f:
         puts("\nWriting {0}".format(colored.green(path)))
@@ -281,7 +281,7 @@ def _setup_tarbell_project_path(settings, path, prompt=True):
     return {"projects_path": projects_path}
 
 
-def _setup_default_templates(settings, path):
+def _setup_default_templates(settings, path, prompt=True):
     """Add some (hardcoded) default templates."""
     project_templates = [{
         "name": "Basic Bootstrap 3 template",
