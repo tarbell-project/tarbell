@@ -1,5 +1,5 @@
 ================
-Tarbell tutorial
+Tutorial
 ================
 
 Let's build a website about celebrated Chicago journalist Ethel Payne! 
@@ -7,7 +7,7 @@ Let's build a website about celebrated Chicago journalist Ethel Payne!
 First you need Tarbell. Fair warning, you're going to have to run these commands in
 a terminal::
 
-    pip install tarbell==0.9b2
+    pip install tarbell==0.9b3
 
 Got it? Now configure Tarbell::
 
@@ -133,8 +133,8 @@ Open the file in your favorite editor. It should look like this::
   S3_BUCKETS = {
       # Provide target -> s3 url pairs, such as:
       # "mytarget": "s3://mys3url.bucket.url/some/path"
-      "staging": "s3://apps.beta.chicagotribune.com/someproject",
-      "production": "s3://apps.chicagotribune.com/someproject/",
+      "staging": "apps.beta.chicagotribune.com/someproject",
+      "production": "apps.chicagotribune.com/someproject/",
   }
 
   # Repository this project is based on (used for updates)
