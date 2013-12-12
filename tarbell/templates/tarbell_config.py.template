@@ -20,10 +20,10 @@ TITLE = "{{ title|escape }}"
 {% if not default_s3_buckets %}#{% endif %}S3_BUCKETS = {
     # Provide target -> s3 url pairs, such as:
     # "mytarget": "s3://mys3url.bucket.url/some/path"
-    {%- for bucket_name, url in default_s3_buckets.iteritems() %}
+    {%- for bucket_name, uri in default_s3_buckets.iteritems() %}
     "{{ bucket_name }}": "{{ uri }}/{{ name }}",
     {%- endfor %}
-{% if not s3_buckets %}#{% endif %}}
+{% if not default_s3_buckets %}#{% endif %}}
 
 # Default template variables
 DEFAULT_CONTEXT = {{ default_context|pprint_lines }}
