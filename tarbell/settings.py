@@ -16,7 +16,7 @@ class Settings:
             pass
 
         self.client_secrets = False
-        client_secrets_path = os.path.join(self.path, "client_secrets.json")
+        client_secrets_path = os.path.join(os.path.dirname(self.path), "client_secrets.json")
         try:
             with open(client_secrets_path) as f:
                 self.client_secrets = True

@@ -17,11 +17,11 @@ TITLE = "{{ title|escape }}"
 # CREATE_JSON = True
 
 # S3 bucket configuration
-{% if not s3_buckets %}#{% endif %}S3_BUCKETS = {
+{% if not default_s3_buckets %}#{% endif %}S3_BUCKETS = {
     # Provide target -> s3 url pairs, such as:
     # "mytarget": "s3://mys3url.bucket.url/some/path"
-    {%- for bucket_name, config in s3_buckets.iteritems() %}
-    "{{ bucket_name }}": "{{ config.uri }}/{{ name }}"
+    {%- for bucket_name, url in default_s3_buckets.iteritems() %}
+    "{{ bucket_name }}": "{{ uri }}/{{ name }}",
     {%- endfor %}
 {% if not s3_buckets %}#{% endif %}}
 
