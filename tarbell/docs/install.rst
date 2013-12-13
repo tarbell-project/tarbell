@@ -1,6 +1,6 @@
-===============
-Install Tarbell
-===============
+============
+Installation
+============
 
 Install Tarbell with `pip install tarbell`
 ------------------------------------------
@@ -31,7 +31,7 @@ to access the Google Drive API. You can share this file with collaborators and
 within your organization, but do not share this file anywhere public.
 
 Log in to the `Google API Developer Console
-<https://code.google.com/apis/console/>`_ and create a new project:
+<https://code.google.com/apis/console/b/0/?noredirect>`_ and create a new project:
 
 .. image:: create_1.png
    :width: 700px
@@ -88,30 +88,17 @@ Enter it. If it works, you'll see:
 
 Now you can access and create Google spreadsheets to use with Tarbell projects.
 
-Configuring Amazon S3
----------------------
+Configure Amazon S3
+-------------------
 
-Learn how to `set up Amazon S3 <http://www.smalldatajournalism.com/projects/one-offs/using-amazon-s3/>`_ in
-the Small Data Journalism guide.
+Generate keys for your Amazon S3 account. Add them during the Amazon S3 section of installation.
 
-Configure `s3cmd`::
+Set a default project path
+--------------------------
 
-  s3cmd --configure
+This path will be used by `tarbell list` and `tarbell switch`.
 
-`tarbell configure` will do this for you::
+Set up project templates
+------------------------
 
-  Would you like to set up Amazon S3? [Y/n] y
-
-  Calling s3cmd --configure
-
-  <s3cmd output, be sure to answer y at the end>
-
-  What is your default staging bucket? (e.g. s3://apps.beta.myorg.com/, leave blank to skip) s3://projects.beta.coolorg.net/
-
-  What is your default production bucket? (e.g. s3://apps.myorg.com/, leave blank to skip) s3://projects.coolorg.net/
-
-  - Done configuring Amazon S3.
-
-
-
-
+Work in progress.

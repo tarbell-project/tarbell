@@ -39,6 +39,8 @@ Here's a simple `_base/_base.html`::
 To inherit from this template extend the base template in `index.html` or other project files you
 create. Now, all your `index.html` needs to contain is::
 
+  {% extends '_base.html' %}
+
   {% block content %}
   <h1>{{ title }} </h1>
   {{ content|markdown }}
@@ -53,11 +55,20 @@ a file with the same name, the project's version will be used instead.
 
 See the basic Tarbell template for a simple implementation of a base template.
 
+Template inheritance
+--------------------
+
+Any file in the base template can be overridden in your project files.
+
+For example, if your base template `include`s a sample `_base/_nav.html`, you can create a file named 
+`_nav.html` in your project directory to override 
+
+This works for all files.
 
 Configuring projects
 --------------------
 
-Project configuration is kept in the `tarbell.py` file in your project's base directory::
+Project configuration is kept in the `tarbell_config.py` file in your project's base directory::
 
   # -*- coding: utf-8 -*-
 
@@ -76,8 +87,8 @@ Project configuration is kept in the `tarbell.py` file in your project's base di
 
   # S3 bucket configuration
   S3_BUCKETS = {
-      "staging": "s3://projects.beta.myorg.tld/profiles/nellie-bly/",
-      "production": "s3://projects.myorg.tld/profiles/nellie-bly/",
+      "staging": "projects.beta.myorg.tld/profiles/nellie-bly/",
+      "production": "projects.myorg.tld/profiles/nellie-bly/",
   }
 
   # Repository this project is based on (used for updates)
@@ -93,9 +104,7 @@ Project configuration is kept in the `tarbell.py` file in your project's base di
 
 If specified, `SPREADSHEET_KEY` will be used as data source if Google Spreadsheets is configured.
 
-If specified, `S3_BUCKETS` should be a Python dict consisting of `targetname`->`targeturl` pairs.
-
-If specified, `TEMPLATE_REPO_URL` will be used to pull in updates to the base template. 
+If specified, `S3_BUCKETS` should be a Python dict consisting of `targetname:targeturl` pairs.
 
 If specified, `DEFAULT_CONTEXT` will provide context variables to the template. The default context
 is dictionary of `key`->`value` pairs to provide to the template. The `value` may be any Python
