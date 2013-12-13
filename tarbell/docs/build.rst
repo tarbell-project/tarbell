@@ -55,26 +55,25 @@ a file with the same name, the project's version will be used instead.
 
 See the basic Tarbell template for a simple implementation of a base template.
 
-Template inheritance
---------------------
+Template inheritance: Override files from base by copying to your project directory
+-----------------------------------------------------------------------------------
 
 Any file in the base template can be overridden in your project files.
 
 For example, if your base template `include`s a sample `_base/_nav.html`, you can create a file named 
 `_nav.html` in your project directory to override 
 
-This works for all files.
+This works for all files, static or templates.
+
+Files prefixed with underscores (`_`) will not be generated or published
+------------------------------------------------------------------------
+
+To suppress a file from publishing, use a filename like `_filename.txt`.
 
 Configuring projects
 --------------------
 
 Project configuration is kept in the `tarbell_config.py` file in your project's base directory::
-
-  # -*- coding: utf-8 -*-
-
-  """
-  Tarbell project configuration
-  """
 
   # Short project name
   NAME = "nellie-bly"
@@ -83,16 +82,17 @@ Project configuration is kept in the `tarbell_config.py` file in your project's 
   TITLE = "The Story of Nellie Bly"
 
   # Google spreadsheet key
-  # SPREADSHEET_KEY = "0Ak3IIavLYTovdC1qMFo5UDEwcUhQZmdZbkk4WW1sYUE"
+  SPREADSHEET_KEY = "0Ak3IIavLYTovdC1qMFo5UDEwcUhQZmdZbkk4WW1sYUE"
+
+  # Create JSON data at ./data.json
+  CREATE_JSON = True
+
 
   # S3 bucket configuration
   S3_BUCKETS = {
       "staging": "projects.beta.myorg.tld/profiles/nellie-bly/",
       "production": "projects.myorg.tld/profiles/nellie-bly/",
   }
-
-  # Repository this project is based on (used for updates)
-  TEMPLATE_REPO_URL = "https://github.com/newsapps/tarbell-template"
 
   # Default template variables
   DEFAULT_CONTEXT = {
@@ -105,6 +105,8 @@ Project configuration is kept in the `tarbell_config.py` file in your project's 
 If specified, `SPREADSHEET_KEY` will be used as data source if Google Spreadsheets is configured.
 
 If specified, `S3_BUCKETS` should be a Python dict consisting of `targetname:targeturl` pairs.
+
+If `True`, `CREATE_JSON` will create a file called `data.json` for AJAX data and context loading.
 
 If specified, `DEFAULT_CONTEXT` will provide context variables to the template. The default context
 is dictionary of `key`->`value` pairs to provide to the template. The `value` may be any Python
