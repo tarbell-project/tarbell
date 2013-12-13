@@ -7,6 +7,8 @@ import csv
 import re
 import requests
 import time
+import sys
+import traceback
 
 from httplib import BadStatusLine
 from flask import Flask, render_template, send_from_directory, Response
@@ -314,7 +316,16 @@ class TarbellSite:
                 rendered = render_template(path, **context)
                 return Response(rendered, mimetype=mimetype)
             except TemplateSyntaxError:
-                puts("{0} can't be parsed by Jinja, serving static".format(colored.yellow(filepath)))
+                ex_type, ex, tb = sys.exc_info()
+                stack = traceback.extract_tb(tb)
+                error = stack[-1]
+                puts("\n{0} can't be parsed by Jinja, serving static".format(colored.red(filepath)))
+                puts("\nLine {0}:".format(colored.green(error[1])))
+                puts("  {0}".format(colored.yellow(error[3])))
+                puts("\nFull traceback:")
+                traceback.print_tb(tb)
+                puts("")
+                del tb
 
         if filepath:
             dir, filename = os.path.split(filepath)
