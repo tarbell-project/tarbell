@@ -336,6 +336,9 @@ def tarbell_newproject(command, args):
                 if not filename.startswith("_") and not filename.startswith("."):
                     puts("Copying {0} to {1}".format(filename, path))
                     shutil.copy2(file, path)
+        ignore = os.path.join(path, "_base", ".gitignore")
+        if os.path.isfile(ignore):
+            shutil.copy2(ignore, path)
 
         # Commit
         puts(colored.green("\nInitial commit"))
