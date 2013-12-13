@@ -89,35 +89,46 @@ def _setup_google_spreadsheets(settings, path, prompt=True):
             return settings
 
     dirname = os.path.dirname(path)
-    # @TODO better client_secrets.json detection
-    puts(("\nLogin in to Google and go to {0} to create an app and generate the "
-          "\n{1} authentication file. You should create credentials for an `installed app`. See "
-          "\n{2} for more information."
-          .format(colored.red("https://code.google.com/apis/console/"),
-                  colored.yellow("client_secrets.json"),
-                  colored.red("http://tarbell.readthedocs.com/#correctlink")
-                 )
-        ))
 
-    secrets_path = raw_input(("\nWhere is your client secrets file? "
-                              "[~/Downloads/client_secrets.json] "
-                            ))
+    secrets = os.path.join(dirname, 'client_secrets.json')
 
-    if secrets_path == "":
-        secrets_path = os.path.join("~", "Downloads/client_secrets.json")
+    write_secrets = True
+    if os.path.isfile(secrets):
+        write_secrets_input = raw_input("client_secrets.json already exists. Would you like to overwrite it? [y/N] ")
+        if not write_secrets_input.lower().startswith('y'):
+            write_secrets = False
 
-    secrets_path = os.path.expanduser(secrets_path)
+    if write_secrets:
+        puts(("\nLogin in to Google and go to {0} to create an app and generate the "
+              "\n{1} authentication file. You should create credentials for an `installed app`. See "
+              "\n{2} for more information."
+              .format(colored.red("https://code.google.com/apis/console/"),
+                      colored.yellow("client_secrets.json"),
+                      colored.red("http://tarbell.readthedocs.com/#correctlink")
+                     )
+            ))
 
-    puts("\nCopying {0} to {1}\n"
-         .format(colored.green(secrets_path),
-                 colored.green(dirname))
-    )
+        secrets_path = raw_input(("\nWhere is your client secrets file? "
+                                  "[~/Downloads/client_secrets.json] "
+                                ))
 
-    _backup(dirname, "client_secrets.json")
-    shutil.copy(secrets_path, os.path.join(dirname, 'client_secrets.json'))
+        if secrets_path == "":
+            secrets_path = os.path.join("~", "Downloads/client_secrets.json")
+
+        secrets_path = os.path.expanduser(secrets_path)
+
+        puts("\nCopying {0} to {1}\n"
+             .format(colored.green(secrets_path),
+                     colored.green(dirname))
+        )
+
+        _backup(dirname, "client_secrets.json")
+        shutil.copy(secrets_path, os.path.join(dirname, 'client_secrets.json'))
 
     # Now, try and obtain the API for the first time
-    get_drive_api(dirname, reset_creds=True)
+    get_api = raw_input("Would you like to authenticate your client_secrets.json? [Y/n] ")
+    if get_api == '' or get_api.lower().startswith('y'):
+        get_drive_api(dirname, reset_creds=True)
 
     ret = {}
     default_account = settings.get("google_account", "")
@@ -306,7 +317,7 @@ def _backup(path, filename):
     target = os.path.join(path, filename)
     if os.path.isfile(target):
         dt = datetime.now()
-        new_filename = "{0}.{1}.{2}".format(
+        new_filename = ".{0}.{1}.{2}".format(
             filename, dt.isoformat(), "backup"
         )
         destination = os.path.join(path, new_filename)
