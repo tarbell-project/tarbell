@@ -192,6 +192,8 @@ def _setup_s3(settings, path, prompt=True):
     # If we're all set with AWS creds, we can setup our default
     # staging and production buckets
     if default_aws_access_key_id and default_aws_secret_access_key:
+        existing_staging_bucket = None
+        existing_production_bucket = None
         if settings.get('default_s3_buckets'):
             existing_staging_bucket = settings['default_s3_buckets'].get('staging', None)
             existing_production_bucket = settings['default_s3_buckets'].get('production', None)
