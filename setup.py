@@ -35,7 +35,7 @@ settings.update(
         "PyYAML==3.10",
         "Werkzeug==0.9.4",
         "boto==2.19.0",
-        "clint==0.3.2",
+        "clint==0.3.1",
         "requests==2.1.0",
         "wsgiref==0.1.2",
         "google-api-python-client==1.2",

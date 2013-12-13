@@ -40,7 +40,6 @@ from .s3 import S3Url, S3Sync
 # --------
 def main():
     """Primary Tarbell command dispatch."""
-
     command = Command.lookup(args.get(0))
 
     if len(args) == 0 or args.contains(('-h', '--help', 'help')):
