@@ -135,30 +135,43 @@ def tarbell_generate(command, args, skip_args=False, extra_context=None, quiet=F
             puts("\nCreated site in {0}".format(output_root))
         return output_root
 
+def git_interact(line, stdin):
+    print line
+    print stdin.put('foo')
+
 
 def tarbell_install(command, args):
     """Install a project."""
     with ensure_settings(command, args) as settings:
         project_url = args.get(0)
         puts("\n- Getting project information for {0}".format(project_url))
+        project_name = project_url.split("/").pop()
+        message = None
+        error = None
 
         # Create a tempdir and clone
         tempdir = tempfile.mkdtemp()
-        git = sh.git.bake(_cwd=tempdir)
-        puts(git.clone(project_url, '.'))
-        puts(git.submodule.update(*['--init', '--recursive']))
-
-        # Load tarbell config
-        filename, pathname, description = imp.find_module('tarbell_config', [tempdir])
-        config = imp.load_module('tarbell_config', filename, pathname, description)
-        puts("\n- Found tarbell_config.py")
-
-        # Copy over files and clean up
-        path = _get_path(config.NAME, settings, mkdir=False)
-        shutil.copytree(tempdir, path)
-        _delete_dir(tempdir)
-        puts("\n- Done installing project in {0}".format(path))
-
+        try:
+            testgit = sh.git.bake(_cwd=tempdir, _tty_out=False)
+            puts(testgit.clone(project_url, '.', *['--depth=1', '--bare']))
+            config = testgit.show("HEAD:tarbell_config.py")
+            puts("\n- Found tarbell_config.py")
+            path = _get_path(project_name, settings, mkdir=True)
+            git = sh.git.bake(_cwd=path)
+            puts(git.clone(project_url, '.'))
+            puts(git.submodule.update(*['--init', '--recursive']))
+            submodule = sh.git.bake(_cwd=os.path.join(path, '_base'))
+            puts(submodule.fetch())
+            puts(submodule.checkout(VERSION))
+            message = "\n- Done installing project in {0}".format(colored.yellow(path))
+        except sh.ErrorReturnCode_128:
+            error = "Not a Tarbell project!"
+        finally:
+            _delete_dir(tempdir)
+            if message:
+                puts(message)
+            if error:
+                show_error(error)
 
 def tarbell_install_template(command, args):
     """Install a project template."""
