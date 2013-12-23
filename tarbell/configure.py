@@ -71,9 +71,9 @@ def _get_or_create_config(path, prompt=True):
         puts("{0} already exists, backing up".format(colored.green(path)))
         _backup(dirname, filename)
 
-    with open(path, 'rw') as f:
+    with open(path, 'w+r') as f:
         settings = yaml.load(f)
-        if settings.get('s3_buckets') and not settings.get('default_s3_buckets'):
+        if settings and settings.get('s3_buckets') and not settings.get('default_s3_buckets'):
             puts("- Automatically updating default bucket configuration from `s3_buckets` to `default_s3_buckets`")
             settings['default_s3_buckets'] = settings['s3_buckets']
             del settings['s3_buckets']
