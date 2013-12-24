@@ -85,12 +85,12 @@ class S3Sync:
         for root, dirs, files in os.walk(self.directory, topdown=True):
             dirs[:] = [os.path.join(root, d) for d in dirs]
             dirs[:] = [d for d in dirs if not re.match(self.excludes, d)]
-            files = [f for f in files if not re.match(self.excludes, f)]
             rel_path = os.path.relpath(root, self.directory)
             for f in files:
                 if rel_path == '.':
-                    paths.append((f, os.path.join(root, f)))
+                    path = (f, os.path.join(root, f))
                 else:
-                    paths.append((os.path.join(rel_path, f), os.path.join(root, f)))
-
+                    path = (os.path.join(rel_path, f), os.path.join(root, f))
+                if not re.match(self.excludes, path[0]):
+                    paths.append(path)
         return paths

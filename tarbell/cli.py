@@ -289,7 +289,7 @@ def tarbell_publish(command, args):
             else:
                 puts("Using custom bucket configuration for {0}".format(bucket_url.root))
 
-            kwargs['excludes'] = settings.config.get('excludes', [])
+            kwargs['excludes'] = site.project.EXCLUDES
             s3 = S3Sync(tempdir, bucket_url, **kwargs)
             s3.deploy_to_s3()
             puts("\nIf you have website hosting enabled, you can see your project at:")

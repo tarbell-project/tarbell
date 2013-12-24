@@ -256,6 +256,11 @@ class TarbellSite:
             project.DEFAULT_CONTEXT = {}
 
         try:
+            project.EXCLUDES
+        except AttributeError:
+            project.EXCLUDES = []
+
+        try:
             self.app.register_blueprint(project.blueprint)
         except AttributeError:
             pass

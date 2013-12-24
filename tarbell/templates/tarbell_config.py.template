@@ -13,6 +13,9 @@ TITLE = "{{ title|escape }}"
 # Google spreadsheet key
 {% if not key %}#{% endif %}SPREADSHEET_KEY = "{{ key }}"
 
+# Exclude these files from publication
+EXCLUDES = ["*.md", "requirements.txt"]
+
 # Create JSON data at ./data.json, disabled by default
 # CREATE_JSON = True
 
