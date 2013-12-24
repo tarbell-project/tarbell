@@ -52,16 +52,17 @@ def show_error(msg):
 
 def get_config_from_args(args):
     """Get config directory from arguments."""
+    path = None
     if args.contains('--settings'):
         path = args.value_after("--settings")
         args.remove("--settings")
         args.remove(path)
-    elif sys.platform == 'win32':
-        path = os.path.join(os.environ['APPDATA'], "Tarbell", "settings.yaml")
-    else:
+
+    if not path:
         path = os.path.expanduser(
             os.path.join("~", ".{0}".format("tarbell"), "settings.yaml")
         )
+
     return path
 
 
