@@ -1,18 +1,24 @@
 import fnmatch
+import hashlib
 import gzip
 import mimetypes
 import os
 import re
 import shutil
+import sys
 import tempfile
 
+from boto.exception import S3ResponseError
 from boto.s3.connection import S3Connection
 from boto.s3.key import Key
-from clint.textui import puts
+from clint.textui import puts, colored
 from urllib import quote_plus
 from urllib2 import urlopen
 
+from .utils import show_error
+
 EXCLUDES = ['.git', '^\.']
+
 
 class S3Url(str):
     def __new__(self, content):
@@ -64,17 +70,17 @@ class S3Sync:
             gzfile.close()
             absolute_path = temp_path
 
-        size = os.path.getsize(absolute_path)
+        hash = '"{0}"'.format(hashlib.md5(open(absolute_path, 'rb').read()).hexdigest())
         key = "{0}/{1}".format(self.bucket.path, keyname)
         existing = self.connection.get_key(key)
 
-        if self.force or not existing or (existing.size != size):
+        if self.force or not existing or (existing.etag != hash):
             k = Key(self.connection)
             k.key = key
             puts("+ Uploading {0}/{1}".format(self.bucket, keyname))
             k.set_contents_from_filename(absolute_path, options, policy='public-read')
         else:
-            puts("- Skipping  {0}/{1}, file sizes match".format(self.bucket, keyname))
+            puts("- Skipping  {0}/{1}, files match".format(self.bucket, keyname))
 
 
     def find_file_paths(self):
