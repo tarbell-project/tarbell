@@ -78,16 +78,6 @@ def display_info(args):
                 colored.green(usage),
                 split_sentences(help)))
 
-    puts('\nOptions\n')
-    puts('{0:50} {1}'.format(
-        colored.green("--reset-creds"),
-        'Reset Google Drive OAuth2 credentials'
-    ))
-    puts('{0:50} {1}'.format(
-        colored.green("--settings <path>"),
-        'Path to settings directory.'
-    ))
-
     config = get_config_from_args(args)
     if not os.path.isfile(config):
         puts('\n---\n\n{0}: {1}'.format(
