@@ -18,7 +18,7 @@ from clint.textui import colored, puts
 
 from .settings import Settings
 from .oauth import get_drive_api
-from .utils import list_get, get_config_from_args
+from .utils import list_get, get_config_from_args, show_error
 
 try:
     import readline
@@ -123,7 +123,10 @@ def _setup_google_spreadsheets(settings, path, prompt=True):
         )
 
         _backup(dirname, "client_secrets.json")
-        shutil.copy(secrets_path, os.path.join(dirname, 'client_secrets.json'))
+        try:
+            shutil.copy(secrets_path, os.path.join(dirname, 'client_secrets.json'))
+        except shutil.Error, e:
+            show_error(str(e))
 
     # Now, try and obtain the API for the first time
     get_api = raw_input("Would you like to authenticate your client_secrets.json? [Y/n] ")
