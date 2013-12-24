@@ -36,9 +36,15 @@ class S3Sync:
         connection = S3Connection(access_key_id, secret_access_key)
         self.force = force
         self.bucket = bucket
-        self.connection = connection.get_bucket(bucket.root)
         self.excludes = r'|'.join([fnmatch.translate(x) for x in EXCLUDES + excludes]) or r'$.'
         self.directory = directory.rstrip('/')
+
+        try:
+            self.connection = connection.get_bucket(bucket.root)
+        except S3ResponseError, e:
+            show_error("S3 error! See below:\n")
+            puts("{0}\n".format(str(e)))
+            sys.exit()
 
     def deploy_to_s3(self):
         """
