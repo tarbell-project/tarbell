@@ -1,7 +1,7 @@
+import fnmatch
 import gzip
 import mimetypes
 import os
-import os.path
 import re
 import shutil
 import tempfile
@@ -12,8 +12,7 @@ from clint.textui import puts
 from urllib import quote_plus
 from urllib2 import urlopen
 
-excludes = r'|'.join([r'.*\.git$'])
-
+EXCLUDES = ['.git', '^\.']
 
 class S3Url(str):
     def __new__(self, content):
@@ -27,11 +26,12 @@ class S3Url(str):
 
 
 class S3Sync:
-    def __init__(self, directory, bucket, access_key_id, secret_access_key, force=False):
+    def __init__(self, directory, bucket, access_key_id, secret_access_key, force=False, excludes=[]):
         connection = S3Connection(access_key_id, secret_access_key)
         self.force = force
         self.bucket = bucket
         self.connection = connection.get_bucket(bucket.root)
+        self.excludes = r'|'.join([fnmatch.translate(x) for x in EXCLUDES + excludes]) or r'$.'
         self.directory = directory.rstrip('/')
 
     def deploy_to_s3(self):
@@ -83,12 +83,11 @@ class S3Sync:
         """
         paths = []
         for root, dirs, files in os.walk(self.directory, topdown=True):
-            dirs[:] = [d for d in dirs if not re.match(excludes, d)]
+            dirs[:] = [os.path.join(root, d) for d in dirs]
+            dirs[:] = [d for d in dirs if not re.match(self.excludes, d)]
+            files = [f for f in files if not re.match(self.excludes, f)]
             rel_path = os.path.relpath(root, self.directory)
-
             for f in files:
-                if f.startswith('.'):
-                    continue
                 if rel_path == '.':
                     paths.append((f, os.path.join(root, f)))
                 else:

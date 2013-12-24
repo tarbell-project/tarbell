@@ -248,7 +248,7 @@ class TarbellSite:
         try:
             project.CREATE_JSON
         except AttributeError:
-            project.CREATE_JSON = True
+            project.CREATE_JSON = False
 
         try:
             project.DEFAULT_CONTEXT

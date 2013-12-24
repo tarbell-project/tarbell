@@ -279,9 +279,9 @@ def tarbell_publish(command, args):
                 colored.green(bucket_url)
             ))
             # Get creds
-            bucket_creds = settings.config['s3_credentials'].get(bucket_url.root)
-            if not bucket_creds:
-                bucket_creds = {
+            kwargs = settings.config['s3_credentials'].get(bucket_url.root)
+            if not kwargs:
+                kwargs = {
                     'access_key_id': settings.config['default_s3_access_key_id'],
                     'secret_access_key': settings.config['default_s3_secret_access_key'],
                 }
@@ -289,7 +289,8 @@ def tarbell_publish(command, args):
             else:
                 puts("Using custom bucket configuration for {0}".format(bucket_url.root))
 
-            s3 = S3Sync(tempdir, bucket_url, **bucket_creds)
+            kwargs['excludes'] = settings.config.get('excludes', [])
+            s3 = S3Sync(tempdir, bucket_url, **kwargs)
             s3.deploy_to_s3()
             puts("\nIf you have website hosting enabled, you can see your project at:")
             puts(colored.green("http://{0}\n".format(bucket_url)))
