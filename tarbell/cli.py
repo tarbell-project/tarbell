@@ -98,10 +98,8 @@ def display_info(args):
 
 def display_version():
     """Displays Tarbell version/release."""
-
-    puts('{0} v{1}'.format(
-        colored.yellow('Tarbell'),
-        __version__
+    puts('You are using Tarbell v{0}'.format(
+        colored.green(VERSION)
     ))
 
 
