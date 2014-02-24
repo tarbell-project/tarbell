@@ -31,40 +31,50 @@ to access the Google Drive API. You can share this file with collaborators and
 within your organization, but do not share this file anywhere public.
 
 Log in to the `Google API Developer Console
-<https://code.google.com/apis/console/b/0/?noredirect>`_ and create a new project:
+<https://cloud.google.com/console/project>`_ and create a new project:
 
-.. image:: create_1.png
+.. image:: create_1_new.png
+   :width: 700px
+.. image:: create_1.5_new.png
    :width: 700px
 
-Now click the "Services" tab and enable Google Drive API.
+Now click the "APIs & auth" tab. (Click on the "APIs" tab below that if it 
+doesn't open automatically.) Enable Google Drive API.
 
-.. image:: create_2.png
+.. image:: create_2_new.png
    :width: 700px
 
-Click the "API Access" tab to create a client ID:
+You'll also want to ensure that BigQuery API, Google Cloud SQL, Google Cloud 
+Storage and Google Cloud Storage JSON API are enabled. (They should be by default, 
+but things will break if they aren't.)
 
-.. image:: create_3.png
+.. image:: create_2.5_new.png
    :width: 700px
 
-Add some project details. These don't really matter:
+Click the "Credentials" tab (right below "APIs") to create a client ID:
 
-.. image:: create_4.png
+.. image:: create_3_new.png
    :width: 700px
 
 This is the important screen. Select "installed app" and "other":
 
-.. image:: create_5.png
+.. image:: create_5_new.png
    :width: 700px
 
 Whew! Now you can download the ``client_secrets.json`` file:
 
-.. image:: create_6.png
+.. image:: create_6_new.png
    :width: 700px
 
-Copy `client_secrets.json` to `~/.tarbell/client_secrets.json` or specify the download
-location when running `tarbell configure`.
+The file you download will be called something like 
+`client_secret_longstringofrandomlettersandnumbers.apps.googleusercontent.json`. 
+Rename it to `client_secrets.json`. Now, you do one of the following:
+* Copy `client_secrets.json` to `~/.tarbell/client_secrets.json`
+* Specify the `client_sercret.json` download location when running `tarbell configure`. 
+  (Tarbell should be able to figure out where the file is automatically when 
+  you configure it.)
 
-The first time a Tarbell command needs access to a Google spreadsheet, you'll be prompted to
+The first time a Tarbell command needs access to a Google spreadsheet (say, while you're running `tarbell configure`), you'll be prompted to
 authenticate::
 
   Go to the following link in your browser:
@@ -75,7 +85,7 @@ authenticate::
 
 Follow the link:
 
-.. image:: create_7.png
+.. image:: create_7_new.png
    :width: 700px
 
 You should receive a confirmation code:
@@ -102,3 +112,5 @@ Set up project templates
 ------------------------
 
 Work in progress.
+
+
