@@ -32,16 +32,17 @@ within your organization, but do not share this file anywhere public.
 Log in to the `Google API Developer Console <https://cloud.google.com/console/project>`_ and create a new project:
 
 .. image:: create_1_new.png
-   :width: 700px
 
 .. image:: create_1-5_new.png
    :width: 700px
+
 
 Now click the "APIs & auth" tab. (Click on the "APIs" tab below that if it 
 doesn't open automatically.) Enable Google Drive API.
 
 .. image:: create_2_new.png
    :width: 700px
+
 
 You'll also want to ensure that BigQuery API, Google Cloud SQL, Google Cloud 
 Storage and Google Cloud Storage JSON API are enabled. (They should be by default, 
@@ -50,20 +51,24 @@ but things will break if they aren't.)
 .. image:: create_2-5_new.png
    :width: 700px
 
+
 Click the "Credentials" tab (right below "APIs") to create a client ID:
 
 .. image:: create_3_new.png
    :width: 700px
+
 
 This is the important screen. Select "installed app" and "other":
 
 .. image:: create_5_new.png
    :width: 700px
 
+
 Whew! Now you can download the ``client_secrets.json`` file:
 
 .. image:: create_6_new.png
    :width: 700px
+
 
 The file you download will be called something like 
 `client_secret_longstringofrandomlettersandnumbers.apps.googleusercontent.json`. 
@@ -89,11 +94,12 @@ authenticate::
 Follow the link:
 
 .. image:: create_7_new.png
-   :width: 700px
+
 
 You should receive a confirmation code:
 
 .. image:: create_8.png
+
 
 Enter it. If it works, you'll see:
 
@@ -112,10 +118,12 @@ To generate keys, log into your `AWS Console <http://aws.amazon.com/>`_, click y
 .. image:: aws_security_creds.png
    :width: 700px
 
+
 Don't worry about IAM users right now.
 
 .. image:: aws_continue.png
    :width: 700px
+
 
 You should see a list of different sections. Click the section that reads, 
 "Access Keys (Access Key ID and Secret Access Key)" and then the button, "Create New Access Key."
@@ -123,8 +131,9 @@ Note that if you have existing keys, you can currently retrieve its Access Key I
 and Secret Access Key from the legacy Security Credentials page (linked to in this section), 
 but that Amazon plans to remove the ability to see this information soon.
 
-.. image:: aws_access_keys.png
+.. image:: aws_create_new_key.png
    :width: 700px
+
 
 Woohoo, now you can download your keys! You MUST do this now -- Amazon only lets you download 
 the keys on this screen. If you accidentally close the prompt, you can always delete the 
