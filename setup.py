@@ -7,7 +7,7 @@ from setuptools import setup, find_packages
 
 
 APP_NAME = 'tarbell'
-VERSION = '0.9b4'
+VERSION = '0.9b5'
 
 settings = dict()
 
@@ -17,7 +17,7 @@ if sys.argv[-1] == 'publish':
     sys.exit()
 
 settings.update(
-    name=APP_NAME,
+    name=APP_NAME
     version=VERSION,
     author=u'Chicago Tribune News Applications Team',
     author_email='newsapps@tribune.com',

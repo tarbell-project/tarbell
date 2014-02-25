@@ -7,7 +7,7 @@ Let's build a website about celebrated Chicago journalist Ethel Payne!
 First you need Tarbell. Fair warning, you're going to have to run these commands in
 a terminal::
 
-    pip install tarbell==0.9b4
+    pip install tarbell==0.9b5
 
 Got it? Now configure Tarbell::
 
