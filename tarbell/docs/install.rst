@@ -33,7 +33,7 @@ Log in to the `Google API Developer Console <https://cloud.google.com/console/pr
 
 .. image:: create_1_new.png
    :width: 700px
-.. image:: create_1.5_new.png
+.. image:: create_1-5_new.png
    :width: 700px
 
 Now click the "APIs & auth" tab. (Click on the "APIs" tab below that if it 
@@ -46,7 +46,7 @@ You'll also want to ensure that BigQuery API, Google Cloud SQL, Google Cloud
 Storage and Google Cloud Storage JSON API are enabled. (They should be by default, 
 but things will break if they aren't.)
 
-.. image:: create_2.5_new.png
+.. image:: create_2-5_new.png
    :width: 700px
 
 Click the "Credentials" tab (right below "APIs") to create a client ID:
