@@ -184,11 +184,5 @@ and `tarbell switch`.
 .. image:: project_path.png
    :width: 700px
 
-Set up project templates
-------------------------
 
-Work in progress.
-
-
-
-
+We're set! Let's start building awesome sites!
