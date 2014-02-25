@@ -27,6 +27,10 @@ from apiclient.http import MediaFileUpload as _MediaFileUpload
 
 from tarbell import __VERSION__ as VERSION
 
+# Handle relative imports from binary, see https://github.com/newsapps/flask-tarbell/issues/87
+if __name__ == "__main__" and __package__ is None:
+    __package__ = "tarbell.cli"
+
 from .app import pprint_lines, process_xlsx, copy_global_values
 from .oauth import get_drive_api
 from .contextmanagers import ensure_settings, ensure_project
