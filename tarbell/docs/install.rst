@@ -33,6 +33,7 @@ Log in to the `Google API Developer Console <https://cloud.google.com/console/pr
 
 .. image:: create_1_new.png
    :width: 700px
+
 .. image:: create_1-5_new.png
    :width: 700px
 
@@ -66,11 +67,15 @@ Whew! Now you can download the ``client_secrets.json`` file:
 
 The file you download will be called something like 
 `client_secret_longstringofrandomlettersandnumbers.apps.googleusercontent.json`. 
-Rename it to `client_secrets.json`. Now, you do one of the following:
-* Copy `client_secrets.json` to `~/.tarbell/client_secrets.json`
-* Specify the `client_sercret.json` download location when running `tarbell configure`. 
-  (Tarbell should be able to figure out where the file is automatically when 
-  you configure it.)
+
+
+Rename it to `client_secrets.json`. 
+
+Now, you do one of the following:
+
+Copy `client_secrets.json` to `~/.tarbell/client_secrets.json`
+Specify the `client_sercret.json` download location when running `tarbell configure`. 
+(Tarbell should be able to figure out where the file is automatically when you configure it.)
 
 The first time a Tarbell command needs access to a Google spreadsheet (say, while you're running `tarbell configure`), you'll be prompted to
 authenticate::
@@ -103,10 +108,12 @@ Generate keys for your Amazon S3 account. Add them during the Amazon S3 section 
 
 To generate keys, log into your `AWS Console <http://aws.amazon.com/>`_, click your name and select
 "Security Credentials".
+
 .. image:: aws_security_creds.png
    :width: 700px
 
 Don't worry about IAM users right now.
+
 .. image:: aws_continue.png
    :width: 700px
 
@@ -115,16 +122,19 @@ You should see a list of different sections. Click the section that reads,
 Note that if you have existing keys, you can currently retrieve its Access Key ID 
 and Secret Access Key from the legacy Security Credentials page (linked to in this section), 
 but that Amazon plans to remove the ability to see this information soon.
+
 .. image:: aws_access_keys.png
    :width: 700px
 
 Woohoo, now you can download your keys! You MUST do this now -- Amazon only lets you download 
 the keys on this screen. If you accidentally close the prompt, you can always delete the 
 keys you just generated and generate a new pair.
+
 .. image:: aws_download_keys.png
    :width: 700px
 
 Now you need to tell Tarbell what your AWS keys are. Run `tarbell configure`. After it checks to see if Google is configured, you'll get this prompt::
+
   Would you like to set up Amazon S3? [Y/n] y
 
   Please enter your default Amazon Access Key ID: (leave blank to skip)
@@ -135,18 +145,22 @@ Now you need to tell Tarbell what your AWS keys are. Run `tarbell configure`. Af
 
 If you don't already have a staging or production bucket, you can create one by 
 going to the S3 management console and clicking "Create bucket."
+
 .. image:: aws_create_bukkits.png
    :width: 700px
+
 .. image:: aws_bukkit_settings.png
    :width: 700px
 
 Just remember that when you name a bucket, it must be unique to AWS, not just your account. 
 Like usernames, bucket names are shared across the entire Amazon system. (Which is silly, but 
 that's how it is.)
+
 .. image:: aws_bukkit_settings.png
    :width: 700px
 
 Once you've added production and staging buckets to your configuration, you will get this message::
+
   Would you like to add bucket credentials? [y/N]
 
 If there are additional buckets in your S3 account that you want to use with Tarbell, enter
@@ -157,6 +171,7 @@ Set a default project path
 
 This is where your Tarbell projects will live. This path will be used by `tarbell list` 
 and `tarbell switch`.
+
 .. image:: project_path.png
    :width: 700px
 
