@@ -39,7 +39,7 @@ copyright = u'2013, Chicago Tribune News Applications Team and David Eads'
 version = '0.9'
 
 # The full version, including alpha/beta/rc tags.
-release = '0.9-beta4'
+release = '0.9-beta5'
 
 exclude_patterns = ['_build']
 
