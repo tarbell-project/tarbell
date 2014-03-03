@@ -63,4 +63,12 @@ file.
 Install an existing project with `tarbell install <repository-url>`
 -------------------------------------------------------------------
 
-The project must include a `tarbell.py` file and be able to be cloned with Git.
+The project must include a tarbell_config.py file and be able to be cloned with Git.
+
+Run::
+
+  tarbell install https://urltorepository.com/projectname
+
+e.g.::
+
+  tarbell install https://github.com/sc3/26thandcalifornia.recoveredfactory.net
