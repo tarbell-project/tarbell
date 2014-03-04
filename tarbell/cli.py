@@ -122,10 +122,30 @@ def tarbell_generate(command, args, skip_args=False, extra_context=None, quiet=F
         if args.contains('--context'):
             site.project.CONTEXT_SOURCE_FILE = args.value_after('--context')
 
-        site.generate_static_site(output_root, extra_context)
-        if not quiet:
-            puts("\nCreated site in {0}".format(output_root))
-        return output_root
+        #check to see if the folder we're trying to create already exists
+        is_folder = os.path.exists(output_root)
+        if is_folder:
+            output_file = raw_input(("\nA folder named {0} already exists! Do you want to delete it? [Y/n] ").format(
+                colored.cyan(output_root)
+            ))
+            if output_file and not output_file.lower() == "y":
+                return puts("\nNot creating static site files.")
+            elif output_file and output_file.lower() == "y":
+                puts(("\nDeleting {0} and creating static site files...\n").format(
+                    colored.cyan(output_root)
+                ))
+
+                _delete_dir(output_root)
+                site.generate_static_site(output_root, extra_context)
+                if not quiet:
+                    puts("\nCreated site in {0}".format(output_root))
+                return output_root
+
+        else:
+            site.generate_static_site(output_root, extra_context)
+            if not quiet:
+                puts("\nCreated site in {0}".format(output_root))
+            return output_root
 
 def git_interact(line, stdin):
     print line

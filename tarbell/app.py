@@ -428,8 +428,11 @@ class TarbellSite:
                 self._copy_file(root.replace("_base/", ""), filename, output_root, extra_context)
 
         for root, dirs, files in filter_files(self.path):
-            for filename in files:
-                self._copy_file(root, filename, output_root, extra_context)
+            #don't copy stuff in the file that we just created
+            #TODO: figure out if _base/index.html and index.html can coexist
+            if root != os.path.abspath(output_root):
+                for filename in files:
+                    self._copy_file(root, filename, output_root, extra_context)
 
     def _copy_file(self, root, filename, output_root, extra_context=None):
         # Strip out full filesystem paths
