@@ -17,7 +17,7 @@ if sys.argv[-1] == 'publish':
     sys.exit()
 
 settings.update(
-    name=APP_NAME
+    name=APP_NAME,
     version=VERSION,
     author=u'Chicago Tribune News Applications Team',
     author_email='newsapps@tribune.com',
