@@ -436,6 +436,7 @@ class TarbellSite:
         rel_path = os.path.join(root.replace(self.path, ""), filename)
         if rel_path.startswith("/"):
             rel_path = rel_path[1:]
+
         output_path = os.path.join(output_root, rel_path)
         output_dir = os.path.dirname(output_path)
 
