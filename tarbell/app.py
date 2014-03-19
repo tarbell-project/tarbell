@@ -392,7 +392,9 @@ class TarbellSite:
             if not self.data or start > self.expires:
                 self.data = self._get_context_from_gdoc(self.project.SPREADSHEET_KEY)
                 end = int(time.time())
-                self.expires = end + SPREADSHEET_CACHE_TTL
+                ttl = getattr(self.project, 'SPREADSHEET_CACHE_TTL',
+                              SPREADSHEET_CACHE_TTL)
+                self.expires = end + ttl
             return self.data
         except AttributeError:
             return {}
