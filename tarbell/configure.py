@@ -226,7 +226,7 @@ def _setup_s3(settings, path, prompt=True):
             })
 
 
-    more_prompt = "\nWould you like to add bucket credentials? [y/N] "
+    more_prompt = "\nWould you like to add additional buckets and credentials? [y/N] "
     while raw_input(more_prompt).lower() == 'y':
         ## Ask for a uri
         additional_s3_bucket = raw_input(
