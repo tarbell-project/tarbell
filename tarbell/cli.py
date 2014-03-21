@@ -304,6 +304,9 @@ def tarbell_publish(command, args):
             kwargs['excludes'] = site.project.EXCLUDES
             s3 = S3Sync(tempdir, bucket_url, **kwargs)
             s3.deploy_to_s3()
+
+            site.call_hook("publish", s3)
+
             puts("\nIf you have website hosting enabled, you can see your project at:")
             puts(colored.green("http://{0}\n".format(bucket_url)))
         except KeyboardInterrupt:

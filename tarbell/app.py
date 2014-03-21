@@ -25,7 +25,7 @@ from utils import filter_files
 from clint.textui import puts, colored
 
 from .oauth import get_drive_api
-
+from .hooks import hooks
 # in seconds
 SPREADSHEET_CACHE_TTL = 4 
 
@@ -216,12 +216,26 @@ class TarbellSite:
         self.project, self.base = self.load_project(path)
 
         self.data = {}
+        self.hooks = self.process_hooks(hooks)
         self.expires = 0
 
         self.app.add_url_rule('/', view_func=self.preview)
         self.app.add_url_rule('/<path:path>', view_func=self.preview)
         self.app.add_template_filter(slughifi, 'slugify')
         self.app.add_template_filter(pprint_lines, 'pprint_lines')
+
+    def process_hooks(self, hooks):
+        try:
+            enabled_hooks = self.project.HOOKS
+        except AttributeError:
+            return hooks
+
+        #@TODO traverse hooks
+
+    def call_hook(self, hook, *args, **kwargs):
+        print hook
+        print self.hooks[hook]
+        pass
 
     def load_project(self, path):
         base = None
