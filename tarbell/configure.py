@@ -67,14 +67,14 @@ def _get_or_create_config(path, prompt=True):
     except OSError:
         pass
 
-    #if os.path.isfile(path):
-        #puts("{0} already exists, backing up".format(colored.green(path)))
-        #_backup(dirname, filename)
-
-    with open(path, 'r+') as f:
-        settings = yaml.load(f)
-
-    return settings or {}
+    try:
+        with open(path, 'r+') as f:
+            if os.path.isfile(path):
+                puts("{0} already exists, backing up".format(colored.green(path)))
+                _backup(dirname, filename)
+            return yaml.load(f)
+    except IOError:
+        return {}
 
 
 def _setup_google_spreadsheets(settings, path, prompt=True):
