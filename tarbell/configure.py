@@ -67,18 +67,14 @@ def _get_or_create_config(path, prompt=True):
     except OSError:
         pass
 
-    if os.path.isfile(path):
-        puts("{0} already exists, backing up".format(colored.green(path)))
-        _backup(dirname, filename)
-
-    with open(path, 'w+r') as f:
-        settings = yaml.load(f)
-        if settings and settings.get('s3_buckets') and not settings.get('default_s3_buckets'):
-            puts("- Automatically updating default bucket configuration from `s3_buckets` to `default_s3_buckets`")
-            settings['default_s3_buckets'] = settings['s3_buckets']
-            del settings['s3_buckets']
-
-    return settings or {}
+    try:
+        with open(path, 'r+') as f:
+            if os.path.isfile(path):
+                puts("{0} already exists, backing up".format(colored.green(path)))
+                _backup(dirname, filename)
+            return yaml.load(f)
+    except IOError:
+        return {}
 
 
 def _setup_google_spreadsheets(settings, path, prompt=True):
@@ -230,7 +226,7 @@ def _setup_s3(settings, path, prompt=True):
             })
 
 
-    more_prompt = "\nWould you like to add bucket credentials? [y/N] "
+    more_prompt = "\nWould you like to add additional buckets and credentials? [y/N] "
     while raw_input(more_prompt).lower() == 'y':
         ## Ask for a uri
         additional_s3_bucket = raw_input(

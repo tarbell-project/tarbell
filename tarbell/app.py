@@ -25,7 +25,7 @@ from utils import filter_files
 from clint.textui import puts, colored
 
 from .oauth import get_drive_api
-
+from .hooks import hooks
 # in seconds
 SPREADSHEET_CACHE_TTL = 4 
 
@@ -216,12 +216,28 @@ class TarbellSite:
         self.project, self.base = self.load_project(path)
 
         self.data = {}
+        self.hooks = self.process_hooks(hooks)
         self.expires = 0
 
         self.app.add_url_rule('/', view_func=self.preview)
         self.app.add_url_rule('/<path:path>', view_func=self.preview)
         self.app.add_template_filter(slughifi, 'slugify')
         self.app.add_template_filter(pprint_lines, 'pprint_lines')
+
+    def process_hooks(self, hooks):
+        try:
+            enabled_hooks = self.project.HOOKS
+        except AttributeError:
+            return hooks
+
+        #@TODO traverse hooks
+
+    def call_hook(self, hook, *args, **kwargs):
+        if len(self.hooks[hook]):
+            puts("-- Calling {0} hooks --".format(colored.red(hook)))
+        for function in self.hooks[hook]:
+            puts("--- Calling {0}".format(colored.green(function.__name__)))
+            function.__call__(*args, **kwargs)
 
     def load_project(self, path):
         base = None
@@ -392,7 +408,9 @@ class TarbellSite:
             if not self.data or start > self.expires:
                 self.data = self._get_context_from_gdoc(self.project.SPREADSHEET_KEY)
                 end = int(time.time())
-                self.expires = end + SPREADSHEET_CACHE_TTL
+                ttl = getattr(self.project, 'SPREADSHEET_CACHE_TTL',
+                              SPREADSHEET_CACHE_TTL)
+                self.expires = end + ttl
             return self.data
         except AttributeError:
             return {}
@@ -428,14 +446,18 @@ class TarbellSite:
                 self._copy_file(root.replace("_base/", ""), filename, output_root, extra_context)
 
         for root, dirs, files in filter_files(self.path):
-            for filename in files:
-                self._copy_file(root, filename, output_root, extra_context)
+            #don't copy stuff in the file that we just created
+            #TODO: figure out if _base/index.html and index.html can coexist
+            if root != os.path.abspath(output_root):
+                for filename in files:
+                    self._copy_file(root, filename, output_root, extra_context)
 
     def _copy_file(self, root, filename, output_root, extra_context=None):
         # Strip out full filesystem paths
         rel_path = os.path.join(root.replace(self.path, ""), filename)
         if rel_path.startswith("/"):
             rel_path = rel_path[1:]
+
         output_path = os.path.join(output_root, rel_path)
         output_dir = os.path.dirname(output_path)
 
