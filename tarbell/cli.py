@@ -139,13 +139,14 @@ def tarbell_generate(command, args, skip_args=False, extra_context=None, quiet=F
                 site.generate_static_site(output_root, extra_context)
                 if not quiet:
                     puts("\nCreated site in {0}".format(output_root))
-                return output_root
 
         else:
             site.generate_static_site(output_root, extra_context)
             if not quiet:
                 puts("\nCreated site in {0}".format(output_root))
-            return output_root
+
+        site.call_hook("generate", site, output_root)
+        return output_root
 
 def git_interact(line, stdin):
     print line
@@ -176,6 +177,11 @@ def tarbell_install(command, args):
             puts(submodule.fetch())
             puts(submodule.checkout(VERSION))
             message = "\n- Done installing project in {0}".format(colored.yellow(path))
+
+            # Get site, run hook
+            with ensure_project(command, args, path) as site:
+                site.call_hook("newproject", site, git)
+
         except sh.ErrorReturnCode_128:
             error = "Not a Tarbell project!"
         finally:
@@ -304,6 +310,8 @@ def tarbell_publish(command, args):
             kwargs['excludes'] = site.project.EXCLUDES
             s3 = S3Sync(tempdir, bucket_url, **kwargs)
             s3.deploy_to_s3()
+            site.call_hook("publish", site, s3)
+
             puts("\nIf you have website hosting enabled, you can see your project at:")
             puts(colored.green("http://{0}\n".format(bucket_url)))
         except KeyboardInterrupt:
@@ -373,15 +381,9 @@ def tarbell_newproject(command, args):
         puts(git.add('.'))
         puts(git.commit(m='Created {0} from {1}'.format(name, template['url'])))
 
-        # Set up remote url
-        remote_url = raw_input("\nWhat is the URL of your project repository? (e.g. git@github.com:myaccount/myproject.git, leave blank to skip) ")
-        if remote_url:
-            puts("\nCreating new remote 'origin' to track {0}.".format(colored.yellow(remote_url)))
-            git.remote.add(*["origin", remote_url])
-            puts("\n{0}: Don't forget! It's up to you to create this remote and push to it.".format(colored.cyan("Warning")))
-        else:
-            puts("\n- Not setting up remote repository. Use your own version control!")
-
+        # Get site, run hook
+        with ensure_project(command, args, path) as site:
+            site.call_hook("newproject", site, git)
 
         # Messages
         puts("\nAll done! To preview your new project, type:\n")
