@@ -233,9 +233,10 @@ class TarbellSite:
         #@TODO traverse hooks
 
     def call_hook(self, hook, *args, **kwargs):
-        puts("Calling {0} hooks".format(hook)) 
+        if len(self.hooks[hook]):
+            puts("-- Calling {0} hooks --".format(colored.red(hook)))
         for function in self.hooks[hook]:
-            puts("Calling {0}".format(colored.green(function.__name__)))
+            puts("--- Calling {0}".format(colored.green(function.__name__)))
             function.__call__(*args, **kwargs)
 
     def load_project(self, path):
