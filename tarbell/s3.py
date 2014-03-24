@@ -38,7 +38,6 @@ class S3Sync:
         self.bucket = bucket
         self.excludes = r'|'.join([fnmatch.translate(x) for x in EXCLUDES + excludes]) or r'$.'
         self.directory = directory.rstrip('/')
-        self.root = bucket.split("/", 1).pop()
 
         try:
             self.connection = connection.get_bucket(bucket.root)
