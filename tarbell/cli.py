@@ -310,7 +310,6 @@ def tarbell_publish(command, args):
             kwargs['excludes'] = site.project.EXCLUDES
             s3 = S3Sync(tempdir, bucket_url, **kwargs)
             s3.deploy_to_s3()
-
             site.call_hook("publish", s3)
 
             puts("\nIf you have website hosting enabled, you can see your project at:")
@@ -382,6 +381,9 @@ def tarbell_newproject(command, args):
         puts(git.add('.'))
         puts(git.commit(m='Created {0} from {1}'.format(name, template['url'])))
 
+        # Get site, run hook
+        with ensure_project(command, args, path) as site:
+            site.call_hook("newproject", site, git)
 
         # Messages
         puts("\nAll done! To preview your new project, type:\n")
@@ -391,10 +393,6 @@ def tarbell_newproject(command, args):
         puts("{0}".format(colored.green("tarbell serve\n")))
 
         puts("\nYou got this!\n")
-
-        # Get site, run hook
-        with ensure_project(command, args, path) as site:
-            site.call_hook("newproject", site, git)
 
 
 def _get_project_name(args):

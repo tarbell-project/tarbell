@@ -8,13 +8,8 @@ hooks = {
 
 
 class register_hook(object):
-    """Register hook with @register_hook("EVENT") where event is "newproject" etc"""
+    """Register hook with @register_hook("EVENT") where EVENT is "newproject" etc"""
     def __init__(self, event):
-        """
-        If there are decorator arguments, the function
-        to be decorated is not passed to the constructor!
-        """
-        print "Inside __init__()"
         self.event = event
 
     def __call__(self, f):
