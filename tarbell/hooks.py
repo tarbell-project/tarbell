@@ -13,6 +13,8 @@ class register_hook(object):
         self.event = event
 
     def __call__(self, f):
-        if f not in hooks[self.event]:
+        # Avoid weird duplication
+        names = ['{0}.{1}'.format(func.__module__, func.func_name) for func in hooks[self.event]]
+        if '{0}.{1}'.format(f.__module__, f.func_name) not in hooks[self.event]:
             hooks[self.event].append(f)
         return f
