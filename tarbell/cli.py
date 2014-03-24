@@ -10,20 +10,19 @@ This module provides the CLI interface to tarbell.
 import os
 import glob
 import sh
-import sys
+import codecs
 import imp
 import jinja2
-import codecs
-import tempfile
-import shutil
 import pkg_resources
-
-from subprocess import call
-from clint import args
-from clint.textui import colored, puts
+import shutil
+import sys
+import tempfile
 
 from apiclient import errors
 from apiclient.http import MediaFileUpload as _MediaFileUpload
+from clint import args
+from clint.textui import colored, puts
+from subprocess import call
 
 from tarbell import __VERSION__ as VERSION
 
