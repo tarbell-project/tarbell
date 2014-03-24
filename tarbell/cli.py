@@ -7,13 +7,13 @@ tarbell.cli
 This module provides the CLI interface to tarbell.
 """
 
-import os
-import glob
-import sh
 import codecs
+import glob
 import imp
 import jinja2
+import os
 import pkg_resources
+import sh
 import shutil
 import sys
 import tempfile
