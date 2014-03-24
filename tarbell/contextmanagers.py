@@ -62,9 +62,10 @@ class EnsureSettings():
 
 class EnsureProject():
     """Context manager to ensure the user is in a Tarbell site environment."""
-    def __init__(self, command, args):
+    def __init__(self, command, args, path=None):
         self.command = command
         self.args = args
+        self.path = path
 
     def __enter__(self):
         return self.ensure_site()
@@ -72,9 +73,11 @@ class EnsureProject():
     def __exit__(self, type, value, traceback):
         pass
 
-    def ensure_site(self, path=None):
-        if not path:
+    def ensure_site(self):
+        if not self.path:
             path = os.getcwd()
+        else:
+            path = self.path
 
         if path is "/":
             show_error(("The current directory is not part of a Tarbell "
