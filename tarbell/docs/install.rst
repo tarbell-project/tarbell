@@ -27,7 +27,8 @@ install it inside a virtualenv, so here's what you should know:
 * The Tarbell settings file `(~/.tarbell/settings.yaml)` is global, meaning all
   Tarbell projects - whether inside a virtualenv or not - share the same
   settings. This includes the path that Tarbell expects to find all your
-  projects.
+  projects. It's where Tarbell will look when you run `tarbell list` and
+  `tarbell switch`.
 * The `client_secrets.json` file used to authenticate to Google is also global,
   so you may run into problems using spreadsheets owned by multiple Google
   accounts.
