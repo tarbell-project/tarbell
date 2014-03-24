@@ -9,6 +9,28 @@ Install Tarbell with `pip install tarbell`
 
     pip install tarbell==0.9b4
 
+A note on virtualenvs
+---------------------
+
+(If you've never heard of virtualenvs, or know you're not using one with
+Tarbell, skip this section.)
+
+Tarbell is intended to be installed globally, so for most users it should be
+installed outside of a `virtualenv <http://www.virtualenv.org/>`_. It works
+either way, but there are some things to keep in mind if you don't install it
+globally.
+
+If you'll be working on Tarbell itself, extending its functionality
+or otherwise manipulating the guts of the system, then it might make sense to
+install it inside a virtualenv, so here's what you should know:
+
+* The Tarbell settings file `(~/.tarbell/settings.yaml)` is global, meaning all
+  Tarbell projects - whether inside a virtualenv or not - share the same
+  settings. This includes the path that Tarbell expects to find all your
+  projects.
+* The `client_secrets.json` file used to authenticate to Google is also global,
+  so you may run into problems using spreadsheets owned by multiple Google
+  accounts.
 
 Configure Tarbell with `tarbell configure`
 ------------------------------------------
@@ -71,16 +93,15 @@ Whew! Now you can download the ``client_secrets.json`` file:
 
 
 The file you download will be called something like 
-`client_secret_longstringofrandomlettersandnumbers.apps.googleusercontent.json`. 
+`client_secret_longstringofrandomlettersandnumbers.apps.googleusercontent.json`.
 
 
-Rename it to `client_secrets.json`. 
+Rename it to `client_secrets.json`.
 
 Now, you do one of the following:
 
-Copy `client_secrets.json` to `~/.tarbell/client_secrets.json`
-Specify the `client_sercret.json` download location when running `tarbell configure`. 
-(Tarbell should be able to figure out where the file is automatically when you configure it.)
+* Copy `client_secrets.json` to `~/.tarbell/client_secrets.json`
+* Specify the `client_secret.json` download location when running `tarbell configure`. (Tarbell should be able to figure out where the file is automatically when you configure it.)
 
 The first time a Tarbell command needs access to a Google spreadsheet (say, while you're running `tarbell configure`), you'll be prompted to
 authenticate::
@@ -94,7 +115,6 @@ authenticate::
 Follow the link:
 
 .. image:: create_7_new.png
-
 
 You should receive a confirmation code:
 

@@ -60,7 +60,7 @@ Template inheritance: Override files from base by copying to your project direct
 
 Any file in the base template can be overridden in your project files.
 
-For example, if your base template `include`s a sample `_base/_nav.html`, you can create a file named 
+For example, if your base template includes a sample `_base/_nav.html`, you can create a file named 
 `_nav.html` in your project directory to override 
 
 This works for all files, static or templates.

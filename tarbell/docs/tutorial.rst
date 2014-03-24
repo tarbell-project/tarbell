@@ -4,7 +4,7 @@ Tutorial
 
 Let's build a website about celebrated Chicago journalist Ethel Payne! 
 
-First you need Tarbell. Fair warning, you're going to have to run these commands in
+First you need Tarbell (if you care about virtualenvs, read `this <install.html#a-note-on-virtualenvs>`_; otherwise, keep going). Fair warning, you're going to have to run these commands in
 a terminal::
 
     pip install tarbell==0.9b5
