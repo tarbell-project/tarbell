@@ -330,6 +330,7 @@ class TarbellSite:
                 "ROOT_URL": "127.0.0.1:5000",
                 "PATH": path,
                 "SPREADSHEET_KEY": self.key,
+                "BUCKETS": self.project.S3_BUCKETS,
             })
             if extra_context:
                 context.update(extra_context)
