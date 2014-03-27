@@ -173,3 +173,75 @@ Similarly, a Javascript file could include::
   console.log(photos.intro.url);
 
 Use this feature with care! Missing variables could easily break your CSS or Javascript.
+
+Anatomy of a project directory
+------------------------------
+
+When you run `tarbell newproject`, a number of new files and folders are created, many of them with
+special significance. Here's a rundown of what they all do.
+
+**Files in the root directory:**
+
+index.html
+  The first page people will see when they visit your project. This is typically where most of
+  the content lives, and is probably where you want to start editing.
+
+tarbell_config.py
+  The settings and context for this specific project, described in more detail in the
+  `Configuring projects section above <#configuring-projects>`_.
+
+
+**Files in the _base/ directory:**
+
+Keep in mind that you rarely want to edit the files in the `_base/` directory - if you want
+to change something, copy the file to the root directory and make the change there. If a file of the
+same name exists in both the root directory and the `_base/` directory, Tarbell will rely on the
+one in the root directory.
+
+The only time you should edit the files in the `_base/` directory is when 
+`you'd like to create or update the base templates themselves <base_templates.html>`_.
+
+_base.html
+  The base page template, containing <head> and <body> tags, and pointing to many of the Javascript
+  and CSS files that will be loaded for each page in the project.
+
+_footer.html
+  The partial template containing anything you'd like to appear consistently in the footer at the
+  bottom of each page.
+
+_nav.html
+  The partial template containing the nav bar that runs along the top of the page.
+
+_spreadsheet.xlsx
+  This is the template file that `Google spreadsheets will be based upon
+  <google_spreadsheets.html>`_. Unlike most other files in `_base/`, overriding it in your root
+  directory won't do anything. However, if you want future projects to be created with a different
+  spreadsheet template, you can edit this file and commit it to a repository you control; learn more
+  about this feature in the `Developing base templates <base_templates.html>`_ section.
+
+base.css
+  The base CSS file imported by the base template for this project. Override this file in your root
+  directory if you'd like to make CSS changes.
+
+base.py
+  A Python file that contains a default set of template filters for use in this project. Override
+  this file in your root directory if you'd like to alter the behavior of these filters, or add your
+  own. If you'd like to make your changes available to other projects, check out the `Developing
+  base templates <base_templates.html>`_ section.
+
+favicon.ico
+  Favicons are `small logos for websites <http://en.wikipedia.org/wiki/Favicon>`_ that typically
+  appear next to a website's name in a browser tab. Change this file in order to change the logo
+  associated with your site in users' browser tabs, though keep in mind that favicons have
+  `a number of rules <http://www.w3.org/2005/10/howto-favicon>`_ about how they should be
+  constructed.
+
+favicon-preview.ico
+  This is the icon for the in-development version of a site that appears next to the website's name
+  in a browser tab, following the same rules as for favicon.ico above. The key difference is that
+  this icon is meant to remind developers and testers that they're not looking at a live site.
+
+index.html
+  This is a fallback version of the project's front page, in case the `index.html` file in the root
+  directory is removed or renamed. It begins life as an exact copy of the root directory's 
+  `index.html`.
