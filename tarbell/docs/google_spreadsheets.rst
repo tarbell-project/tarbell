@@ -28,7 +28,7 @@ Use them in your templates:
 Named worksheets
 ----------------
 
-Other worksheets can hold any kind of data support by Google spreadsheets. These variables can be accessed by their worksheet name.
+Other worksheets can hold any kind of data supported by Google spreadsheets. These variables can be accessed by their worksheet name.
 
 If there is no `key` column in the worksheet, the worksheet can be accessed as a list. Imagine a spreadsheet named `cars` with these values:
 
