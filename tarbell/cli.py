@@ -179,7 +179,7 @@ def tarbell_install(command, args):
 
             # Get site, run hook
             with ensure_project(command, args, path) as site:
-                site.call_hook("newproject", site, git)
+                site.call_hook("install", site, git)
 
         except sh.ErrorReturnCode_128:
             error = "Not a Tarbell project!"
