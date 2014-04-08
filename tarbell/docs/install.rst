@@ -7,7 +7,14 @@ Install Tarbell with `pip install tarbell`
 
 ::
 
-    pip install tarbell==0.9b4
+    pip install -e git+https://github.com/newsapps/flask-tarbell@0.9-beta5#egg=tarbell
+
+.. note::
+
+    0.9-beta5 is the current development version. It should only be used by advanced users because
+    it may be unstable. If you are using this version, you'll need to run
+    ``pip install -U -e git+https://github.com/newsapps/flask-tarbell@0.9-beta5#egg=tarbell`` from
+    time to time to pick up the latest changes.
 
 A note on virtualenvs
 ---------------------
