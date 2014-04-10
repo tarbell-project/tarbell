@@ -193,7 +193,7 @@ def make_worksheet_data(headers, worksheet):
                 # Magic values worksheet
                 if worksheet.name == "values":
                     value = row.get('value')
-                    if value:
+                    if value or value == 0:
                         keyed_data[key] = value
                 else:
                     keyed_data[key] = row
