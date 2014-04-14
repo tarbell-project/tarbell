@@ -7,22 +7,32 @@ Install Tarbell with `pip install tarbell`
 
 ::
 
-    pip install tarbell==0.9b4
+    pip install -e git+https://github.com/newsapps/flask-tarbell@0.9-beta5#egg=tarbell
+
+.. note::
+
+    0.9-beta5 is the current development version. It should only be used by advanced users because
+    it may be unstable. If you are using this version, you'll need to run
+    ``pip install -U -e git+https://github.com/newsapps/flask-tarbell@0.9-beta5#egg=tarbell`` from
+    time to time to pick up the latest changes.
 
 A note on virtualenvs
 ---------------------
 
-(If you've never heard of virtualenvs, or know you're not using one with
-Tarbell, skip this section.)
+.. note::
+ 
+  If you've never heard of virtualenvs or know you're not using one with
+  Tarbell, skip this section.
 
-Tarbell is intended to be installed globally, so for most users it should be
-installed outside of a `virtualenv <http://www.virtualenv.org/>`_. It works
-either way, but there are some things to keep in mind if you don't install it
-globally.
+Virtual environments (`virtualenv <http://www.virtualenv.org/>`_) are useful for
+developers and advanced users managing many Python packages. Tarbell can be installed
+globally or within a virtualenv.
 
 If you'll be working on Tarbell itself, extending its functionality
 or otherwise manipulating the guts of the system, then it might make sense to
 install it inside a virtualenv, so here's what you should know:
+
+Here are some things to keep in mind if you use a virtualenv:
 
 * The Tarbell settings file `(~/.tarbell/settings.yaml)` is global, meaning all
   Tarbell projects - whether inside a virtualenv or not - share the same
@@ -30,8 +40,8 @@ install it inside a virtualenv, so here's what you should know:
   projects (i.e., where Tarbell will look when you run `tarbell list` and
   `tarbell switch`.)
 * The `client_secrets.json` file used to authenticate to Google is also global,
-  so you may run into problems using spreadsheets owned by multiple Google
-  accounts.
+  so you may run into problems using multiple Google accounts to access spreadsheets.
+
 
 Configure Tarbell with `tarbell configure`
 ------------------------------------------

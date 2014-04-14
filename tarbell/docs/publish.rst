@@ -48,24 +48,57 @@ all kept as subdomains of tribapps.com, and your staging site actually houses
 many different sites at various stages of development, so you want to publish
 to a specific directory.
 
+This example assumes the same AWS ID and secret access key can be used to authenticate
+with each of the targets.
+
 Create or update the `S3_BUCKETS` variable in `tarbell_config.py` as follows::
 
   S3_BUCKETS = {
-      "staging": "staging.tribapps.com/tarbell-staging/",
-      "production": "tarbell.tribapps.com/",
-      "archive": "archive.tribapps.com/",
+      "staging": "staging.tribapps.com/tarbell-staging",
+      "production": "tarbell.tribapps.com",
+      "archive": "archive.tribapps.com",
   }
 
 To push your site to http://staging.tribapps.com/tarbell-staging, run::
 
   tarbell publish staging
 
+
 To push your site to http://tarbell.tribapps.com, run::
 
   tarbell publish production
 
-You're pretty smart (that's why you're using Tarbell), so you've probably
-already figured out the pattern, but to push your site to
+You've probably already figured out the pattern, but to push your site to
 http://archive.tribapps.com, run::
 
   tarbell publish archive
+
+.. note:: 
+
+    The preferred format for S3 buckets is demonstrated above, without an ``s3://`` protocol
+    indicator or trailing slash. However, ``s3://foo.com/bar/`` will work as well.
+
+
+Handling buckets with differing credentials
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+What if ``archive.tribapps.com`` uses different Amazon S3 credentials? 
+
+To handle buckets with non-default credentials, run ``tarbell configure`` and configure 
+a new bucket::
+
+  Please specify an additional bucket (e.g. additional.bucket.myorg.com/, leave blank to skip adding bucket) archive.tribapps.com
+
+  Please specify an AWS Access Key ID for this bucket: [AKIAIJPIGKFM3K36WADA] XXXXXXXX
+
+  Please specify an AWS Secret Access Key for this bucket: [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] XXXXXXXXXXXX
+
+Or add some lines to ``~/.tarbell/settings.yaml``::
+
+  # ... 
+  s3_credentials:
+    foo.bar.com:
+      access_key_id: XXXXXXXX
+      secret_access_key: XXXXXXXXXXXX
+
+You can now publish to a bucket with non-default access credentials.
