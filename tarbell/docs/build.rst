@@ -195,8 +195,11 @@ Use this feature with care! Missing variables could easily break your CSS or Jav
 Anatomy of a project directory
 ------------------------------
 
-When you run ``tarbell newproject``, a number of new files and folders are created, many of them with
-special significance. Here's a rundown of what they all do.
+When you run ``tarbell newproject`` with the default base template, a number of new files and
+folders are created, many of them with special significance. Details may vary for other base templates,
+but they're likely to have many similar files and concepts.
+
+Here's a rundown of what they all do.
 
 **Files in the root directory:**
 
