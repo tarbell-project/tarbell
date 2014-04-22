@@ -30,7 +30,7 @@ globally or within a virtualenv.
 
 If you'll be working on Tarbell itself, extending its functionality
 or otherwise manipulating the guts of the system, then it might make sense to
-install it inside a virtualenv, so here's what you should know:
+install it inside a virtualenv.
 
 Here are some things to keep in mind if you use a virtualenv:
 
