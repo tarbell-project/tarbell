@@ -17,7 +17,7 @@ EXCLUDES = ["*.md", "requirements.txt"]
 # CREATE_JSON = True
 
 # Google spreadsheet key
-{% if not key %}#{% endif %}SPREADSHEET_KEY = "{{ key }}"
+{% if not key %}# {% endif %}SPREADSHEET_KEY = "{{ key }}"
 
 # Spreadsheet cache lifetime in seconds. (Default: 4)
 # SPREADSHEET_CACHE_TTL = 4
