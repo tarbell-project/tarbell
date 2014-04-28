@@ -370,11 +370,32 @@ class TarbellSite:
                 context.update(self.get_context_from_csv())
             # Excel
             if re.search(r'(xlsx|XLSX|xls|XLS)$', file):
-                pass
+                context.update(self.get_context_from_xlsx())
         except AttributeError:
             context.update(self.get_context_from_gdoc())
 
         return context
+
+    def get_context_from_xlsx(self):
+        if re.search('^(http|https)://', self.project.CONTEXT_SOURCE_FILE):
+            resp = requests.get(self.project.CONTEXT_SOURCE_FILE)
+            content = resp.content
+        else:
+            try:
+                with open(self.project.CONTEXT_SOURCE_FILE) as xlsxfile:
+                    content = xlsxfile.read()
+            except IOError:
+                filepath = "%s/%s" % (
+                    os.path.abspath(self.path),
+                    self.project.CONTEXT_SOURCE_FILE)
+                with open(filepath) as xlsxfile:
+                    content = xlsxfile.read()
+
+        data = process_xlsx(content)
+        if 'values' in data:
+            data = copy_global_values(data)
+
+        return data
 
     def get_context_from_csv(self):
         """
