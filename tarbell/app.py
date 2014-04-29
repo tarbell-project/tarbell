@@ -272,6 +272,11 @@ class TarbellSite:
             project.DEFAULT_CONTEXT = {}
 
         try:
+            project.S3_BUCKETS
+        except AttributeError:
+            project.S3_BUCKETS = {}
+
+        try:
             project.EXCLUDES
         except AttributeError:
             project.EXCLUDES = []

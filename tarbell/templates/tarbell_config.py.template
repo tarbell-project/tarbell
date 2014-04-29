@@ -10,14 +10,22 @@ NAME = "{{ name }}"
 # Descriptive title of project
 TITLE = "{{ title|escape }}"
 
-# Google spreadsheet key
-{% if not key %}#{% endif %}SPREADSHEET_KEY = "{{ key }}"
-
 # Exclude these files from publication
 EXCLUDES = ["*.md", "requirements.txt"]
 
 # Create JSON data at ./data.json, disabled by default
 # CREATE_JSON = True
+
+# Google spreadsheet key
+{% if not key %}# {% endif %}SPREADSHEET_KEY = "{{ key }}"
+
+# Spreadsheet cache lifetime in seconds. (Default: 4)
+# SPREADSHEET_CACHE_TTL = 4
+
+# Get context from a local file or URL. This file can be a CSV or Excel
+# spreadsheet file. Relative, absolute, and remote (http/https) paths can be 
+# used.
+# CONTEXT_SOURCE_FILE = ""
 
 # S3 bucket configuration
 {% if not default_s3_buckets %}#{% endif %}S3_BUCKETS = {
