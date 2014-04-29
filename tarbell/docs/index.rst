@@ -44,9 +44,9 @@ Reference
 =========
 
 .. toctree::
-    contributing
     base_templates
     hooks
     reference
     configuring
+    contributing
 
