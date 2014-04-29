@@ -77,51 +77,15 @@ To suppress a file from publishing, use a filename like ``_filename.txt``.
 Configuring projects
 --------------------
 
-Project configuration is kept in the `tarbell_config.py` file in your project's base directory:
-
-.. code-block:: python
-
-  # Short project name
-  NAME = "nellie-bly"
-
-  # Descriptive title of project
-  TITLE = "The Story of Nellie Bly"
-
-  # Google spreadsheet key
-  SPREADSHEET_KEY = "0Ak3IIavLYTovdC1qMFo5UDEwcUhQZmdZbkk4WW1sYUE"
-
-  # Create JSON data at ./data.json
-  CREATE_JSON = True
-
-
-  # S3 bucket configuration
-  S3_BUCKETS = {
-      "staging": "projects.beta.myorg.tld/profiles/nellie-bly/",
-      "production": "projects.myorg.tld/profiles/nellie-bly/",
-  }
-
-  # Default template variables
-  DEFAULT_CONTEXT = {
-      'name': 'nellie-bly',
-      'title': 'The Story of Nellie Bly'
-  }
-
-``TITLE`` and ``NAME`` are required and describe the project.
-
-If specified, ``SPREADSHEET_KEY`` will be used as data source if Google Spreadsheets is configured.
-
-If specified, ``S3_BUCKETS`` should be a Python dict consisting of ``targetname:targeturl`` pairs.
-
-If ``True``, ``CREATE_JSON`` will create a file called ``data.json`` for AJAX data and context loading.
-
-If specified, ``DEFAULT_CONTEXT`` will provide context variables to the template. The default context
-is dictionary of ``key``->``value`` pairs to provide to the template. The ``value`` may be any Python
-object that can be represented as a Jinja template variable.
+Project configuration is kept in the `tarbell_config.py` file in your project's base directory.
+See :ref:`tarbell-config` for configuration documentation.
 
 Using context variables
 -----------------------
 
-Template data comes from Google spreadsheets or tarbell.py's ``DEFAULT_CONTEXT``.
+Template data can come from Google spreadsheets, a local or remote CSV or Excel file, or 
+tarbell_config.py's ``DEFAULT_CONTEXT``. The context source is configured in ``tarbell_config.py`` 
+(see :ref:`tarbell-config` for reference). 
 
 This simple ``DEFAULT_CONTEXT`` shows many of the key template features:
 

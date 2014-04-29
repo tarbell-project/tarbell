@@ -2,6 +2,8 @@
 Configuration reference
 =======================
 
+.. _tarbell-config:
+
 Project settings (``tarbell_config.py``)
 ----------------------------------------
 
