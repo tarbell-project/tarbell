@@ -2,6 +2,7 @@
 Installation
 ============
 
+
 Install Tarbell with `pip install tarbell`
 ------------------------------------------
 

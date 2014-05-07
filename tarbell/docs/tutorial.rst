@@ -2,24 +2,24 @@
 Tutorial
 ================
 
-Let's build a website about celebrated Chicago journalist Ethel Payne! 
+Let's build a website about celebrated Chicago journalist Ethel Payne!
 
-First you need Tarbell (if you care about virtualenvs, read `this <install.html#a-note-on-virtualenvs>`_; otherwise, keep going). Fair warning, you're going to have to run these commands in
-a terminal::
+You'll need to have access to a command prompt (an application on your computer
+that allows you to execute text-based commands). On a Mac, search for the Terminal application.
+On a PC, search for the Command Prompt program. All of the commands we'll show you here
+will need to be typed into the command prompt.
 
-    pip install tarbell==0.9b5
+First you need to `install <install.html>`_ and `configure <install.html#configure-tarbell-with-tarbell-configure>`_
+Tarbell. (Make sure to set up a Google spreadsheet.) Go ahead. We'll wait.
 
-Got it? Now configure Tarbell::
+Step 1: Set up a new project
+==============
 
-    tarbell configure
-
-For our tutorial, just say "no" to configuring Google or Amazon. It's optional!
-
-Now that you've got Tarbell configured, create a new project::
+After you've got Tarbell configured, create a new project by typing this command into your prompt::
 
   tarbell newproject
 
-You'll need to answer a few questions::
+You'll need to answer a few questions. It will go something like this::
 
   tarbell newproject
 
@@ -39,28 +39,48 @@ You'll need to answer a few questions::
 
   Which template would you like to use? [1] 1
 
-  - Cloning https://github.com/newsapps/tarbell-template to /Users/davideads/tarbell/ethelpayne
+  Cloning into '_base'...
+
+  Checking connectivity... done
+
+  client_secrets found. Would you like to create a Google spreadsheet? [Y/n] y
+
+  What Google account should have access to this this spreadsheet? (Use a full email address, such as your.name@gmail.com or the Google account equivalent.)
+
+  Success! View the spreadsheet at https://docs.google.com/spreadsheet/your_key_will_go_here
 
   Copying configuration file
-  Copying _base/_spreadsheet.xlsx to tarbell.py's DEFAULT_CONTEXT
 
   - Creating tarbell.py project configuration file
 
   - Done copying configuration file
 
-  Setting up git remote repositories
+  Copying html files...
+  Copying index.html to /Users/davideads/tarbell/ethelpayne
 
-  - Renaming master to update_project_template
+  Initial commit
 
-  - Add and commit tarbell.py
+  [master (root-commit) 2bf96fb] Created ethelpayne from https://github.com/newsapps/tarbell-template
+  5 files changed, 58 insertions(+)
+  create mode 100644 .gitignore
+  create mode 100644 .gitmodules
+  create mode 160000 _base
+  create mode 100644 index.html
+  create mode 100644 tarbell_config.py
 
-  What is the URL of your project repository? (e.g. git@github.com:eads/myproject.git, leave blank to skip) 
-
-  - Not setting up remote repository. Use your own version control!
+  -- Calling newproject hooks --
+  --- Calling create_repo
+  Want to create a Github repo for this project [Y/n]? n
+  Not creating Github repo...
 
   All done! To preview your new project, type:
 
   tarbell switch ethelpayne
+
+  or
+
+  cd /Users/davideads/tarbell/ethelpayne
+  tarbell serve
 
   You got this!
 
@@ -80,131 +100,71 @@ Well, you heard the machine, you got this. Run the switch command to fire up a p
 
 Now visit http://127.0.0.1:5000/ in a browser.
 
+(You can also run your project by changing to the directory you created for it and running tarbell serve.)
+
 You're ready to start editing your template.
 
-First, set some project data in `/path/to/project` (in this case `/Users/davideads/tarbell/ethelpayne/tarbell.py`). 
-Open the file in your favorite editor. It should look like this::
+Step 2: Add content
+===========
 
-  # -*- coding: utf-8 -*-
+In a browser, open the Google spreadsheet that you created during the project set up.
+This is where our website's content will live. You'll see three worksheets: *values*,
+*data* and *keyed_data*. Let's look at the values worksheet first.
+You should see something like this:
 
-  """
-  Tarbell project configuration
-  """
+[IMAGE]
 
-  # Short project name
-  NAME = "ethelpayne"
+Keys and values are a common idea in programming: each key is shorthand for a corresponding value.
+Each of the values in the *values* column is available to your site when you use
+the matching *key* in your template.
 
-  # Descriptive title of project
-  TITLE = "Ethel Payne: A life in journalism"
+.. note::
+Header fields that start with underscores, like *_notes* does here, will not be made
+available to your template.
 
-  # Google spreadsheet key
-  #SPREADSHEET_KEY = "None"
+Open your project's index.html page and find this line::
 
-  # S3 bucket configuration
-  S3_BUCKETS = {
-      # Provide target -> s3 url pairs, such as:
-      # "mytarget": "s3://mys3url.bucket.url/some/path"
-      "staging": "apps.beta.chicagotribune.com/someproject",
-      "production": "apps.chicagotribune.com/someproject/",
-  }
-
-  # Repository this project is based on (used for updates)
-  TEMPLATE_REPO_URL = "https://github.com/newsapps/tarbell-template"
-
-  # Default context variables
-  DEFAULT_CONTEXT = {
-      'data': [   {   'born': 2535.0,
-                      'died': 33604.0,
-                      'name': u'Grace Hopper'},
-                  {   'born': 4244.0,
-                      'died': 33386.0,
-                      'name': u'Ethel Payne'}],
-      'headline': u'Ida Tarbell quote',
-      'intro': u'Rockefeller and his associates did not build the Standard Oil Co. in the board rooms of Wall Street banks. They fought their way to control by rebate and drawback, bribe and blackmail, espionage and price cutting, by ruthless ... efficiency of organization.',
-      'name': 'dontkillmy',
-      'quote': u"To know every detail of the oil trade, to be able to reach at any moment its remotest point, to control even its weakest factor \u2014 this was John D. Rockefeller's ideal of doing business. It seemed to be an intellectual necessity for him to be able to direct the course of any particular gallon of oil from the moment it gushed from the earth until it went into the lamp of a housewife. \n\nThere must be nothing \u2014 nothing in his great machine he did not know to be working right. It was to complete this ideal, to satisfy this necessity, that he undertook, late in the seventies, to organise the oil markets of the world, as he had already organised oil refining and oil transporting.",
-      'quote_author': u'Ida Tarbell, History of the Standard Oil Company',
-      'title': u'Ethel Payne: A life in journalism'
-  }
-
-Edit the last section to include a new variable::
-
-  DEFAULT_CONTEXT = {
-      # ...
-      'title': u'Ethel Payne: A life in journalism',
-      'payne_quote': u'I stick to my firm, unshakeable belief that the black press is an advocacy press, and that I, as a part of that press, can’t afford the luxury of being unbiased ... when it come to issues that really affect my people, and I plead guilty, because I think that I am an instrument of change.',
-      'payne_quote_author': u'Ethel Payne',
-  }
-
-Now edit your project's `index.html`. ::
-
-  {% extends "_base.html" %}
-
-  {% block content %}
-
-  {% if PREVIEW_SERVER %}
-  <div class="alert alert-warning">
-    <p>Edit this <a href="https://docs.google.com/spreadsheet/ccc?key={{ SPREADSHEET_KEY }}" target="_blank">project's Google spreadsheet</a>.</p> 
-
-    <p>You can modify this file by editing <code>{{ PROJECT_PATH }}/index.html</code>.</p>
-
-    <p>This block will not publish when <code>tarbell publish</code> is invoked.</p>
-  </div>
-  {% endif %}
-
-  <div class="jumbotron">
     <h1>{{ headline }}</h1>
-    <p>{{ intro }}</p>
-  </div>
 
-  <div class="row">
-    <div class="col-md-8">
-      <blockquote>
-        {{ quote|markdown }}
-        <small>{{ quote_author }}</small>
-      </blockquote>
-    </div>
+.. note::
 
-    <div class="col-md-4">
-      <table class="table">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Born</th>
-            <th>Died</th>
-          </tr>
-        </thead>
-        <tbody>
-        {% for row in data %}
-        <tr>
-          <td>{{ row.name }}</td>
-          <td>{{ row.born|format_date }}</td>
-          <td>{{ row.died|format_date }}</td>
-        </tr>
-        {% endfor %}
-        </tbody>
-      </table>
-    </div>
-  </div>
-  {% endblock content %}
+To start creating pages, you'll need a text editor. (`Notepad++<http://notepad-plus-plus.org/download/v6.6.1.html>`_ is a
+good starter editor for Windows, while `TextWrangler<http://www.barebones.com/products/textwrangler/>`_ is a
+good one for Macs.)
 
-
-Change the quote section to use your new variables. Change this::
-
-    <div class="col-md-8">
-      <blockquote>
-        {{ quote|markdown }}
-        <small>{{ quote_author }}</small>
-      </blockquote>
-    </div>
-
-to this::
-
-    <div class="col-md-8">
-      <blockquote>
-        {{ payne_quote|markdown }}
-        <small>{{ payne_quote_author }}</small>
-      </blockquote>
-    </div>
+Look at your page in the browser again and notice the headline matches what's
+in your Google spreadsheet under the *value* column with the *key* "headline".
+Try changing that value in the spreadsheet to "Ethel Payne, Chicago journalist".
 
 Reload the server at http://127.0.0.1:5000 in your web browser to see your changes!
+
+You can add as many keys and values as you like. We'll add a few.
+
+[IMAGE]
+
+Now we need to reference these variables in the template. Go back to index.html and add::
+
+  <blockquote>{{ quote }}</blockquote>
+  <p>from {{ quote_source }}</p>
+
+Reload your site and look at the results!
+
+.. note::
+
+  Tarbell uses `Jinja2<http://jinja.pocoo.org/>`_ for templating. Read the `excellent documentation<http://jinja.pocoo.org/docs/>`_ to learn more about using Jinja.
+
+Displaying data
+===============
+
+TK
+
+Adding CSS
+==========
+
+TK
+
+Using Javascript
+===============
+
+TK
+
