@@ -156,12 +156,106 @@ Reload your site and look at the results!
 Displaying data
 ===============
 
-TK
+Sometimes you need to display tabular data. Helpfully, the Google spreadsheet you
+created has some data like this under the *data* worksheet. The best way to display
+this data in Tarbell is by using a for loop (using `Jinja2<http://jinja.pocoo.org/>`_ syntax)::
+
+  {% for row in data %}
+    <p>
+      <strong>{{ row.column1 }}:</strong>
+      {{ row.column2 }}
+    </p>
+  {% endfor %}
+
+You should see the following when you reload your page:
+
+**row1, column1**:	row1, column2
+**row2, column1**:	row2, column2
+
+Let's take a closer look at what's going on here::
+
+  {% for row in data %}
+
+This reads in every row in the *data* worksheet. If we called our worksheet "birthdates,"
+we could access that data by doing::
+
+  {% for row in birthdates %}
+
+You'll notice that we no longer have columns labeled "key" and "value." Instead, we access
+the column we want by name. To understand this better, let's add some data about some
+famous ladies who might have been friends of Ida Tarbell had they known one another:
+
+[IMAGE]
+
+Now let's edit our index.html again to display this information::
+
+  {% for row in data %}
+    <h2>{{ row.name }}</h2>
+    <strong>{{ row.born|format_date }} - {{ row.died|format_date }}</strong>
+    <p>{{ row.name }} was known for her work in {{ row.known_for }}.</p>
+  {% endfor %}
+
+
+Your page should now look like this:
+
+[IMAGE]
 
 Adding CSS
 ==========
 
-TK
+Out of the box, Tarbell gives you Bootstrap 3 CSS. Chances are, you'll want to extend
+this to add your own CSS to your project.
+
+To this point, we've ignored the *_base* directory in your project. Now's the time to
+dive in! You may have noticed this line up at the top of your index.html file::
+
+  {% extends "_base.html" %}
+
+The _base.html file is where all of the CSS, JavaScript and other goodies live. By "extending"
+_base.html, index.html has access to all of the things that live in the base. You can
+`read more about how template inheritance works here.<http://jinja.pocoo.org/docs/templates/#template-inheritance>`_
+
+.. note::
+
+  Filenames prefaced with an underscore will be ignored when you publish your project. Our naming convention
+  is to use underscores for "partial" templates that represent small pieces of the page, like navigation
+  and footers.
+
+There are two CSS blocks at the top of the page::
+
+  {% block library_css %}
+  <link rel="stylesheet" type="text/css" href="http://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.1.1/css/bootstrap.min.css" />
+  <link rel="stylesheet" type="text/css" href="css/base.css" />
+  {% endblock library_css %}
+
+  {% block css %}{% endblock %}
+
+The first block includes Bootstrap 3's CSS and your project's default base.css stylesheet. Don't worry about
+it right now. The second block is what you'll want to extend.
+
+.. note::
+
+  You'll only need to touch the library_css block if you need to do something like override the version of Bootstrap
+  included here. Otherwise, for adding project-wide styles, edit the base.css file.
+
+In your project root (i.e., not in base), create a css folder. Inside that, create a new style.css file and
+add some CSS rules::
+
+  h2 { font-family: Georgia, serif; }
+  strong { color: #c7254e; }
+
+Now switch back over to your index.html and add the css block. Do this on line 2, after the base extension::
+
+  {% extends "_base.html" %}
+
+  {% block css %}
+  <link rel="stylesheet" href="style.css">
+  {% endblock %}
+
+  {% block content %}
+
+Your text should now be styled!
+
 
 Using Javascript
 ===============
