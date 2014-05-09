@@ -143,10 +143,6 @@ def tarbell_generate(command, args, skip_args=False, extra_context=None, quiet=F
         site.call_hook("generate", site, output_root)
         return output_root
 
-def git_interact(line, stdin):
-    print line
-    print stdin.put('foo')
-
 
 def tarbell_install(command, args):
     """Install a project."""
