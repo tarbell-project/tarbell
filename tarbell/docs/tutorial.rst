@@ -249,7 +249,7 @@ Now switch back over to your index.html and add the css block. Do this on line 2
   {% extends "_base.html" %}
 
   {% block css %}
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="css/style.css">
   {% endblock %}
 
   {% block content %}
@@ -260,5 +260,22 @@ Your text should now be styled!
 Using Javascript
 ===============
 
-TK
+You can include JavaScript on your page much the way you would include CSS. By default,
+these are the blocks available in _base.html::
 
+  {% block library_scripts %}
+  <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+  <script src="http://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.1.1/js/bootstrap.min.js"></script>
+  {% endblock library_scripts %}
+
+  {% block scripts %}{% endblock %}
+
+The *library_scripts* block contains the default Bootstrap Javascript and jQuery. You probably
+don't need to mess with this.
+
+The *scripts* block can be extended in your templates. You'll want to create a *js* directory in
+your project root to hold all of your Javascript files. Then you can include them in your index.html
+(or other templates)::
+  {% block scripts %}
+  <script type="text/javascript" rel="js/project.css"></script>
+  {% endblock %}
