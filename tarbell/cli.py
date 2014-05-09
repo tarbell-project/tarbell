@@ -113,16 +113,17 @@ def tarbell_generate(command, args, skip_args=False, extra_context=None, quiet=F
     with ensure_settings(command, args) as settings, ensure_project(command, args) as site:
         if not skip_args:
             output_root = list_get(args, 0, False)
+            is_folder = os.path.exists(output_root)
         if quiet:
             site.quiet = True
         if not output_root:
             output_root = tempfile.mkdtemp(prefix="{0}-".format(site.project.__name__))
+            is_folder = False
 
         if args.contains('--context'):
             site.project.CONTEXT_SOURCE_FILE = args.value_after('--context')
 
         #check to see if the folder we're trying to create already exists
-        is_folder = os.path.exists(output_root)
         if is_folder:
             output_file = raw_input(("\nA folder named {0} already exists! Do you want to delete it? [Y/n] ").format(
                 colored.cyan(output_root)
@@ -133,12 +134,7 @@ def tarbell_generate(command, args, skip_args=False, extra_context=None, quiet=F
                 puts(("\nDeleting {0} and creating static site files...\n").format(
                     colored.cyan(output_root)
                 ))
-
                 _delete_dir(output_root)
-                site.generate_static_site(output_root, extra_context)
-                if not quiet:
-                    puts("\nCreated site in {0}".format(output_root))
-
         else:
             site.generate_static_site(output_root, extra_context)
             if not quiet:
