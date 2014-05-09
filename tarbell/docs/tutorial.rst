@@ -12,7 +12,7 @@ will need to be typed into the command prompt.
 First you need to `install <install.html>`_ and `configure <install.html#configure-tarbell-with-tarbell-configure>`_
 Tarbell. (Make sure to set up a Google spreadsheet.) Go ahead. We'll wait.
 
-Step 1: Set up a new project
+Set up a new project
 ==============
 
 After you've got Tarbell configured, create a new project by typing this command into your prompt::
@@ -104,7 +104,7 @@ Now visit http://127.0.0.1:5000/ in a browser.
 
 You're ready to start editing your template.
 
-Step 2: Add content
+Add content
 ===========
 
 In a browser, open the Google spreadsheet that you created during the project set up.
@@ -199,6 +199,7 @@ Now let's edit our index.html again to display this information::
 Your page should now look like this:
 
 .. image:: tabular_data.png
+
 Adding CSS
 ==========
 
@@ -278,3 +279,30 @@ your project root to hold all of your Javascript files. Then you can include the
   {% block scripts %}
   <script type="text/javascript" rel="js/project.css"></script>
   {% endblock %}
+
+Overriding default templates
+============================
+
+While the Tarbell blueprint contains some very handy things in the _base directory,
+you may find you need to override some of the provided templates. One of the most common
+case in which this occurs is the navigation.
+
+In the _base.html template, you can see that the nav is included just before the content starts::
+
+  {% block nav %}
+    {% include "_nav.html" %}
+  {% endblock nav %}
+
+  {% block content %}{% endblock content %}
+
+To override the default nav, create a new _nav.html file in your project root (at the same
+level as index.html, not within the _base directory). Type in a message to yourself::
+
+  Ida Tarbell would be proud of this website!
+
+Reload your test page. Bingo!
+
+Now, such a message probably isn't very helpful to your users, so to create a more functional
+nav, copy the code out of _base/_nav.html, paste it into _nav.html,
+and rejigger the code as desired. It's all Bootstrap 3, so you might find it helpful to
+`view the Bootstrap navbar docs.<http://getbootstrap.com/components/#navbar>`_
