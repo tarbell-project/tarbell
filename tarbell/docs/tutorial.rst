@@ -112,7 +112,7 @@ This is where our website's content will live. You'll see three worksheets: *val
 *data* and *keyed_data*. Let's look at the values worksheet first.
 You should see something like this:
 
-[IMAGE]
+.. image:: values_worksheet.png
 
 Keys and values are a common idea in programming: each key is shorthand for a corresponding value.
 Each of the values in the *values* column is available to your site when you use
@@ -140,7 +140,7 @@ Reload the server at http://127.0.0.1:5000 in your web browser to see your chang
 
 You can add as many keys and values as you like. We'll add a few.
 
-[IMAGE]
+.. image:: addtl_values.png
 
 Now we need to reference these variables in the template. Go back to index.html and add::
 
@@ -185,7 +185,7 @@ You'll notice that we no longer have columns labeled "key" and "value." Instead,
 the column we want by name. To understand this better, let's add some data about some
 famous ladies who might have been friends of Ida Tarbell had they known one another:
 
-[IMAGE]
+.. image:: addtl_columns.png
 
 Now let's edit our index.html again to display this information::
 
@@ -198,8 +198,7 @@ Now let's edit our index.html again to display this information::
 
 Your page should now look like this:
 
-[IMAGE]
-
+.. image:: tabular_data.png
 Adding CSS
 ==========
 
