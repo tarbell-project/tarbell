@@ -44,7 +44,11 @@ def tarbell_configure(command, args):
     if prompt or "path" in args:
         settings.update(_setup_tarbell_project_path(settings, path, prompt))
     if prompt or "templates" in args:
-        settings.update(_setup_default_templates(settings, path, prompt))
+        default_templates = _setup_default_templates(settings, path, prompt)
+        if len(settings["project_templates"]) > len(default_templates["project_templates"]):
+            puts("\nFound custom Blueprint. Preserving settings...")
+        else:
+            settings.update(default_templates)
 
     with open(path, 'w') as f:
         puts("\nWriting {0}".format(colored.green(path)))
