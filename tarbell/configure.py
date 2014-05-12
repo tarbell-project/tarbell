@@ -305,6 +305,9 @@ def _setup_default_templates(settings, path, prompt=True):
     }, {
         "name": "Searchable map template",
         "url": "https://github.com/eads/tarbell-map-template",
+    }, {
+        "name": "Tarbell template walkthrough",
+        "url": "https://github.com/hbillings/tarbell-tutorial-template",
     }]
     for project in project_templates:
         puts("+ Adding {0} ({1})".format(project["name"], project["url"]))
