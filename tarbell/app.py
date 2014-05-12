@@ -29,6 +29,9 @@ from .hooks import hooks
 # in seconds
 SPREADSHEET_CACHE_TTL = 4 
 
+# all spreadsheet values except empty string
+VALID_CELL_TYPES = range(1, 5)
+
 # pass template variables to files with these mimetypes
 TEMPLATE_TYPES = [
     "text/html",
@@ -160,7 +163,7 @@ def make_worksheet_data(headers, worksheet):
         row_dict = {}
         while cell_idx < worksheet.ncols:
             cell_type = worksheet.cell_type(row_idx, cell_idx)
-            if cell_type > 0 and cell_type < 5:
+            if cell_type in VALID_CELL_TYPES:
                 cell_value = worksheet.cell_value(row_idx, cell_idx)
                 try:
                     row_dict[headers[cell_idx]] = cell_value
@@ -193,7 +196,7 @@ def make_worksheet_data(headers, worksheet):
                 # Magic values worksheet
                 if worksheet.name == "values":
                     value = row.get('value')
-                    if value:
+                    if value not in ("", None):
                         keyed_data[key] = value
                 else:
                     keyed_data[key] = row
