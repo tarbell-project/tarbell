@@ -306,3 +306,30 @@ Now, such a message probably isn't very helpful to your users, so to create a mo
 nav, copy the code out of _base/_nav.html, paste it into _nav.html,
 and rejigger the code as desired. It's all Bootstrap 3, so you might find it helpful to
 `view the Bootstrap navbar docs.<http://getbootstrap.com/components/#navbar>`_
+
+Putting it all together: Leaflet maps
+====================================
+
+Let's set up a simple Leaflet map. Inside the content block, add a div that will contain your map::
+
+    <div id="map"></div>
+
+We'll need to set a height for this map with CSS, so let's create a stylesheet (by creating
+a css folder in the project root and making a styles.css file) and add that rule::
+
+  #map { height: 180px; }
+
+Include the Leaflet CSS and your new stylesheet before the content block::
+
+  {% block css %}
+  <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.css" />
+  <link rel="stylesheet" href="css/styles.css" />
+  {% endblock %}
+
+Then add the Javascript library after the content block::
+
+  {% block scripts %}
+  <script src="http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.js"></script>
+  {% endblock %}
+
+
