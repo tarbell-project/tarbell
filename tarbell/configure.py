@@ -98,9 +98,9 @@ def _setup_google_spreadsheets(settings, path, prompt=True):
         puts(("\nLogin in to Google and go to {0} to create an app and generate the "
               "\n{1} authentication file. You should create credentials for an `installed app`. See "
               "\n{2} for more information."
-              .format(colored.red("https://code.google.com/apis/console/"),
+              .format(colored.red("https://console.developers.google.com/project"),
                       colored.yellow("client_secrets.json"),
-                      colored.red("http://tarbell.readthedocs.com/#correctlink")
+                      colored.red("http://tarbell.readthedocs.org/en/latest/install.html#configure-google-spreadsheet-access-optional")
                      )
             ))
 
