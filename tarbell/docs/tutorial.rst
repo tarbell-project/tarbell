@@ -128,8 +128,8 @@ Open your project's index.html page and find this line::
 
 .. note::
 
-To start creating pages, you'll need a text editor. (`Notepad++<http://notepad-plus-plus.org/download/v6.6.1.html>`_ is a
-good starter editor for Windows, while `TextWrangler<http://www.barebones.com/products/textwrangler/>`_ is a
+To start creating pages, you'll need a text editor. (`Notepad++ <http://notepad-plus-plus.org/download/v6.6.1.html>`_ is a
+good starter editor for Windows, while `TextWrangler <http://www.barebones.com/products/textwrangler/>`_ is a
 good one for Macs.)
 
 Look at your page in the browser again and notice the headline matches what's
@@ -158,7 +158,7 @@ Displaying data
 
 Sometimes you need to display tabular data. Helpfully, the Google spreadsheet you
 created has some data like this under the *data* worksheet. The best way to display
-this data in Tarbell is by using a for loop (using `Jinja2<http://jinja.pocoo.org/>`_ syntax)::
+this data in Tarbell is by using a for loop (using `Jinja2 <http://jinja.pocoo.org/>`_ syntax)::
 
   {% for row in data %}
     <p>
@@ -213,7 +213,7 @@ dive in! You may have noticed this line up at the top of your index.html file::
 
 The _base.html file is where all of the CSS, JavaScript and other goodies live. By "extending"
 _base.html, index.html has access to all of the things that live in the base. You can
-`read more about how template inheritance works here.<http://jinja.pocoo.org/docs/templates/#template-inheritance>`_
+`read more about how template inheritance works here. <http://jinja.pocoo.org/docs/templates/#template-inheritance>`_
 
 .. note::
 
@@ -305,7 +305,7 @@ Reload your test page. Bingo!
 Now, such a message probably isn't very helpful to your users, so to create a more functional
 nav, copy the code out of _base/_nav.html, paste it into _nav.html,
 and rejigger the code as desired. It's all Bootstrap 3, so you might find it helpful to
-`view the Bootstrap navbar docs.<http://getbootstrap.com/components/#navbar>`_
+`view the Bootstrap navbar docs. <http://getbootstrap.com/components/#navbar>`_
 
 Putting it all together: Leaflet maps
 ====================================
