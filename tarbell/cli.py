@@ -569,6 +569,7 @@ def _copy_config_template(name, title, template, path, key, settings):
             },
             "name": name,
             "title": title,
+            "map_data": "maps.csv",
             "template_repo_url": template.get('url'),
             "key": key,
         })

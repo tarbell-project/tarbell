@@ -307,6 +307,7 @@ nav, copy the code out of _base/_nav.html, paste it into _nav.html,
 and rejigger the code as desired. It's all Bootstrap 3, so you might find it helpful to
 `view the Bootstrap navbar docs.<http://getbootstrap.com/components/#navbar>`_
 
+
 Putting it all together: Leaflet maps
 ====================================
 
@@ -332,4 +333,37 @@ Then add the Javascript library after the content block::
   <script src="http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.js"></script>
   {% endblock %}
 
+Okay, you have the external files you need for your map. But you'll need to write a little JavaScript to make a map object, and give it coordinates. We're going to use Chicago, first.
+
+Add a js directory to the project root, and make a file named maps.js. Write a document.ready function in it. Inside your document.ready, make a Leaflet map object, store it in a variable named map that references the map element on your index page::
+
+$(document).ready(function(){
+
+  var map = L.map('map').setView([41.838299, -87.706953], 11);
+
+});
+
+This sets the latitude and longitude, and then the zoom level of the tile.
+
+Next we'll give Leaflet the URL of a tileset, and set the max and min zoom levels for the tiles. We'll use Open Street Map's tileset.
+
+  L.tileLayer(
+    'http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+      attribution: 'Map data &copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
+      maxZoom: 16,
+      minZoom: 9
+  }).addTo(map);
+
+
+Wouldn't it be great to have a few coordinates stored in your project? Let's do that now.
+
+Go to your spreadsheet, and edit the data sheet to contain columns named city, latitude and longitude. Enter "Paris", "48.8567", and "2.3508" in your first row::
+
+Next, in maps.js, access the data and convert it to json in one fell swoop with this::
+
+var mydata = {{ data|tojson }}
+
+Storing it in mydata for convenience. Now you can easily change map views by using this syntax::
+
+var map = L.map('map').setView([mydata[0].latitude, mydata[0].longitude], 11);
 
