@@ -160,7 +160,7 @@ def tarbell_install(command, args):
             puts(testgit.clone(project_url, '.', *['--depth=1', '--bare']))
             config = testgit.show("HEAD:tarbell_config.py")
             puts("\n- Found tarbell_config.py")
-            path = _get_path(project_name, settings, mkdir=True)
+            path = _get_path(_clean_suffix(project_name, ".git"), settings, mkdir=True)
             git = sh.git.bake(_cwd=path)
             puts(git.clone(project_url, '.'))
             puts(git.submodule.update(*['--init', '--recursive']))
@@ -404,6 +404,22 @@ def _get_project_title():
 
         return title
 
+
+def _clean_suffix(string, suffix):
+    """If string endswith the suffix, remove it. Else leave it alone"""
+    suffix_len = len(suffix)
+
+    if len(string) < suffix_len:
+        # the string param was shorter than the suffix
+        raise ValueError("A suffix can not be bigger than string argument.")
+    if string.endswith(suffix):
+        # return from the beginning up to
+        # but not including the first letter
+        # in the suffix
+        return string[0:-suffix_len]   
+    else:
+        # leave unharmed
+        return string
 
 def _get_path(name, settings, mkdir=True):
     """Generate a project path."""
