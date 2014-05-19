@@ -104,6 +104,11 @@ Now visit http://127.0.0.1:5000/ in a browser.
 
 You're ready to start editing your template.
 
+Structure your project
+======================
+It's a good idea to organize your project's files according to convention. That way everyone knows where to find things. Make directories named css, data, images and js in your _base/ directory to keep your project uncluttered.
+See `create <create.html>`_ for more detail about best practices when creating your projects.
+
 Add content
 ===========
 
