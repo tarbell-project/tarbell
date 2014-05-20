@@ -331,7 +331,7 @@ Reload your test page. Bingo!
 Now, such a message probably isn't very helpful to your users, so to create a more functional
 nav, copy the code out of _base/_nav.html, paste it into _nav.html,
 and rejigger the code as desired. It's all Bootstrap 3, so you might find it helpful to
-`view the Bootstrap navbar docs. <http://getbootstrap.com/components/#navbar>`_
+`view the Bootstrap navbar docs <http://getbootstrap.com/components/#navbar>`_.
 
 Putting it all together: Leaflet maps
 ====================================
