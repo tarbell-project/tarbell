@@ -5,9 +5,13 @@ Tutorial
 Let's build a website about celebrated Chicago journalist Ethel Payne!
 
 You'll need to have access to a command prompt (an application on your computer
-that allows you to execute text-based commands). On a Mac, search for the Terminal application.
-On a PC, search for the Command Prompt program. All of the commands we'll show you here
+that allows you to execute text-based commands). Search for the Terminal application.
+All of the commands we'll show you here
 will need to be typed into the command prompt.
+
+.. note::
+
+  Tarbell currently does not work on Windows machines.
 
 First you need to `install <install.html>`_ and `configure <install.html#configure-tarbell-with-tarbell-configure>`_
 Tarbell. (Make sure to set up a Google spreadsheet.) Go ahead. We'll wait.
@@ -108,8 +112,8 @@ Add content
 ===========
 
 In a browser, open the Google spreadsheet that you created during the project set up.
-This is where our website's content will live. You'll see three worksheets: *values*,
-*data* and *keyed_data*. Let's look at the values worksheet first.
+This is where our website's content will live. Let's look at the values worksheet (visible in
+the tabs in the bottom left) first.
 You should see something like this:
 
 .. image:: values_worksheet.png
@@ -128,9 +132,8 @@ Open your project's index.html page and find this line::
 
 .. note::
 
-To start creating pages, you'll need a text editor. (`Notepad++ <http://notepad-plus-plus.org/download/v6.6.1.html>`_ is a
-good starter editor for Windows, while `TextWrangler <http://www.barebones.com/products/textwrangler/>`_ is a
-good one for Macs.)
+To start creating pages, you'll need a text editor. (`TextWrangler <http://www.barebones.com/products/textwrangler/>`_ 
+is a good text editor.)
 
 Look at your page in the browser again and notice the headline matches what's
 in your Google spreadsheet under the *value* column with the *key* "headline".
@@ -236,7 +239,7 @@ it right now. The second block is what you'll want to extend.
 .. note::
 
   You'll only need to touch the library_css block if you need to do something like override the version of Bootstrap
-  included here. Otherwise, for adding project-wide styles, edit the base.css file.
+  included here.Otherwise, for adding project-wide styles, edit the base.css file.
 
 In your project root (i.e., not in base), create a css folder. Inside that, create a new style.css file and
 add some CSS rules::
@@ -279,6 +282,29 @@ your project root to hold all of your Javascript files. Then you can include the
   {% block scripts %}
   <script type="text/javascript" rel="js/project.css"></script>
   {% endblock %}
+
+
+Using ``{{ super() }}``
+======================
+
+Sometimes, you want to extend a CSS or Javascript block without overriding the stuff that's in the
+base. You can do that with the ``super()`` template tag. This will look at all of the things in the
+base version of the block, and add your new content to it rather than override it. For instance::
+
+  {% block library_scripts %}
+  {{ super() }}
+  <script src="js/app.js"></script>
+  {% endblock library_scripts %}
+
+This will yield this on the rendered page::
+
+  <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+  <script src="http://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.1.1/js/bootstrap.min.js"></script>
+  <script src="js/app.js"></script>
+
+Without ``super()``, you would merely end up with::
+
+  <script src="js/app.js"></script>
 
 Overriding default templates
 ============================
