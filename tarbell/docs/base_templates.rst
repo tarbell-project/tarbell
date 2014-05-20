@@ -1,11 +1,11 @@
 =========================
-Developing base templates
+Developing Tarbell Blueprints
 =========================
 
-Fork a base template or create your own
+Fork a blueprint or create your own
 ---------------------------------------
 
-Base templates should consist of `_base/base.py` and any additional files.
+Blueprints should consist of `_base/base.py` and any additional files.
 
 
 Defining filters and context processors in `_base/base.py`

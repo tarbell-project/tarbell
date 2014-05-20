@@ -104,6 +104,11 @@ Now visit http://127.0.0.1:5000/ in a browser.
 
 You're ready to start editing your template.
 
+Structure your project
+======================
+It's a good idea to organize your project's files according to convention. That way everyone knows where to find things. Make directories named css, data, images and js in your _base/ directory to keep your project uncluttered.
+See `create <create.html>`_ for more detail about best practices when creating your projects.
+
 Add content
 ===========
 
@@ -283,11 +288,11 @@ your project root to hold all of your Javascript files. Then you can include the
 Overriding default templates
 ============================
 
-While the Tarbell blueprint contains some very handy things in the _base directory,
+While the Tarbell blueprint contains some very handy things,
 you may find you need to override some of the provided templates. One of the most common
-case in which this occurs is the navigation.
+cases in which this occurs is the navigation.
 
-In the _base.html template, you can see that the nav is included just before the content starts::
+In the _base/_base.html template, you can see that the nav is included just before the content starts::
 
   {% block nav %}
     {% include "_nav.html" %}
@@ -307,6 +312,7 @@ nav, copy the code out of _base/_nav.html, paste it into _nav.html,
 and rejigger the code as desired. It's all Bootstrap 3, so you might find it helpful to
 `view the Bootstrap navbar docs.<http://getbootstrap.com/components/#navbar>`_
 
+
 Putting it all together: Leaflet maps
 ====================================
 
@@ -314,8 +320,7 @@ Let's set up a simple Leaflet map. Inside the content block, add a div that will
 
     <div id="map"></div>
 
-We'll need to set a height for this map with CSS, so let's create a stylesheet (by creating
-a css folder in the project root and making a styles.css file) and add that rule::
+We'll need to set a height for this map with CSS, so let's create a stylesheet (by creating a css folder in the project root and making a styles.css file) and add that rule::
 
   #map { height: 180px; }
 
@@ -332,4 +337,44 @@ Then add the Javascript library after the content block::
   <script src="http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.js"></script>
   {% endblock %}
 
+Okay, now you have the external files you need for your map. But you'll need to write a little JavaScript to make a map object, and give it coordinates, to display a location. We're going to use Chicago as our first location.
 
+Add a js directory to the project root, and create a file in it named maps.js. Write a document.ready function in maps.js. Inside your document.ready, make a Leaflet map object, store it in a variable named map that references the map element on your index page::
+
+  $(document).ready(function(){
+
+    var map = L.map('map').setView([41.838299, -87.706953], 11);
+
+  });
+
+This sets the latitude and longitude, and then the zoom level of the tile.
+
+Next we'll give Leaflet the URL of a tileset, and set the max and min zoom levels for the tiles. We'll use Open Street Map's tileset::
+
+  L.tileLayer(
+    'http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+      attribution: 'Map data &copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
+      maxZoom: 16,
+      minZoom: 9
+  }).addTo(map);
+
+
+Wouldn't it be great to have locations stored in your project, ready to drive any Leaflet maps you create? Let's make that happen now.
+
+Go to your Google spreadsheet, and edit the data sheet to contain columns named city, latitude and longitude. Enter the following data for Chicago, Paris and Berlin:
+
+.. image:: leaflet_data.png
+
+Next, in maps.js, access the data and convert it to json in one fell swoop with this very handy Jinja filter::
+
+  var mydata = {{ data|tojson }}
+
+Storing it in mydata for convenience. Now you can easily change map views by using this syntax::
+
+  var map = L.map('map').setView([mydata[0].latitude, mydata[0].longitude], 11);
+
+  var map = L.map('map').setView([mydata[1].latitude, mydata[1].longitude], 11);
+
+For further reading on Leaflet Maps, including setting markers, we recommend this post:
+
+`Maps <http://docs.tribapps.com/maps.html>`_

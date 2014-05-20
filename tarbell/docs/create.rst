@@ -32,3 +32,15 @@ Run::
 e.g.::
 
   tarbell install https://github.com/sc3/26thandcalifornia.recoveredfactory.net
+
+Structure your project according to common convention
+-------------------------------------------------------------------
+Web application projects tend to follow pretty well-established patterns, especially in their directory names and structures. Making directories for your stylesheets, data, JavaScript files and images will not only keep you organized but will allow others to easily find what they are looking for.
+
+We recommend you make directories named css, data, js and images in your _base/directory, in keeping with Tribune conventions.
+
+
+
+
+
+

@@ -44,7 +44,15 @@ def tarbell_configure(command, args):
     if prompt or "path" in args:
         settings.update(_setup_tarbell_project_path(settings, path, prompt))
     if prompt or "templates" in args:
-        settings.update(_setup_default_templates(settings, path, prompt))
+        if "project_templates" in settings:
+            override_templates = raw_input("\nFound Base Template settings. Would you like to override them? [Default: No, 'none' to skip]")
+            if override_templates and override_templates != "No" and  override_templates != "no" and override_templates != "N" and override_templates != "n":
+                settings.update(_setup_default_templates(settings, path, prompt))
+            else:
+                puts("\nPreserving Base Template settings...")
+        else:
+            settings.update(_setup_default_templates(settings, path, prompt))
+
 
     with open(path, 'w') as f:
         puts("\nWriting {0}".format(colored.green(path)))
