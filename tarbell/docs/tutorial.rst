@@ -288,11 +288,11 @@ your project root to hold all of your Javascript files. Then you can include the
 Overriding default templates
 ============================
 
-While the Tarbell blueprint contains some very handy things in the _base directory,
+While the Tarbell blueprint contains some very handy things,
 you may find you need to override some of the provided templates. One of the most common
-case in which this occurs is the navigation.
+cases in which this occurs is the navigation.
 
-In the _base.html template, you can see that the nav is included just before the content starts::
+In the _base/_base.html template, you can see that the nav is included just before the content starts::
 
   {% block nav %}
     {% include "_nav.html" %}
