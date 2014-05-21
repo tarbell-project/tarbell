@@ -82,6 +82,7 @@ flag in `tarbell_config.py` to `True`. When you visit `yoursite.com/data.json`, 
 that will look something like this:
 
 .. code-block:: json
+
   {
     name: "ethelpayne",
     title: "Ethel Payne: A life in journalism",
@@ -103,11 +104,11 @@ that will look something like this:
     ]
   }
 
-Here's what's going on here: The first block of keys and values comes from the `values` workbook. The `data`
+The first block of keys and values comes from the `values` workbook. The `data`
 array represents another workbook. Any other workbooks you create within your spreadsheet will be represented
 as separate arrays.
 
-Optionally, you can use the CONTEXT_SOURCE_FILE setting in `tarbell_config.py` to determine your data source,
+Optionally, you can use the `CONTEXT_SOURCE_FILE` setting in `tarbell_config.py` to determine your data source,
 which can be a URL, local file, CSV or Excel file.
 
 .. note::
