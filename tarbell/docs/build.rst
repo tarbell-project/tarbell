@@ -65,7 +65,7 @@ Template inheritance: Override files from base by copying to your project direct
 Any file in the base template can be overridden in your project files.
 
 For example, if your base template includes a sample ``_base/_nav.html``, you can create a file named 
-``_nav.html`` in your project directory to override 
+``_nav.html`` in your project directory to override the default base nav.
 
 This works for all files, static or templates.
 
@@ -79,6 +79,47 @@ Configuring projects
 
 Project configuration is kept in the `tarbell_config.py` file in your project's base directory.
 See :ref:`tarbell-config` for configuration documentation.
+
+Creating JSON
+-------------
+
+You can publish the data coming from your Google spreadsheet as JSON if so desired. To do this, set the `CREATE_JSON`
+flag in `tarbell_config.py` to `True`. When you visit `yoursite.com/data.json`, Tarbell will create some JSON
+that will look something like this:
+
+.. code-block:: json
+  {
+    name: "ethelpayne",
+    title: "Ethel Payne: A life in journalism",
+    headline: "Ethel Payne, Chicago journalist",
+    quote: "I stick to my firm, unshakeable belief that the black press is an advocacy press, and that I, as a part of that press, can’t afford the luxury of being unbiased ... when it come to issues that really affect my people, and I plead guilty, because I think that I am an instrument of change.",
+    data: [
+      {
+        name: "Ethel Payne",
+        known_for: "civil rights journalism",
+        born: "8/14/1911",
+        died: 33386
+      }
+      {
+        name: "Grace Hopper",
+        known_for: "mathematics and computer programming",
+        born: "12/9/1906",
+        died: 33604
+      },
+    ]
+  }
+
+Here's what's going on here: The first block of keys and values comes from the `values` workbook. The `data`
+array represents another workbook. Any other workbooks you create within your spreadsheet will be represented
+as separate arrays.
+
+Optionally, you can use the CONTEXT_SOURCE_FILE setting in `tarbell_config.py` to determine your data source,
+which can be a URL, local file, CSV or Excel file.
+
+.. note::
+  The `data.json` file is created on the fly and will not appear in your project root. You can view and access
+  it locally at `127.0.0.1:5000/data.json`.
+
 
 Using context variables
 -----------------------
