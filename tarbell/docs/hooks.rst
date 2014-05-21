@@ -2,7 +2,7 @@
 Hooks
 =====
 
-Tarbell hooks allow project and base template developers to take actions during Tarbell project creation, projection installation, generation, and publishing.
+Tarbell hooks allow project and blueprint developers to take actions during Tarbell project creation, projection installation, generation, and publishing.
 
 To define a hook, edit `tarbell_config.py` or `base.py`::
 
@@ -12,7 +12,7 @@ To define a hook, edit `tarbell_config.py` or `base.py`::
   def create_tickets(site, git):
       # ... code to create tickets on service of your choice
 
-Here is a more advanced hook from the Bootstrap base template that prompts the user to create a new repo
+Here is a more advanced hook from the Bootstrap blueprint that prompts the user to create a new repo
 for their project on Github after project creation::
 
   import requests
