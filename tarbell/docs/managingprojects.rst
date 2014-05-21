@@ -17,8 +17,8 @@ Run preview server with `tarbell serve`
 
 You must be in a Tarbell project directory to run Tarbell serve.
 
-Update a project's base template with `tarbell update`
+Update a project's blueprint with `tarbell update`
 ------------------------------------------------------
 
-Run `tarbell update` to update a project's base template.
+Run `tarbell update` to update a project's blueprint.
 

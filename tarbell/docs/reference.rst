@@ -51,7 +51,7 @@ Publish a Tarbell project to Amazon S3 using optional target (configured in `tar
 
 **Usage:** `tarbell update`
 
-Updates base template with git submodule update.
+Updates blueprint with git submodule update.
 
 `tarbell generate`
 ------------------
@@ -89,4 +89,4 @@ Install a Tarbell project from the Git repository url specified.
 
 **Usage:** `tarbell install-template <git repository url>`
 
-Install a base template from the given repository url.
+Install a blueprint from the given repository url.
