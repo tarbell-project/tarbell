@@ -19,7 +19,7 @@ Tarbell. (Make sure to set up a Google spreadsheet.) Go ahead. We'll wait.
 Set up a new project
 ==============
 
-After you've got Tarbell configured, create a new project by typing this command into your prompt::
+Once Tarbell is configured, create a new project by typing this command into your prompt::
 
   tarbell newproject
 
@@ -104,14 +104,18 @@ Well, you heard the machine, you got this. Run the switch command to fire up a p
 
 Now visit http://127.0.0.1:5000/ in a browser.
 
-(You can also run your project by changing to the directory you created for it and running tarbell serve.)
-
+You can also run your project by changing to the proejct directory and running the command:: 
+  
+    tarbell serve.
+  
 You're ready to start editing your template.
 
 Structure your project
 ======================
-It's a good idea to organize your project's files according to convention. That way everyone knows where to find things. Make directories named css, data, images and js in your _base/ directory to keep your project uncluttered.
-See `create <create.html>`_ for more detail about best practices when creating your projects.
+It's a good idea to organize your project's files according to convention. That way everyone knows 
+where to find things. Make directories named css, data, images and js in your project root directory (i.e., not in _base) 
+to keep your project uncluttered. See the section for `creating and installing projects <create.html>`_ for 
+more detail about best practices when creating your projects.
 
 Add content
 ===========
@@ -128,17 +132,19 @@ Each of the values in the *values* column is available to your site when you use
 the matching *key* in your template.
 
 .. note::
-Header fields that start with underscores, like *_notes* does here, will not be made
-available to your template.
 
-Open your project's index.html page and find this line::
+  Header fields that start with underscores, like *_notes* does here, will not be made
+  available to your template.
+
+Open your project's index.html page and, assuming you chose the Basic Boostrap template (option 1),
+you should be able to find this line::
 
     <h1>{{ headline }}</h1>
 
 .. note::
 
-To start creating pages, you'll need a text editor. (`TextWrangler <http://www.barebones.com/products/textwrangler/>`_ 
-is a good text editor.)
+  To start creating pages, you'll need a text editor. (`TextWrangler <http://www.barebones.com/products/textwrangler/>`_ 
+  is a decent option.)
 
 Look at your page in the browser again and notice the headline matches what's
 in your Google spreadsheet under the *value* column with the *key* "headline".
@@ -159,12 +165,12 @@ Reload your site and look at the results!
 
 .. note::
 
-  Tarbell uses `Jinja2<http://jinja.pocoo.org/>`_ for templating. Read the `excellent documentation<http://jinja.pocoo.org/docs/>`_ to learn more about using Jinja.
+  Tarbell uses `Jinja2 <http://jinja.pocoo.org/>`_ for templating. Read the `excellent documentation <http://jinja.pocoo.org/docs/>`_ to learn more about using Jinja.
 
 Displaying data
 ===============
 
-Sometimes you need to display tabular data. Helpfully, the Google spreadsheet you
+Sometimes you need to display structured data. Helpfully, the Google spreadsheet you
 created has some data like this under the *data* worksheet. The best way to display
 this data in Tarbell is by using a for loop (using `Jinja2 <http://jinja.pocoo.org/>`_ syntax)::
 
@@ -246,7 +252,7 @@ it right now. The second block is what you'll want to extend.
   You'll only need to touch the library_css block if you need to do something like override the version of Bootstrap
   included here.Otherwise, for adding project-wide styles, edit the base.css file.
 
-In your project root (i.e., not in base), create a css folder. Inside that, create a new style.css file and
+In your project root (i.e., not in base), create a css folder, if you haven't done so already. Inside that, create a new style.css file and
 add some CSS rules::
 
   h2 { font-family: Georgia, serif; }
