@@ -250,7 +250,7 @@ it right now. The second block is what you'll want to extend.
 .. note::
 
   You'll only need to touch the library_css block if you need to do something like override the version of Bootstrap
-  included here.Otherwise, for adding project-wide styles, edit the base.css file.
+  included here. Otherwise, for adding project-wide styles, edit the base.css file.
 
 In your project root (i.e., not in base), create a css folder, if you haven't done so already. Inside that, create a new style.css file and
 add some CSS rules::
@@ -320,9 +320,9 @@ Without ``super()``, you would merely end up with::
 Overriding default templates
 ============================
 
-While the Tarbell blueprint contains some very handy things,
-you may find you need to override some of the provided templates. One of the most common
-cases in which this occurs is the navigation.
+While the Tarbell blueprint (`see more on blueprints <http://tarbell.readthedocs.org/en/0.9-beta5/build.html>`_) 
+contains some very handy things, you may find you need to override some of the provided templates. One of 
+the most common cases in which this occurs is the navigation.
 
 In the _base/_base.html template, you can see that the nav is included just before the content starts::
 
@@ -352,7 +352,7 @@ Let's set up a simple Leaflet map. Inside the content block, add a div that will
 
     <div id="map"></div>
 
-We'll need to set a height for this map with CSS, so let's create a stylesheet (by creating a css folder in the project root and making a styles.css file) and add that rule::
+We'll need to set a height for this map in the CSS file created earlier called style.css with the following rule::
 
   #map { height: 180px; }
 
@@ -369,9 +369,13 @@ Then add the Javascript library after the content block::
   <script src="http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.js"></script>
   {% endblock %}
 
-Okay, now you have the external files you need for your map. But you'll need to write a little JavaScript to make a map object, and give it coordinates, to display a location. We're going to use Chicago as our first location.
+Okay, now you have the external files you need for your map. But you'll need to write a little JavaScript 
+to make a map object, and give it coordinates, to display a location. We're going to use Chicago as our 
+first location.
 
-Add a js directory to the project root, and create a file in it named maps.js. Write a document.ready function in maps.js. Inside your document.ready, make a Leaflet map object, store it in a variable named map that references the map element on your index page::
+Add a js directory to the project root, and create a file in it named maps.js. Write a document.ready 
+function in maps.js. Inside your document.ready, make a Leaflet map object, store it in a variable named 
+map that references the map element on your index page::
 
   $(document).ready(function(){
 
@@ -381,7 +385,8 @@ Add a js directory to the project root, and create a file in it named maps.js. W
 
 This sets the latitude and longitude, and then the zoom level of the tile.
 
-Next we'll give Leaflet the URL of a tileset, and set the max and min zoom levels for the tiles. We'll use Open Street Map's tileset::
+Next we'll give Leaflet the URL of a tileset, and set the max and min zoom levels for the tiles. 
+We'll use Open Street Map's tileset::
 
   L.tileLayer(
     'http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
