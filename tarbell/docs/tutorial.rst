@@ -382,8 +382,10 @@ map that references the map element on your index page::
     var map = L.map('map').setView([41.838299, -87.706953], 11);
 
   });
-
-This sets the latitude and longitude, and then the zoom level of the tile.
+  
+Leaflet map objects give you a great deal of control over your map's appearance and behavior. The most basic settings 
+are made via the setView method, which controls latitude, longitude and zoom levels. Leaflet exposes many methods and properties 
+to manage the state of your map, though, and we definitely encourage you to check out `their docs <http://leafletjs.com/reference.html>_` and continue experimenting at the end of this tutorial. 
 
 Next we'll give Leaflet the URL of a tileset, and set the max and min zoom levels for the tiles. 
 We'll use Open Street Map's tileset::
@@ -406,11 +408,18 @@ Next, in maps.js, access the data and convert it to json in one fell swoop with 
 
   var mydata = {{ data|tojson }}
 
-Storing it in mydata for convenience. Now you can easily change map views by using this syntax::
+We store it in mydata for convenience. Now you can easily change map views by using this syntax::
 
   var map = L.map('map').setView([mydata[0].latitude, mydata[0].longitude], 11);
 
   var map = L.map('map').setView([mydata[1].latitude, mydata[1].longitude], 11);
+
+Want to have your map show you the whole world? Try this::
+
+map.fitWorld().zoomIn();
+
+And there you go! You should now have your own working Leaflet map, capable of displaying data on three major 
+cites or the whole world at once.
 
 For further reading on Leaflet Maps, including setting markers, we recommend this post:
 
