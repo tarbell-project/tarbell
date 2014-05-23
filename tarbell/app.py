@@ -233,8 +233,6 @@ class TarbellSite:
         except AttributeError:
             return hooks
 
-        #@TODO traverse hooks
-
     def call_hook(self, hook, *args, **kwargs):
         if len(self.hooks[hook]):
             puts("-- Calling {0} hooks --".format(colored.red(hook)))
