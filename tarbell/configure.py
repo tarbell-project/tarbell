@@ -17,7 +17,7 @@ from datetime import datetime
 from clint.textui import colored, puts
 
 from .settings import Settings
-from .oauth import get_drive_api
+from .oauth import get_drive_api_from_client_secrets
 from .utils import list_get, get_config_from_args, show_error
 
 try:
@@ -135,7 +135,7 @@ def _setup_google_spreadsheets(settings, path, prompt=True):
     # Now, try and obtain the API for the first time
     get_api = raw_input("Would you like to authenticate your client_secrets.json? [Y/n] ")
     if get_api == '' or get_api.lower().startswith('y'):
-        get_drive_api(dirname, reset_creds=True)
+        get_drive_api_from_client_secrets(dirname, reset_creds=True)
 
     ret = {}
     default_account = settings.get("google_account", "")

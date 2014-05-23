@@ -17,7 +17,7 @@ parser = ArgumentParser(description=__doc__,
 flags = parser.parse_args(['--noauth_local_webserver'])
 
 
-def get_drive_api(path=None, reset_creds=False):
+def get_drive_api_from_client_secrets(path=None, reset_creds=False):
     """
     Reads the local client secrets file if available (otherwise, opens a
     browser tab to walk through the OAuth 2.0 process, and stores the client
@@ -35,6 +35,12 @@ def get_drive_api(path=None, reset_creds=False):
         credentials = tools.run_flow(flow, storage, flags)
         storage.put(credentials)
 
+    return _get_drive_api(credentials)
+
+
+def get_drive_api_from_file(path):
+    f = open(path)
+    credentials = client.OAuth2Credentials.from_json(f.read())
     return _get_drive_api(credentials)
 
 
