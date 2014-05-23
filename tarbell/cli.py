@@ -31,7 +31,7 @@ if __name__ == "__main__" and __package__ is None:
     __package__ = "tarbell.cli"
 
 from .app import pprint_lines, process_xlsx, copy_global_values
-from .oauth import get_drive_api
+from .oauth import get_drive_api_from_client_secrets
 from .contextmanagers import ensure_settings, ensure_project
 from .configure import tarbell_configure
 from .utils import list_get, black, split_sentences, show_error, get_config_from_args
@@ -516,7 +516,7 @@ def _create_spreadsheet(name, title, path, settings):
         show_error("_base/_spreadsheet.xlsx doesn't exist!")
         return None
 
-    service = get_drive_api(settings.path)
+    service = get_drive_api_from_client_secrets(settings.path)
     body = {
         'title': '{0} (Tarbell)'.format(title),
         'description': '{0} ({1})'.format(title, name),

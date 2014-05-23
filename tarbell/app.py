@@ -24,10 +24,10 @@ from werkzeug.wsgi import FileWrapper
 from utils import filter_files
 from clint.textui import puts, colored
 
-from .oauth import get_drive_api
+from .oauth import get_drive_api_from_client_secrets, get_drive_api_from_file
 from .hooks import hooks
 # in seconds
-SPREADSHEET_CACHE_TTL = 4 
+SPREADSHEET_CACHE_TTL = 4
 
 # all spreadsheet values except empty string
 VALID_CELL_TYPES = range(1, 5)
@@ -257,9 +257,18 @@ class TarbellSite:
         filename, pathname, description = imp.find_module('tarbell_config', [path])
         project = imp.load_module('project', filename, pathname, description)
 
+        # @TODO factor into command line flag?
+        try:
+            project.CREDENTIALS_PATH
+        except AttributeError:
+            project.CREDENTIALS_PATH = None
+
         try:
             self.key = project.SPREADSHEET_KEY
-            self.client = get_drive_api(self.path)
+            if project.CREDENTIALS_PATH:
+                self.client = get_drive_api_from_file(project.CREDENTIALS_PATH)
+            else:
+                self.client = get_drive_api_from_client_secrets(self.path)
         except AttributeError:
             self.key = None
             self.client = None
@@ -462,7 +471,10 @@ class TarbellSite:
         except BadStatusLine:
             # Stale connection, reset API and data
             puts("Connection reset, reloading drive API")
-            self.client = get_drive_api(self.path)
+            if self.CREDENTIALS_PATH:
+                self.client = get_drive_api_from_file(self.CREDENTIALS_PATH)
+            else:
+                self.client = get_drive_api_from_client_secrets(self.path)
             self.data = {}
             return self._get_context_from_gdoc(key)
 
