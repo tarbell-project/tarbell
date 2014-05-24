@@ -37,6 +37,7 @@ TEMPLATE_TYPES = [
     "text/html",
     "text/css",
     "application/javascript",
+    "application/json",
 ]
 
 def split_template_path(template):
