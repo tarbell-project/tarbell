@@ -23,7 +23,7 @@ Once Tarbell is configured, create a new project by typing this command into you
 
   tarbell newproject
 
-You'll need to answer a few questions. It will go something like this::
+You'll need to answer a few questions. What will its name be, where on your computer will it live? And a few others about its data sources and management. Anytme you see something in brackets, you are being prompted with a default answer, and can just hit enter if you wish to accept it. The process will go something like this::
 
   tarbell newproject
 
@@ -33,7 +33,9 @@ You'll need to answer a few questions. It will go something like this::
 
   What is the project's full title? (e.g. My awesome project) Ethel Payne: A life in journalism
 
-  Pick a template
+You will be asked to choose which blueprint you wish to be the foundation of your project. Blueprints can be expanded upon but are very useful for setting the basic configurations necessary for the kinds of projects they have been designed for. See `this page <http://flask.pocoo.org/docs/blueprints/>`_ for more about blueprints, and go ahead and pick one::
+  
+  Pick a Tarbell Blueprint
 
     [1] Basic Bootstrap 3 template
         https://github.com/newsapps/tarbell-template
@@ -47,11 +49,15 @@ You'll need to answer a few questions. It will go something like this::
 
   Checking connectivity... done
 
+At this point Tarbell will prompt you to make a Google spreadsheet, and if you didn't do this during the `install <install.html>`_ and `configure <install.html#configure-tarbell-with-tarbell-configure>`_ part of the tutorial, it's a good idea to do it now. Tarbell will look for the Google settings you'll need::
+
   client_secrets found. Would you like to create a Google spreadsheet? [Y/n] y
 
   What Google account should have access to this this spreadsheet? (Use a full email address, such as your.name@gmail.com or the Google account equivalent.)
 
   Success! View the spreadsheet at https://docs.google.com/spreadsheet/your_key_will_go_here
+
+Now Tarbell installs your project's files and creates a git repo for your code::
 
   Copying configuration file
 
@@ -72,6 +78,8 @@ You'll need to answer a few questions. It will go something like this::
   create mode 100644 index.html
   create mode 100644 tarbell_config.py
 
+At this point you might have the option to work with some project management tools, and you will definitely be prompted to use Github for sharing your code::  
+
   -- Calling newproject hooks --
   --- Calling create_repo
   Want to create a Github repo for this project [Y/n]? n
@@ -85,6 +93,8 @@ You'll need to answer a few questions. It will go something like this::
 
   cd /Users/davideads/tarbell/ethelpayne
   tarbell serve
+
+And if all has gone well? You will see this message::
 
   You got this!
 
