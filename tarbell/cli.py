@@ -351,14 +351,8 @@ def tarbell_newproject(command, args):
         # Create spreadsheet
         key = _create_spreadsheet(name, title, path, settings)
 
-        # Add Google Analytics ID
-        use = raw_input("\nWould you like to use Google Analytics [Y/n]? ")
-        ga_id = ""
-        if use.lower() == "y":
-            ga_id = raw_input("\nWhat is the Google Analytics ID to use for this project? [Typically formatted like UA-XXXXXXX-Y] ")
-
         # Create config file
-        _copy_config_template(name, title, template, path, key, ga_id, settings)
+        _copy_config_template(name, title, template, path, key, settings)
 
         # Copy html files
         puts(colored.green("\nCopying html files..."))
@@ -556,7 +550,7 @@ def _add_user_to_file(file_id, service, user_email,
         print 'An error occurred: %s' % error
 
 
-def _copy_config_template(name, title, template, path, key, ga_id, settings):
+def _copy_config_template(name, title, template, path, key, settings):
         """Get and render tarbell_config.py.template from base"""
         puts("\nCopying configuration file")
         context = settings.config
@@ -569,7 +563,6 @@ def _copy_config_template(name, title, template, path, key, ga_id, settings):
             "title": title,
             "template_repo_url": template.get('url'),
             "key": key,
-            "ga_id": ga_id
         })
 
         # @TODO refactor this a bit
