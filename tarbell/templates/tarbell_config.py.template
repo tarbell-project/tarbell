@@ -27,9 +27,6 @@ EXCLUDES = ["*.md", "requirements.txt"]
 # used.
 # CONTEXT_SOURCE_FILE = ""
 
-# Google Analytics ID to track this site
-{% if not ga_id %}#{% endif %}GOOGLE_ANALYTICS_ID = "{{ ga_id }}"
-
 # S3 bucket configuration
 {% if not default_s3_buckets %}#{% endif %}S3_BUCKETS = {
     # Provide target -> s3 url pairs, such as:

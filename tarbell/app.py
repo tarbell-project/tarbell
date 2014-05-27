@@ -272,11 +272,6 @@ class TarbellSite:
             self.client = None
 
         try:
-            self.ga_id = project.GOOGLE_ANALYTICS_ID
-        except AttributeError:
-            self.ga_id = ''
-
-        try:
             project.CREATE_JSON
         except AttributeError:
             project.CREATE_JSON = False
@@ -351,7 +346,6 @@ class TarbellSite:
                 "PATH": path,
                 "SPREADSHEET_KEY": self.key,
                 "BUCKETS": self.project.S3_BUCKETS,
-                "GOOGLE_ANALYTICS_ID": self.ga_id,
             })
             if extra_context:
                 context.update(extra_context)
