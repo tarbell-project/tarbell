@@ -35,7 +35,7 @@ settings.update(
         "MarkupSafe==0.23",
         "PyYAML==3.11",
         "boto==2.28.0",
-        "clint==0.3.1",
+        "clint==0.3.7",
         "docutils==0.11",
         "google-api-python-client==1.2",
         "keyring==3.8",

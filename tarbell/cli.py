@@ -20,7 +20,7 @@ import tempfile
 
 from apiclient import errors
 from apiclient.http import MediaFileUpload as _MediaFileUpload
-from clint import args
+from clint import arguments
 from clint.textui import colored, puts
 from subprocess import call
 
@@ -37,10 +37,14 @@ from .configure import tarbell_configure
 from .utils import list_get, black, split_sentences, show_error, get_config_from_args
 from .s3 import S3Url, S3Sync
 
+# Load readline if possible
 try:
     import readline
 except ImportError:
-    pass
+    show_error("Could not import readline.")
+
+# Set args
+args = arguments.Args()
 
 # --------
 # Dispatch
@@ -236,23 +240,31 @@ def tarbell_list(command, args):
             colored.yellow(projects_path)
         ))
 
+        longest_title = 0
+        projects = []
         for directory in os.listdir(projects_path):
             project_path = os.path.join(projects_path, directory)
             try:
                 filename, pathname, description = imp.find_module('tarbell_config', [project_path])
                 config = imp.load_module(directory, filename, pathname, description)
-                puts("{0:30} {1}".format(
-                    colored.red(config.NAME),
-                    colored.cyan(config.TITLE)
-                ))
-
-                puts("{0}".format(colored.yellow(project_path))),
-                puts("")
-
+                projects.append((project_path, config))
+                if len(config.TITLE) > longest_title:
+                    longest_title = len(config.TITLE)
             except ImportError:
                 pass
 
-        puts("Use {0} to switch to a project\n".format(
+        fmt = "{0: <"+str(longest_title+1)+"} {1}"
+        puts(fmt.format(
+            'title',
+            'path'
+        ))
+        for path, config in projects:
+            puts(colored.yellow(fmt.format(
+                config.TITLE,
+                colored.cyan(path)
+            )))
+
+        puts("\nUse {0} to switch to a project\n".format(
             colored.green("tarbell switch <projectname>")
             ))
 
