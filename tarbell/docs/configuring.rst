@@ -75,6 +75,6 @@ This example shows every possible setting.
     Define S3 credentials using a ``bucket-uri->{ access_key_id: ..., secret_access_key: ...}`` data strucutre. 
 
 Google SDK client secrets (``~/.tarbell/client_secrets.json``)
------------------------------------------------------------------
+--------------------------------------------------------------
 
 Place a ``client_secrets.json`` file in ``~/.tarbell`` or use ``tarbell configure drive``.
