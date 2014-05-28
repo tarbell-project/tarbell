@@ -27,28 +27,20 @@ class EnsureSettings():
         self.path = get_config_from_args(args)
 
     def __enter__(self):
-        if (os.path.isfile(self.path)):
-            settings = Settings(self.path)
-            # beta2 and older check
-            if settings.config.get('s3_buckets'):
-                puts(colored.red("--- Warning! ---\n"))
-                puts("Your configuration file is out of date. Amazon S3 publishing will not work.")
-                puts("Run {0} to update your Amazon S3 configuration.".format(
-                    colored.yellow('tarbell configure s3')
-                    ))
-                puts(colored.red("\n----------------\n"))
-                if self.command.name == "publish":
-                    show_error("publish called, exiting.")
-                    sys.exit(1)
+        settings = Settings(self.path)
+        # beta2 and older check
+        if settings.config.get('s3_buckets'):
+            puts(colored.red("--- Warning! ---\n"))
+            puts("Your configuration file is out of date. Amazon S3 publishing will not work.")
+            puts("Run {0} to update your Amazon S3 configuration.".format(
+                colored.yellow('tarbell configure s3')
+                ))
+            puts(colored.red("\n----------------\n"))
+            if self.command.name == "publish":
+                show_error("publish called, exiting.")
+                sys.exit(1)
 
-            return settings
-
-        else:
-            puts("{0}: {1}".format(
-                colored.red("Warning:"),
-                "No Tarbell configuration found, please run `tarbell configure`."
-            ))
-            return {}
+        return settings
 
     def __exit__(self, type, value, traceback):
         # @TODO This isn't quite right, __enter__ does too much work.

@@ -306,7 +306,7 @@ def tarbell_publish(command, args):
             ))
 
             # Get creds
-            if settings.get("config"):
+            if settings.config:
                 # If settings has a config section, use it
                 kwargs = settings.config['s3_credentials'].get(bucket_url.root)
                 if not kwargs:
@@ -319,6 +319,7 @@ def tarbell_publish(command, args):
                     puts("Using custom bucket configuration for {0}".format(bucket_url.root))
             else:
                 # If no configuration exists, read from environment variables if possible
+                puts("Attemping to use AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY")
                 kwargs = {
                     'access_key_id': os.environ["AWS_ACCESS_KEY_ID"],
                     'secret_access_key': os.environ["AWS_SECRET_ACCESS_KEY"],
@@ -508,11 +509,10 @@ def _create_spreadsheet(name, title, path, settings):
     if not settings.client_secrets:
         return None
 
-    create = raw_input("{0} found. Would you like to create a Google spreadsheet? [Y/n] ".format(
-        colored.cyan("client_secrets")
-    ))
+    create = raw_input("Would you like to create a Google spreadsheet? [Y/n] ")
+
     if create and not create.lower() == "y":
-        return puts("Not creating spreadsheet...")
+        return puts("Not creating spreadsheet.")
 
     email_message = (
         "What Google account should have access to this "
