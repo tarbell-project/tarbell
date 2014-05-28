@@ -6,15 +6,14 @@ Let's build a website about celebrated Chicago journalist Ethel Payne!
 
 You'll need to have access to a command prompt (an application on your computer
 that allows you to execute text-based commands). Search for the Terminal application.
-All of the commands we'll show you here
-will need to be typed into the command prompt.
+All of the commands we'll show you here will need to be typed into the command prompt.
+
+First you need to `install <install.html>`_ and `configure <install.html#configure-tarbell-with-tarbell-configure>`_
+Tarbell. (Make sure to set up a Google spreadsheet.) Go ahead. We'll wait.
 
 .. note::
 
   Tarbell currently does not work on Windows machines.
-
-First you need to `install <install.html>`_ and `configure <install.html#configure-tarbell-with-tarbell-configure>`_
-Tarbell. (Make sure to set up a Google spreadsheet.) Go ahead. We'll wait.
 
 Set up a new project
 ====================
