@@ -6,7 +6,7 @@ Installation
 Install Tarbell with `pip install tarbell`
 ------------------------------------------
 
-::
+.. code-block:: bash
 
     pip install -e git+https://github.com/newsapps/flask-tarbell@0.9-beta5#egg=tarbell
 
@@ -35,19 +35,21 @@ install it inside a virtualenv.
 
 Here are some things to keep in mind if you use a virtualenv:
 
-* The Tarbell settings file `(~/.tarbell/settings.yaml)` is global, meaning all
+* The Tarbell settings file ``(~/.tarbell/settings.yaml)`` is global, meaning all
   Tarbell projects - whether inside a virtualenv or not - share the same
   settings. This includes the path that Tarbell expects to find all your
-  projects (i.e., where Tarbell will look when you run `tarbell list` and
-  `tarbell switch`.)
-* The `client_secrets.json` file used to authenticate to Google is also global,
+  projects (i.e., where Tarbell will look when you run ``tarbell list`` and
+  ``tarbell switch``.)
+* The ``client_secrets.json`` file used to authenticate to Google is also global,
   so you may run into problems using multiple Google accounts to access spreadsheets.
 
 
 Configure Tarbell with `tarbell configure`
 ------------------------------------------
 
-The `tarbell configure` command will set up your Tarbell settings::
+The ``tarbell configure`` command will set up your Tarbell settings
+
+.. code-block:: bash
 
   tarbell configure
 
@@ -105,18 +107,19 @@ Whew! Now you can download the ``client_secrets.json`` file:
 
 
 The file you download will be called something like 
-`client_secret_longstringofrandomlettersandnumbers.apps.googleusercontent.json`.
-
+``client_secret_longstringofrandomlettersandnumbers.apps.googleusercontent.json``.
 
 Rename it to `client_secrets.json`.
 
 Now, you do one of the following:
 
-* Copy `client_secrets.json` to `~/.tarbell/client_secrets.json`
-* Specify the `client_secret.json` download location when running `tarbell configure`. (Tarbell should be able to figure out where the file is automatically when you configure it.)
+* Copy ``client_secrets.json`` to ``~/.tarbell/client_secrets.json``.
+* Specify the ``client_secrets.json`` download location when running ``tarbell configure``. (By default, Tarbell will attempt to find this file in your ``Downloads`` directory.)
 
 The first time a Tarbell command needs access to a Google spreadsheet (say, while you're running `tarbell configure`), you'll be prompted to
-authenticate::
+authenticate
+
+.. code-block:: bash
 
   Go to the following link in your browser:
 
