@@ -27,6 +27,12 @@ EXCLUDES = ["*.md", "requirements.txt"]
 # used.
 # CONTEXT_SOURCE_FILE = ""
 
+# EXPERIMENTAL: Path to a credentials file to authenticate with Google Drive.
+# This is useful for for automated deployment. This option may be replaced by
+# command line flag or environment variable. Take care not to commit or publish
+# your credentials file.
+# CREDENTIALS_PATH = ""
+
 # S3 bucket configuration
 {% if not default_s3_buckets %}#{% endif %}S3_BUCKETS = {
     # Provide target -> s3 url pairs, such as:
