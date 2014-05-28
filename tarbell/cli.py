@@ -37,10 +37,11 @@ from .configure import tarbell_configure
 from .utils import list_get, black, split_sentences, show_error, get_config_from_args
 from .s3 import S3Url, S3Sync
 
+# Load readline if possible
 try:
     import readline
 except ImportError:
-    pass
+    show_error("Could not import readline.")
 
 # --------
 # Dispatch
