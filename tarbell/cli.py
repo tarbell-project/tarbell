@@ -85,9 +85,10 @@ def display_info(args):
     for command in Command.all_commands():
         usage = command.usage or command.name
         help = command.help or ''
-        puts('{0:50} {1}'.format(
-                colored.green(usage),
-                split_sentences(help)))
+        puts('{0: <37} {1}\n'.format(
+                usage,
+                colored.yellow(split_sentences(help, 37))
+        ))
 
     config = get_config_from_args(args)
     if not os.path.isfile(config):
