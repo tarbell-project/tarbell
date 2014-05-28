@@ -2,8 +2,8 @@
 Publishing
 ==========
 
-Manually publish projects with `tarbell generate <output_dir>`
---------------------------------------------------------------
+Manually publish projects with ``tarbell generate <output_dir>``
+----------------------------------------------------------------
 
 Generate HTML in a temporary directory::
 
@@ -14,21 +14,21 @@ Generate HTML in a specific directory::
   tarbell generate ~/output/myproject
 
 
-Publish projects with `tarbell publish <staging/production/target>`
--------------------------------------------------------------------
+Publish projects with ``tarbell publish <staging/production/target>``
+---------------------------------------------------------------------
 
 If Amazon S3 is configured, you can publish with::
 
   tarbell publish
 
-The default bucket is `staging`.
+The default bucket is ``staging``.
 
-You can specify a bucket when publishing (defined in `tarbell_config.py`)::
+You can specify a bucket when publishing (defined in ``tarbell_config.py``)::
 
   tarbell publish production
 
-Remove projects with `tarbell unpublish <staging/production/target>`
---------------------------------------------------------------------
+Remove projects with ``tarbell unpublish <staging/production/target>``
+----------------------------------------------------------------------
 
 Not implemented.
 
@@ -37,9 +37,9 @@ Configuring S3 buckets for a project
 
 As touched on in the
 `Configuring projects section <build.html#configuring-projects>`_, you can
-change the names and locations of your S3 buckets in the `tarbell_config.py`
-file for a given project. Often, projects have a `staging` version for testing,
-and a `production` version for the final product. However, these names are
+change the names and locations of your S3 buckets in the ``tarbell_config.py``
+file for a given project. Often, projects have a ``staging`` version for testing,
+and a ``production`` version for the final product. However, these names are
 entirely arbitrary, so you can pick anything you like.
 
 As an example, let's say you have 3 versions of your site: one for testing, one
@@ -51,7 +51,9 @@ to a specific directory.
 This example assumes the same AWS ID and secret access key can be used to authenticate
 with each of the targets.
 
-Create or update the `S3_BUCKETS` variable in `tarbell_config.py` as follows::
+Create or update the ``S3_BUCKETS`` variable in ``tarbell_config.py`` as follows:
+
+.. code-block:: python
 
   S3_BUCKETS = {
       "staging": "staging.tribapps.com/tarbell-staging",
@@ -62,7 +64,6 @@ Create or update the `S3_BUCKETS` variable in `tarbell_config.py` as follows::
 To push your site to http://staging.tribapps.com/tarbell-staging, run::
 
   tarbell publish staging
-
 
 To push your site to http://tarbell.tribapps.com, run::
 
