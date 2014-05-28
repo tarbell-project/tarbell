@@ -236,23 +236,36 @@ def tarbell_list(command, args):
             colored.yellow(projects_path)
         ))
 
+        longest_name = 0
+        longest_title = 0
+        projects = []
         for directory in os.listdir(projects_path):
             project_path = os.path.join(projects_path, directory)
             try:
                 filename, pathname, description = imp.find_module('tarbell_config', [project_path])
                 config = imp.load_module(directory, filename, pathname, description)
-                puts("{0:30} {1}".format(
-                    colored.red(config.NAME),
-                    colored.cyan(config.TITLE)
-                ))
-
-                puts("{0}".format(colored.yellow(project_path))),
-                puts("")
-
+                projects.append((project_path, config))
+                if len(config.NAME) > longest_name:
+                    longest_name = len(config.NAME)
+                if len(config.TITLE) > longest_title:
+                    longest_title = len(config.TITLE)
             except ImportError:
                 pass
 
-        puts("Use {0} to switch to a project\n".format(
+        fmt = "{0:"+str(longest_name + 12)+"} {1:"+str(longest_title + 12)+"} {2}"
+        puts(fmt.format(
+            'name',
+            'title',
+            'path'
+        ))
+        for path, config in projects:
+            puts(fmt.format(
+                colored.red(config.NAME),
+                colored.cyan(config.TITLE),
+                colored.yellow(path)
+            ))
+
+        puts("\nUse {0} to switch to a project\n".format(
             colored.green("tarbell switch <projectname>")
             ))
 
