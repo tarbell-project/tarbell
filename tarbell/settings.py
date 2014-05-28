@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import yaml
 import os
+from clint.textui import colored, puts
 
 
 class Settings:
@@ -13,7 +14,10 @@ class Settings:
             with open(self.path) as f:
                 self.config = yaml.load(f)
         except IOError:
-            pass
+            puts("{0}: {1}".format(
+                colored.red("Warning:"),
+                "No Tarbell configuration found, please run `tarbell configure`."
+            ))
 
         self.client_secrets = False
         client_secrets_path = os.path.join(os.path.dirname(self.path), "client_secrets.json")

@@ -85,9 +85,10 @@ def display_info(args):
     for command in Command.all_commands():
         usage = command.usage or command.name
         help = command.help or ''
-        puts('{0:50} {1}'.format(
-                colored.green(usage),
-                split_sentences(help)))
+        puts('{0: <37} {1}\n'.format(
+                usage,
+                colored.yellow(split_sentences(help, 37))
+        ))
 
     config = get_config_from_args(args)
     if not os.path.isfile(config):
@@ -303,16 +304,27 @@ def tarbell_publish(command, args):
                 colored.red(bucket_name),
                 colored.green(bucket_url)
             ))
+
             # Get creds
-            kwargs = settings.config['s3_credentials'].get(bucket_url.root)
-            if not kwargs:
-                kwargs = {
-                    'access_key_id': settings.config['default_s3_access_key_id'],
-                    'secret_access_key': settings.config['default_s3_secret_access_key'],
-                }
-                puts("Using default bucket credentials")
+            if settings.config:
+                # If settings has a config section, use it
+                kwargs = settings.config['s3_credentials'].get(bucket_url.root)
+                if not kwargs:
+                    kwargs = {
+                        'access_key_id': settings.config['default_s3_access_key_id'],
+                        'secret_access_key': settings.config['default_s3_secret_access_key'],
+                    }
+                    puts("Using default bucket credentials")
+                else:
+                    puts("Using custom bucket configuration for {0}".format(bucket_url.root))
             else:
-                puts("Using custom bucket configuration for {0}".format(bucket_url.root))
+                # If no configuration exists, read from environment variables if possible
+                puts("Attemping to use AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY")
+                kwargs = {
+                    'access_key_id': os.environ["AWS_ACCESS_KEY_ID"],
+                    'secret_access_key': os.environ["AWS_SECRET_ACCESS_KEY"],
+                }
+
 
             kwargs['excludes'] = site.project.EXCLUDES
             s3 = S3Sync(tempdir, bucket_url, **kwargs)
@@ -497,11 +509,10 @@ def _create_spreadsheet(name, title, path, settings):
     if not settings.client_secrets:
         return None
 
-    create = raw_input("{0} found. Would you like to create a Google spreadsheet? [Y/n] ".format(
-        colored.cyan("client_secrets")
-    ))
+    create = raw_input("Would you like to create a Google spreadsheet? [Y/n] ")
+
     if create and not create.lower() == "y":
-        return puts("Not creating spreadsheet...")
+        return puts("Not creating spreadsheet.")
 
     email_message = (
         "What Google account should have access to this "
