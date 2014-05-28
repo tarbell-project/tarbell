@@ -45,13 +45,14 @@ settings.update(
         "docutils==0.11",
         "sh==1.09",
         "sphinx_rtd_theme==0.1.5",
+        "readline==6.2.4.1",
         "Markdown==2.3.1"],
     entry_points={
         'console_scripts': [
             'tarbell = tarbell.cli:main',
         ],
     },
-    keywords=['Development Status :: 3 - alpha',
+    keywords=['Development Status :: 4 - beta',
           'License :: OSI Approved :: MIT License',
           'Operating System :: OS Independent',
           'Programming Language :: Python',

@@ -37,6 +37,10 @@ from .configure import tarbell_configure
 from .utils import list_get, black, split_sentences, show_error, get_config_from_args
 from .s3 import S3Url, S3Sync
 
+try:
+    import readline
+except ImportError:
+    pass
 
 # --------
 # Dispatch
