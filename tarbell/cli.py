@@ -304,16 +304,26 @@ def tarbell_publish(command, args):
                 colored.red(bucket_name),
                 colored.green(bucket_url)
             ))
+
             # Get creds
-            kwargs = settings.config['s3_credentials'].get(bucket_url.root)
-            if not kwargs:
-                kwargs = {
-                    'access_key_id': settings.config['default_s3_access_key_id'],
-                    'secret_access_key': settings.config['default_s3_secret_access_key'],
-                }
-                puts("Using default bucket credentials")
+            if settings.get("config"):
+                # If settings has a config section, use it
+                kwargs = settings.config['s3_credentials'].get(bucket_url.root)
+                if not kwargs:
+                    kwargs = {
+                        'access_key_id': settings.config['default_s3_access_key_id'],
+                        'secret_access_key': settings.config['default_s3_secret_access_key'],
+                    }
+                    puts("Using default bucket credentials")
+                else:
+                    puts("Using custom bucket configuration for {0}".format(bucket_url.root))
             else:
-                puts("Using custom bucket configuration for {0}".format(bucket_url.root))
+                # If no configuration exists, read from environment variables if possible
+                kwargs = {
+                    'access_key_id': os.environ["AWS_ACCESS_KEY_ID"],
+                    'secret_access_key': os.environ["AWS_SECRET_ACCESS_KEY"],
+                }
+
 
             kwargs['excludes'] = site.project.EXCLUDES
             s3 = S3Sync(tempdir, bucket_url, **kwargs)

@@ -23,6 +23,7 @@ class EnsureSettings():
     """Ensure the user has a Tarbell configuration."""
     def __init__(self, command, args):
         self.command = command
+        self.args = args
         self.path = get_config_from_args(args)
 
     def __enter__(self):
@@ -43,17 +44,11 @@ class EnsureSettings():
             return settings
 
         else:
-            puts("\n{0}: {1}".format(
+            puts("{0}: {1}".format(
                 colored.red("Warning:"),
-                "No Tarbell configuration found, running {0}.".format(
-                    colored.green("tarbell configure")
-                )
+                "No Tarbell configuration found, please run `tarbell configure`."
             ))
-            settings = tarbell_configure(self.args)
-            puts("\n\n Trying to run {0} again".format(
-                colored.yellow("tarbell {0}".format(self.args.get(0)))
-            ))
-            return settings
+            return {}
 
     def __exit__(self, type, value, traceback):
         # @TODO This isn't quite right, __enter__ does too much work.
