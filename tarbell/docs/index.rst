@@ -21,8 +21,7 @@ Need help? `Join the email list <https://groups.google.com/forum/#!forum/tarbell
 
 *Tarbell is named after Ida Tarbell, a distinguished muckraking journalist whose
 1904 The History of the Standard Oil Company is a masterpiece of investigative
-reporting. `Read more about her on Wikipedia
-<http://en.wikipedia.org/wiki/Ida_Tarbell>`_.*
+reporting.* `Read more about her on Wikipedia <http://en.wikipedia.org/wiki/Ida_Tarbell>`_.
 
 Anatomy of a Tarbell project
 ================
