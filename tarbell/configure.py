@@ -20,10 +20,6 @@ from .settings import Settings
 from .oauth import get_drive_api_from_client_secrets
 from .utils import list_get, get_config_from_args, show_error
 
-try:
-    import readline
-except ImportError:
-    pass
 
 def tarbell_configure(command, args):
     """Tarbell configuration routine"""

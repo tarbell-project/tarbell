@@ -90,9 +90,9 @@ a new bucket::
 
   Please specify an additional bucket (e.g. additional.bucket.myorg.com/, leave blank to skip adding bucket) archive.tribapps.com
 
-  Please specify an AWS Access Key ID for this bucket: [AKIAIJPIGKFM3K36WADA] XXXXXXXX
+  Please specify an AWS Access Key ID for this bucket: [XXXXXXXXX] XXXXXXXXX
 
-  Please specify an AWS Secret Access Key for this bucket: [hHymc92ZSm21VsTQtDyEXOyF/4GUKGQZxsEteX+F] XXXXXXXXXXXX
+  Please specify an AWS Secret Access Key for this bucket: [XXXXXXXXX] XXXXXXXXX
 
 Or add some lines to ``~/.tarbell/settings.yaml``::
 
