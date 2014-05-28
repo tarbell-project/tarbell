@@ -17,7 +17,7 @@ First you need to `install <install.html>`_ and `configure <install.html#configu
 Tarbell. (Make sure to set up a Google spreadsheet.) Go ahead. We'll wait.
 
 Set up a new project
-==============
+====================
 
 Once Tarbell is configured, create a new project by typing this command into your prompt::
 
@@ -282,7 +282,7 @@ Your text should now be styled!
 
 
 Using Javascript
-===============
+================
 
 You can include JavaScript on your page much the way you would include CSS. By default,
 these are the blocks available in _base.html::
@@ -300,13 +300,14 @@ don't need to mess with this.
 The *scripts* block can be extended in your templates. You'll want to create a *js* directory in
 your project root to hold all of your Javascript files. Then you can include them in your index.html
 (or other templates)::
+
   {% block scripts %}
   <script type="text/javascript" rel="js/project.css"></script>
   {% endblock %}
 
 
 Using ``{{ super() }}``
-======================
+=======================
 
 Sometimes, you want to extend a CSS or Javascript block without overriding the stuff that's in the
 base. You can do that with the ``super()`` template tag. This will look at all of the things in the
@@ -356,7 +357,7 @@ and rejigger the code as desired. It's all Bootstrap 3, so you might find it hel
 
 
 Putting it all together: Leaflet maps
-====================================
+=====================================
 
 Let's set up a simple Leaflet map. Inside the content block, add a div that will contain your map::
 

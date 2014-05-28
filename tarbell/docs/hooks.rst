@@ -118,4 +118,3 @@ Here's the `_fb_template` referenced above::
   <body></body>
 
   </html>
-

@@ -15,16 +15,15 @@ prompts help you set up and configure your project, so that publishing it is a b
 
 New here? Read the `Tarbell tutorial <tutorial.html>`_ or `install and configure Tarbell <install.rst>`_ to get started.
 
-.. note::
-
-Need help? `Join the email list <https://groups.google.com/forum/#!forum/tarbell-project>`_.
+Need help? `File a ticket tagged "support" in Github <https://github.com/newsapps/flask-tarbell/issues/new>`_.
 
 *Tarbell is named after Ida Tarbell, a distinguished muckraking journalist whose
 1904 The History of the Standard Oil Company is a masterpiece of investigative
 reporting.* `Read more about her on Wikipedia <http://en.wikipedia.org/wiki/Ida_Tarbell>`_.
 
 Anatomy of a Tarbell project
-================
+============================
+
 Tarbell projects are made up of four pieces:
 
 * The `core Tarbell library <https://github.com/newsapps/flask-tarbell>`_, installed when you run `pip install tarbell`

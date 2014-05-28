@@ -3,12 +3,12 @@ Managing projects
 =================
 
 Show all projects with `tarbell list`
-------------------------------------
+-------------------------------------
 
 `tarbell list` shows all projects in your Tarbell projects directory.
 
 Switch to a project with `tarbell switch <projectname>`
-----------------------------------------
+-------------------------------------------------------
 
 You can be in any directory, but the project must be in your default Tarbell projects directory.
 
