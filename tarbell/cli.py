@@ -20,7 +20,7 @@ import tempfile
 
 from apiclient import errors
 from apiclient.http import MediaFileUpload as _MediaFileUpload
-from clint import args
+from clint import arguments
 from clint.textui import colored, puts
 from subprocess import call
 
@@ -42,6 +42,9 @@ try:
     import readline
 except ImportError:
     show_error("Could not import readline.")
+
+# Set args
+args = arguments.Args()
 
 # --------
 # Dispatch
