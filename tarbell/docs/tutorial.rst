@@ -147,7 +147,9 @@ the matching *key* in your template.
   available to your template.
 
 Open your project's index.html page and, assuming you chose the Basic Boostrap template (option 1),
-you should be able to find this line::
+you should be able to find this line
+
+.. code-block:: django
 
     <h1>{{ headline }}</h1>
 
@@ -166,7 +168,9 @@ You can add as many keys and values as you like. We'll add a few.
 
 .. image:: addtl_values.png
 
-Now we need to reference these variables in the template. Go back to index.html and add::
+Now we need to reference these variables in the template. Go back to index.html and add
+
+.. code-block:: django
 
   <blockquote>{{ quote }}</blockquote>
   <p>from {{ quote_source }}</p>
@@ -182,7 +186,9 @@ Displaying data
 
 Sometimes you need to display structured data. Helpfully, the Google spreadsheet you
 created has some data like this under the *data* worksheet. The best way to display
-this data in Tarbell is by using a for loop (using `Jinja2 <http://jinja.pocoo.org/>`_ syntax)::
+this data in Tarbell is by using a for loop (using `Jinja2 <http://jinja.pocoo.org/>`_ syntax)
+
+.. code-block:: django
 
   {% for row in data %}
     <p>
@@ -196,12 +202,16 @@ You should see the following when you reload your page:
 **row1, column1**:	row1, column2
 **row2, column1**:	row2, column2
 
-Let's take a closer look at what's going on here::
+Let's take a closer look at what's going on here:
+
+.. code-block:: django
 
   {% for row in data %}
 
 This reads in every row in the *data* worksheet. If we called our worksheet "birthdates,"
-we could access that data by doing::
+we could access that data by doing:
+
+.. code-block:: django
 
   {% for row in birthdates %}
 
@@ -211,7 +221,9 @@ famous ladies who might have been friends of Ida Tarbell had they known one anot
 
 .. image:: addtl_columns.png
 
-Now let's edit our index.html again to display this information::
+Now let's edit our index.html again to display this information:
+
+.. code-block:: django
 
   {% for row in data %}
     <h2>{{ row.name }}</h2>
@@ -230,13 +242,15 @@ Adding CSS
 Out of the box, Tarbell gives you Bootstrap 3 CSS. Chances are, you'll want to extend
 this to add your own CSS to your project.
 
-To this point, we've ignored the *_base* directory in your project. Now's the time to
-dive in! You may have noticed this line up at the top of your index.html file::
+To this point, we've ignored the ``_base`` directory in your project. Now's the time to
+dive in! You may have noticed this line up at the top of your ``index.html`` file:
+
+.. code-block:: django
 
   {% extends "_base.html" %}
 
-The _base.html file is where all of the CSS, JavaScript and other goodies live. By "extending"
-_base.html, index.html has access to all of the things that live in the base. You can
+The ``_base.html`` file is where all of the CSS, JavaScript and other goodies live. By "extending"
+``_base.html``, index.html has access to all of the things that live in the base. You can
 `read more about how template inheritance works here. <http://jinja.pocoo.org/docs/templates/#template-inheritance>`_
 
 .. note::
@@ -245,7 +259,9 @@ _base.html, index.html has access to all of the things that live in the base. Yo
   is to use underscores for "partial" templates that represent small pieces of the page, like navigation
   and footers.
 
-There are two CSS blocks at the top of the page::
+There are two CSS blocks at the top of the page:
+
+.. code-block:: django
 
   {% block library_css %}
   <link rel="stylesheet" type="text/css" href="http://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.1.1/css/bootstrap.min.css" />
@@ -263,12 +279,16 @@ it right now. The second block is what you'll want to extend.
   included here. Otherwise, for adding project-wide styles, edit the base.css file.
 
 In your project root (i.e., not in base), create a css folder, if you haven't done so already. Inside that, create a new style.css file and
-add some CSS rules::
+add some CSS rules:
+
+.. code-block:: css
 
   h2 { font-family: Georgia, serif; }
   strong { color: #c7254e; }
 
-Now switch back over to your index.html and add the css block. Do this on line 2, after the base extension::
+Now switch back over to your index.html and add the css block. Do this on line 2, after the base extension:
+
+.. code-block:: django
 
   {% extends "_base.html" %}
 
@@ -285,7 +305,9 @@ Using Javascript
 ================
 
 You can include JavaScript on your page much the way you would include CSS. By default,
-these are the blocks available in _base.html::
+these are the blocks available in _base.html:
+
+.. code-block:: django
 
   {% block library_scripts %}
   <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
@@ -299,7 +321,10 @@ don't need to mess with this.
 
 The *scripts* block can be extended in your templates. You'll want to create a *js* directory in
 your project root to hold all of your Javascript files. Then you can include them in your index.html
-(or other templates)::
+(or other templates):
+
+
+.. code-block:: django
 
   {% block scripts %}
   <script type="text/javascript" rel="js/project.css"></script>
@@ -311,20 +336,26 @@ Using ``{{ super() }}``
 
 Sometimes, you want to extend a CSS or Javascript block without overriding the stuff that's in the
 base. You can do that with the ``super()`` template tag. This will look at all of the things in the
-base version of the block, and add your new content to it rather than override it. For instance::
+base version of the block, and add your new content to it rather than override it. For instance:
+
+.. code-block:: django
 
   {% block library_scripts %}
   {{ super() }}
   <script src="js/app.js"></script>
   {% endblock library_scripts %}
 
-This will yield this on the rendered page::
+This will yield this on the rendered page:
+
+.. code-block:: html
 
   <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
   <script src="http://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.1.1/js/bootstrap.min.js"></script>
   <script src="js/app.js"></script>
 
-Without ``super()``, you would merely end up with::
+Without ``super()``, you would merely end up with:
+
+.. code-block:: html
 
   <script src="js/app.js"></script>
 
@@ -335,7 +366,9 @@ While the Tarbell blueprint (`see more on blueprints <http://tarbell.readthedocs
 contains some very handy things, you may find you need to override some of the provided templates. One of 
 the most common cases in which this occurs is the navigation.
 
-In the _base/_base.html template, you can see that the nav is included just before the content starts::
+In the ``_base/_base.html`` template, you can see that the nav is included just before the content starts:
+
+.. code-block:: django
 
   {% block nav %}
     {% include "_nav.html" %}
@@ -343,15 +376,17 @@ In the _base/_base.html template, you can see that the nav is included just befo
 
   {% block content %}{% endblock content %}
 
-To override the default nav, create a new _nav.html file in your project root (at the same
-level as index.html, not within the _base directory). Type in a message to yourself::
+To override the default nav, create a new ``_nav.html`` file in your project root (at the same
+level as ``index.html``, not within the ``_base`` directory). Type in a message to yourself:
+
+.. code-block:: django
 
   Ida Tarbell would be proud of this website!
 
 Reload your test page. Bingo!
 
 Now, such a message probably isn't very helpful to your users, so to create a more functional
-nav, copy the code out of _base/_nav.html, paste it into _nav.html,
+nav, copy the code out of ``_base/_nav.html``, paste it into ``_nav.html``,
 and rejigger the code as desired. It's all Bootstrap 3, so you might find it helpful to
 `view the Bootstrap navbar docs <http://getbootstrap.com/components/#navbar>`_.
 
@@ -359,22 +394,30 @@ and rejigger the code as desired. It's all Bootstrap 3, so you might find it hel
 Putting it all together: Leaflet maps
 =====================================
 
-Let's set up a simple Leaflet map. Inside the content block, add a div that will contain your map::
+Let's set up a simple Leaflet map. Inside the content block, add a div that will contain your map:
+
+.. code-block:: django
 
     <div id="map"></div>
 
-We'll need to set a height for this map in the CSS file created earlier called style.css with the following rule::
+We'll need to set a height for this map in the CSS file created earlier called style.css with the following rule:
+
+.. code-block:: css
 
   #map { height: 180px; }
 
-Include the Leaflet CSS and your new stylesheet before the content block::
+Include the Leaflet CSS and your new stylesheet before the content block:
+
+.. code-block:: django
 
   {% block css %}
   <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.css" />
   <link rel="stylesheet" href="css/styles.css" />
   {% endblock %}
 
-Then add the Javascript library after the content block::
+Then add the Javascript library after the content block:
+
+.. code-block:: django
 
   {% block scripts %}
   <script src="http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.js"></script>
@@ -386,7 +429,9 @@ first location.
 
 Add a js directory to the project root, and create a file in it named maps.js. Write a document.ready 
 function in maps.js. Inside your document.ready, make a Leaflet map object, store it in a variable named 
-map that references the map element on your index page::
+map that references the map element on your index page:
+
+.. code-block:: javascript
 
   $(document).ready(function(){
 
@@ -399,7 +444,9 @@ are made via the setView method, which controls latitude, longitude and zoom lev
 to manage the state of your map, though, and we definitely encourage you to check out `their docs <http://leafletjs.com/reference.html>_` and continue experimenting at the end of this tutorial. 
 
 Next we'll give Leaflet the URL of a tileset, and set the max and min zoom levels for the tiles. 
-We'll use Open Street Map's tileset::
+We'll use Open Street Map's tileset:
+
+.. code-block:: javascript
 
   L.tileLayer(
     'http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
@@ -408,26 +455,30 @@ We'll use Open Street Map's tileset::
       minZoom: 9
   }).addTo(map);
 
-
 Wouldn't it be great to have locations stored in your project, ready to drive any Leaflet maps you create? Let's make that happen now.
 
 Go to your Google spreadsheet, and edit the data sheet to contain columns named city, latitude and longitude. Enter the following data for Chicago, Paris and Berlin:
 
 .. image:: leaflet_data.png
 
-Next, in maps.js, access the data and convert it to json in one fell swoop with this very handy Jinja filter::
+Next, in maps.js, access the data and convert it to json in one fell swoop with this very handy Jinja filter:
+
+.. code-block:: javascript
 
   var mydata = {{ data|tojson }}
 
-We store it in mydata for convenience. Now you can easily change map views by using this syntax::
+We store it in mydata for convenience. Now you can easily change map views by using this syntax:
+
+.. code-block:: javascript
 
   var map = L.map('map').setView([mydata[0].latitude, mydata[0].longitude], 11);
-
   var map = L.map('map').setView([mydata[1].latitude, mydata[1].longitude], 11);
 
-Want to have your map show you the whole world? Try this::
+Want to have your map show you the whole world? Try this:
 
-map.fitWorld().zoomIn();
+.. code-block:: javascript
+
+  map.fitWorld().zoomIn();
 
 And there you go! You should now have your own working Leaflet map, capable of displaying data on three major 
 cites or the whole world at once.
