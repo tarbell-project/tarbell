@@ -348,15 +348,60 @@ and rejigger the code as desired. It's all Bootstrap 3, so you might find it hel
 Putting it all together: Leaflet maps
 ====================================
 
-Let's set up a simple Leaflet map. Inside the content block, add a div that will contain your map::
+With Tarbell, you can use a Google spreadsheet to provide any kind of data to your page: text, image URLs, and 
+even latitude/longitude data that can power a map. We're going to show you how to use Tarbell to store
+geodata for a map.
+
+Set up the spreadsheet
+^^^^^^^^^^^^^^^^^^^^^^
+
+First, we need to create that Google spreadsheet to power the map. Go to the spreadsheet you created when you started
+your project, and edit the ``data`` workbook to contain columns named ``city``, ``latitude`` and ``longitude``.
+Then, select the visible cells with your mouse, and choose Format -> Number -> Plain text.
+(This will prevent Google from automatically converting your lat/longs to dates.)
+Enter the following data:
+
+*Chicago 41.838299 -87.706953*
+*Detroit 42.3314 -83.0458*
+*Minneapolis	44.9833	-93.2667*
+
+It should look like this:
+
+.. image:: leaflet_data.png
+
+Make a holder for the map
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Now, we're going to create what's called a "partial." This is an HTML file which gets parsed and
+added to another HTML file when Tarbell compiles your pages. (``_nav.html`` is a partial,
+as is ``_footer.html``.) We'll call it ``_map.html``. Open it up and add a div that will
+contain your map::
 
     <div id="map"></div>
 
-We'll need to set a height for this map in the CSS file created earlier called style.css with the following rule::
+.. note::
+  Partials are always prefaced with an underscore ``_``. This tells Tarbell to refrain from
+  compiling them as independent pages. Otherwise, your project would end up with pages like
+  `yoursite.com/_footer.html`. Anything you write in a partial could also be written directly on
+  a page, but using a partial makes it easier to reuse code. For instance, we may want to use our map on
+  every page on our site, but using a partial means we only store the code in one file, making it
+  easy to update and maintain.
+
+Give the map a height
+^^^^^^^^^^^^^^^^^^^^^
+
+We'll need to set a height for this map in the ``style.css`` CSS file created earlier with the following rule::
 
   #map { height: 180px; }
 
-Include the Leaflet CSS and your new stylesheet before the content block::
+Include map assets on the index page
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+On the ``index.html`` page, include the partial like so:::
+
+  {% include "_map.html" %}
+
+Include the Leaflet CSS and your new stylesheet before the content block on the index page::
 
   {% block css %}
   <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.css" />
@@ -367,51 +412,103 @@ Then add the Javascript library after the content block::
 
   {% block scripts %}
   <script src="http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.js"></script>
+  <script src="js/map.js"></script>
   {% endblock %}
 
-Okay, now you have the external files you need for your map. But you'll need to write a little JavaScript 
-to make a map object, and give it coordinates, to display a location. We're going to use Chicago as our 
-first location.
+You'll need to create a ``js`` directory in your project root. Within that, create a
+file named ``map.js`` (note that we included that in the block above). This is where we'll
+write a little bit of Javascript to make the map work.
 
-Add a js directory to the project root, and create a file in it named maps.js. Write a document.ready 
-function in maps.js. Inside your document.ready, make a Leaflet map object, store it in a variable named 
-map that references the map element on your index page::
 
-  $(document).ready(function(){
+Write some Javascript
+^^^^^^^^^^^^^^^^^^^^^
 
-    var map = L.map('map').setView([41.838299, -87.706953], 11);
+.. note::
 
-  });
+  Your Javascript should be enclosed in a  ``$(document).ready(function(){`` call,
+  which ensures that everything enclosed within will be loaded after the page has
+  loaded. For more information, `see this page. <http://learn.jquery.com/using-jquery-core/document-ready/>`_
 
-This sets the latitude and longitude, and then the zoom level of the tile.
+Now that everything else is set up, open your ``map.js`` file. First, let's access the data you put in
+your spreadsheet and convert it to JSON in one fell swoop with a very handy Jinja filter::
 
-Next we'll give Leaflet the URL of a tileset, and set the max and min zoom levels for the tiles. 
+  var map_data = {{ data|tojson }}
+
+This will turn the columns from the workbook called ``data`` into something that looks like this::
+
+  .. image:: map_data.png
+
+We can reference our city data in the rest of our Javascript now. So let's make the map!
+
+When we include ``leaflet.js`` on the page, it will create a Javascript object named ``L`` that allows us to access
+all the Leaflet functionality we need. We need to store that object in a variable that references the ``map`` div
+in ``_map.html``. We'll set the latitude and longitude to that of the first city (from the ``map_data`` variable),
+and then the zoom level of the tile (the lower the number, the farther out the map will be zoomed to start)::
+
+  var map = L.map('map').setView([41.838299, -87.706953], 6);
+
+This tells Leaflet to create a map and set the center of it to Chicago, with a default zoom level of 11.
+
+Next we'll give Leaflet the URL of a tileset to ``addTo``, and set the max and min zoom levels for the tiles.
 We'll use Open Street Map's tileset::
 
   L.tileLayer(
     'http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
       attribution: 'Map data &copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
       maxZoom: 16,
-      minZoom: 9
+      minZoom: 5
   }).addTo(map);
 
+.. note::
 
-Wouldn't it be great to have locations stored in your project, ready to drive any Leaflet maps you create? Let's make that happen now.
+  For more information about what this code does, see `our docs on creating Leaflet maps <http://docs.beta.tribapps.com/maps.html#how-to-use-leaflet-js>`_
 
-Go to your Google spreadsheet, and edit the data sheet to contain columns named city, latitude and longitude. Enter the following data for Chicago, Paris and Berlin:
+So now we have a map, but it would be really helpful to display some information on it. Let's add a marker for
+Chicago, by adding the lat/lon from the spreadsheet and then attaching it to the map::
 
-.. image:: leaflet_data.png
+  var chicagoMarker = L.marker([map_data[0].latitude, map_data[0].longitude]);
+  chicagoMarker.addTo(map);
 
-Next, in maps.js, access the data and convert it to json in one fell swoop with this very handy Jinja filter::
+Bingo, there's Chicago! Now, suppose we want to display a little information when you click on the city::
 
-  var mydata = {{ data|tojson }}
+  chicagoMarker.bindPopup('<h3>This is the city of ' + map_data[0].city + '</h3>');
 
-Storing it in mydata for convenience. Now you can easily change map views by using this syntax::
+Now, when you click on Chicago, the popup should show the name of the city.
 
-  var map = L.map('map').setView([mydata[0].latitude, mydata[0].longitude], 11);
+.. note::
 
-  var map = L.map('map').setView([mydata[1].latitude, mydata[1].longitude], 11);
+  Remember that we assigned the contents of your spreadsheet to the variable ``map_data``. Because we
+  converted that data to JSON, we can access the first element in the data by using the syntax ``[0]``. To
+  grab the second city, we'd use ``map_data[1]``, because in this instance, our counting is zero-indexed.
+  We can tell Javascript which column header we want to reference with the syntax ``.columname``. So
+  ``map_data[0].latitude`` translates to, "Give me the latitude column for the first city in the data."
 
-For further reading on Leaflet Maps, including setting markers, we recommend this post:
+You can see how we could easily create markers for the other two cities::
 
-`Maps <http://docs.tribapps.com/maps.html>`_
+  var detroitMarker = L.marker([map_data[0].latitude, map_data[1].longitude]);
+  detroitMarker.bindPopup('<h3>This is the city of ' + map_data[1].city + '</h3>');
+  detroitMarker.addTo(map);
+
+  var minneapolisMarker = L.marker([map_data[2].latitude, map_data[2].longitude]);
+  minneapolisMarker.bindPopup('<h3>This is the city of ' + map_data[2].city + '</h3>');
+  minneapolisMarker.addTo(map);
+
+Yay! But wait...what if we have *a lot* of other cities? This is going to take forever. There is a better way!
+Replace all the city marker code with this:::
+
+  for (i=0; i <= map_data.length; i++){
+      var marker = L.marker([map_data[i].latitude, map_data[i].longitude]);
+      marker.bindPopup('<h3>This is the city of ' + map_data[i].city + '</h3>');
+      marker.addTo(map);
+  }
+
+Now you're cooking with gas! This is a standard Javascript `for loop <http://www.tizag.com/javascriptT/javascriptfor.php>`_
+that creates a counter, ``i``. Note that instead of using numbers with ``map_data``, we're now using ``i`` instead.
+Each time the loop runs, as long as ``i`` is less than the number of items in the ``map_data`` array, ``i`` will be incremented. 
+So on the first pass, ``i`` will equal 0, and will pull in the information for Chicago. On the
+second pass, it will equal 1 and pull in the information for Detroit. Finally, it will equal 2, and will grab
+Minneapolis' information before it quits. This will work for a spreadsheet of 3 cities or 300.
+
+To delve deeper into what makes a Leaflet map tick, we recommend `reading the Tribune Leaflet docs <http://docs.tribapps.com/maps.html>`_.
+
+Happy Tarbelling!
