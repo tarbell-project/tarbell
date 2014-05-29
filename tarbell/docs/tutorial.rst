@@ -463,17 +463,23 @@ We'll use Open Street Map's tileset::
 
   For more information about what this code does, see `our docs on creating Leaflet maps <http://docs.beta.tribapps.com/maps.html#how-to-use-leaflet-js>`_
 
+.. image:: map_tiles.png
+
 So now we have a map, but it would be really helpful to display some information on it. Let's add a marker for
 Chicago, by adding the lat/lon from the spreadsheet and then attaching it to the map::
 
   var chicagoMarker = L.marker([map_data[0].latitude, map_data[0].longitude]);
   chicagoMarker.addTo(map);
 
+.. image:: chicago_marker.png
+
 Bingo, there's Chicago! Now, suppose we want to display a little information when you click on the city::
 
   chicagoMarker.bindPopup('<h3>This is the city of ' + map_data[0].city + '</h3>');
 
 Now, when you click on Chicago, the popup should show the name of the city.
+
+.. image:: popup.png
 
 .. note::
 
@@ -492,6 +498,9 @@ You can see how we could easily create markers for the other two cities::
   var minneapolisMarker = L.marker([map_data[2].latitude, map_data[2].longitude]);
   minneapolisMarker.bindPopup('<h3>This is the city of ' + map_data[2].city + '</h3>');
   minneapolisMarker.addTo(map);
+
+
+.. image:: final_map.png
 
 Yay! But wait...what if we have *a lot* of other cities? This is going to take forever. There is a better way!
 Replace all the city marker code with this:::
