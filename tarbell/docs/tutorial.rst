@@ -435,9 +435,9 @@ contain your map::
 Give the map a height
 ^^^^^^^^^^^^^^^^^^^^^
 
-We'll need to set a height for this map in the ``style.css`` CSS file created earlier with the following rule::
+We'll need to set a height and width for this map in the ``style.css`` CSS file created earlier with the following rule::
 
-  #map { height: 180px; }
+  #map { height: 600px; width: 600px; }
 
 Include map assets on the index page
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
