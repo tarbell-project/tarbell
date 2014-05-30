@@ -4,7 +4,9 @@ Hooks
 
 Tarbell hooks allow project and blueprint developers to take actions during Tarbell project creation, projection installation, generation, and publishing.
 
-To define a hook, edit `tarbell_config.py` or `base.py`::
+To define a hook, edit ``tarbell_config.py`` or ``base.py``:
+
+.. code-block:: python
 
   from tarbell.hooks import register_hook
 
@@ -13,7 +15,9 @@ To define a hook, edit `tarbell_config.py` or `base.py`::
       # ... code to create tickets on service of your choice
 
 Here is a more advanced hook from the Bootstrap blueprint that prompts the user to create a new repo
-for their project on Github after project creation::
+for their project on Github after project creation:
+
+.. code-block:: python
 
   import requests
   import getpass
@@ -47,7 +51,9 @@ for their project on Github after project creation::
           data = {'title': title, 'body': description}
           resp = requests.post('https://api.github.com/repos/{0}/{1}/issues'.format(user, name), auth=(user, password), headers=headers, data=json.dumps(data))
 
-Use the publish hook to update the Facebook cache::
+Use the publish hook to update the Facebook cache:
+
+.. code-block:: python
 
   import urllib
 
@@ -70,7 +76,9 @@ Use the publish hook to update the Facebook cache::
 
 Finally, here's a hook from a project's `tarbell_config.py` that publishes special social media stub
 pages for each row in a worksheet. This allows individual items to be shared from a single-page 
-listicle app::
+listicle app:
+
+.. code-block:: python
 
   import jinja2
 
@@ -100,7 +108,9 @@ listicle app::
           url = "http://{0}/{1}".format(s3.bucket.root, k.key)
           _ping_facebook(url)
 
-Here's the `_fb_template` referenced above::
+Here's the `_fb_template` referenced above:
+
+.. code-block:: html
 
   <html>
 
@@ -118,4 +128,3 @@ Here's the `_fb_template` referenced above::
   <body></body>
 
   </html>
-

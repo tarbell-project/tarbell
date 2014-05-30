@@ -6,24 +6,23 @@ Let's build a website about celebrated Chicago journalist Ethel Payne!
 
 You'll need to have access to a command prompt (an application on your computer
 that allows you to execute text-based commands). Search for the Terminal application.
-All of the commands we'll show you here
-will need to be typed into the command prompt.
+All of the commands we'll show you here will need to be typed into the command prompt.
+
+First you need to `install <install.html>`_ and `configure <install.html#configure-tarbell-with-tarbell-configure>`_
+Tarbell. (Make sure to set up a Google spreadsheet.) Go ahead. We'll wait.
 
 .. note::
 
   Tarbell currently does not work on Windows machines.
 
-First you need to `install <install.html>`_ and `configure <install.html#configure-tarbell-with-tarbell-configure>`_
-Tarbell. (Make sure to set up a Google spreadsheet.) Go ahead. We'll wait.
-
 Set up a new project
-==============
+====================
 
 Once Tarbell is configured, create a new project by typing this command into your prompt::
 
   tarbell newproject
 
-You'll need to answer a few questions. It will go something like this::
+You'll need to answer a few questions. What will its name be, where on your computer will it live? And a few others about its data sources and management. Anytme you see something in brackets, you are being prompted with a default answer, and can just hit enter if you wish to accept it. The process will go something like this::
 
   tarbell newproject
 
@@ -33,7 +32,9 @@ You'll need to answer a few questions. It will go something like this::
 
   What is the project's full title? (e.g. My awesome project) Ethel Payne: A life in journalism
 
-  Pick a template
+You will be asked to choose which blueprint you wish to be the foundation of your project. Blueprints can be expanded upon but are very useful for setting the basic configurations necessary for the kinds of projects they have been designed for. See `this page <http://flask.pocoo.org/docs/blueprints/>`_ for more about blueprints, and go ahead and pick one::
+  
+  Pick a Tarbell Blueprint
 
     [1] Basic Bootstrap 3 template
         https://github.com/newsapps/tarbell-template
@@ -47,11 +48,15 @@ You'll need to answer a few questions. It will go something like this::
 
   Checking connectivity... done
 
+At this point Tarbell will prompt you to make a Google spreadsheet, and if you didn't do this during the `install <install.html>`_ and `configure <install.html#configure-tarbell-with-tarbell-configure>`_ part of the tutorial, it's a good idea to do it now. Tarbell will look for the Google settings you'll need::
+
   client_secrets found. Would you like to create a Google spreadsheet? [Y/n] y
 
   What Google account should have access to this this spreadsheet? (Use a full email address, such as your.name@gmail.com or the Google account equivalent.)
 
   Success! View the spreadsheet at https://docs.google.com/spreadsheet/your_key_will_go_here
+
+Now Tarbell installs your project's files and creates a git repo for your code::
 
   Copying configuration file
 
@@ -72,6 +77,8 @@ You'll need to answer a few questions. It will go something like this::
   create mode 100644 index.html
   create mode 100644 tarbell_config.py
 
+At this point you might have the option to work with some project management tools, and you will definitely be prompted to use Github for sharing your code::  
+
   -- Calling newproject hooks --
   --- Calling create_repo
   Want to create a Github repo for this project [Y/n]? n
@@ -85,6 +92,8 @@ You'll need to answer a few questions. It will go something like this::
 
   cd /Users/davideads/tarbell/ethelpayne
   tarbell serve
+
+And if all has gone well? You will see this message::
 
   You got this!
 
@@ -137,7 +146,9 @@ the matching *key* in your template.
   available to your template.
 
 Open your project's index.html page and, assuming you chose the Basic Boostrap template (option 1),
-you should be able to find this line::
+you should be able to find this line
+
+.. code-block:: django
 
     <h1>{{ headline }}</h1>
 
@@ -156,7 +167,9 @@ You can add as many keys and values as you like. We'll add a few.
 
 .. image:: addtl_values.png
 
-Now we need to reference these variables in the template. Go back to index.html and add::
+Now we need to reference these variables in the template. Go back to index.html and add
+
+.. code-block:: django
 
   <blockquote>{{ quote }}</blockquote>
   <p>from {{ quote_source }}</p>
@@ -172,7 +185,9 @@ Displaying data
 
 Sometimes you need to display structured data. Helpfully, the Google spreadsheet you
 created has some data like this under the *data* worksheet. The best way to display
-this data in Tarbell is by using a for loop (using `Jinja2 <http://jinja.pocoo.org/>`_ syntax)::
+this data in Tarbell is by using a for loop (using `Jinja2 <http://jinja.pocoo.org/>`_ syntax)
+
+.. code-block:: django
 
   {% for row in data %}
     <p>
@@ -186,12 +201,16 @@ You should see the following when you reload your page:
 **row1, column1**:	row1, column2
 **row2, column1**:	row2, column2
 
-Let's take a closer look at what's going on here::
+Let's take a closer look at what's going on here:
+
+.. code-block:: django
 
   {% for row in data %}
 
 This reads in every row in the *data* worksheet. If we called our worksheet "birthdates,"
-we could access that data by doing::
+we could access that data by doing:
+
+.. code-block:: django
 
   {% for row in birthdates %}
 
@@ -201,7 +220,9 @@ famous ladies who might have been friends of Ida Tarbell had they known one anot
 
 .. image:: addtl_columns.png
 
-Now let's edit our index.html again to display this information::
+Now let's edit our index.html again to display this information:
+
+.. code-block:: django
 
   {% for row in data %}
     <h2>{{ row.name }}</h2>
@@ -220,13 +241,15 @@ Adding CSS
 Out of the box, Tarbell gives you Bootstrap 3 CSS. Chances are, you'll want to extend
 this to add your own CSS to your project.
 
-To this point, we've ignored the *_base* directory in your project. Now's the time to
-dive in! You may have noticed this line up at the top of your index.html file::
+To this point, we've ignored the ``_base`` directory in your project. Now's the time to
+dive in! You may have noticed this line up at the top of your ``index.html`` file:
+
+.. code-block:: django
 
   {% extends "_base.html" %}
 
-The _base.html file is where all of the CSS, JavaScript and other goodies live. By "extending"
-_base.html, index.html has access to all of the things that live in the base. You can
+The ``_base.html`` file is where all of the CSS, JavaScript and other goodies live. By "extending"
+``_base.html``, index.html has access to all of the things that live in the base. You can
 `read more about how template inheritance works here. <http://jinja.pocoo.org/docs/templates/#template-inheritance>`_
 
 .. note::
@@ -235,7 +258,9 @@ _base.html, index.html has access to all of the things that live in the base. Yo
   is to use underscores for "partial" templates that represent small pieces of the page, like navigation
   and footers.
 
-There are two CSS blocks at the top of the page::
+There are two CSS blocks at the top of the page:
+
+.. code-block:: django
 
   {% block library_css %}
   <link rel="stylesheet" type="text/css" href="http://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.1.1/css/bootstrap.min.css" />
@@ -253,12 +278,16 @@ it right now. The second block is what you'll want to extend.
   included here. Otherwise, for adding project-wide styles, edit the base.css file.
 
 In your project root (i.e., not in base), create a css folder, if you haven't done so already. Inside that, create a new style.css file and
-add some CSS rules::
+add some CSS rules:
+
+.. code-block:: css
 
   h2 { font-family: Georgia, serif; }
   strong { color: #c7254e; }
 
-Now switch back over to your index.html and add the css block. Do this on line 2, after the base extension::
+Now switch back over to your index.html and add the css block. Do this on line 2, after the base extension:
+
+.. code-block:: django
 
   {% extends "_base.html" %}
 
@@ -272,10 +301,12 @@ Your text should now be styled!
 
 
 Using Javascript
-===============
+================
 
 You can include JavaScript on your page much the way you would include CSS. By default,
-these are the blocks available in _base.html::
+these are the blocks available in _base.html:
+
+.. code-block:: django
 
   {% block library_scripts %}
   <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
@@ -289,31 +320,41 @@ don't need to mess with this.
 
 The *scripts* block can be extended in your templates. You'll want to create a *js* directory in
 your project root to hold all of your Javascript files. Then you can include them in your index.html
-(or other templates)::
+(or other templates):
+
+
+.. code-block:: django
+
   {% block scripts %}
   <script type="text/javascript" rel="js/project.css"></script>
   {% endblock %}
 
 
 Using ``{{ super() }}``
-======================
+=======================
 
 Sometimes, you want to extend a CSS or Javascript block without overriding the stuff that's in the
 base. You can do that with the ``super()`` template tag. This will look at all of the things in the
-base version of the block, and add your new content to it rather than override it. For instance::
+base version of the block, and add your new content to it rather than override it. For instance:
+
+.. code-block:: django
 
   {% block library_scripts %}
   {{ super() }}
   <script src="js/app.js"></script>
   {% endblock library_scripts %}
 
-This will yield this on the rendered page::
+This will yield this on the rendered page:
+
+.. code-block:: html
 
   <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
   <script src="http://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.1.1/js/bootstrap.min.js"></script>
   <script src="js/app.js"></script>
 
-Without ``super()``, you would merely end up with::
+Without ``super()``, you would merely end up with:
+
+.. code-block:: html
 
   <script src="js/app.js"></script>
 
@@ -324,7 +365,9 @@ While the Tarbell blueprint (`see more on blueprints <http://tarbell.readthedocs
 contains some very handy things, you may find you need to override some of the provided templates. One of 
 the most common cases in which this occurs is the navigation.
 
-In the _base/_base.html template, you can see that the nav is included just before the content starts::
+In the ``_base/_base.html`` template, you can see that the nav is included just before the content starts:
+
+.. code-block:: django
 
   {% block nav %}
     {% include "_nav.html" %}
@@ -332,21 +375,23 @@ In the _base/_base.html template, you can see that the nav is included just befo
 
   {% block content %}{% endblock content %}
 
-To override the default nav, create a new _nav.html file in your project root (at the same
-level as index.html, not within the _base directory). Type in a message to yourself::
+To override the default nav, create a new ``_nav.html`` file in your project root (at the same
+level as ``index.html``, not within the ``_base`` directory). Type in a message to yourself:
+
+.. code-block:: django
 
   Ida Tarbell would be proud of this website!
 
 Reload your test page. Bingo!
 
 Now, such a message probably isn't very helpful to your users, so to create a more functional
-nav, copy the code out of _base/_nav.html, paste it into _nav.html,
+nav, copy the code out of ``_base/_nav.html``, paste it into ``_nav.html``,
 and rejigger the code as desired. It's all Bootstrap 3, so you might find it helpful to
 `view the Bootstrap navbar docs <http://getbootstrap.com/components/#navbar>`_.
 
 
 Putting it all together: Leaflet maps
-====================================
+=====================================
 
 With Tarbell, you can use a Google spreadsheet to provide any kind of data to your page: text, image URLs, and 
 even latitude/longitude data that can power a map. We're going to show you how to use Tarbell to store
@@ -401,14 +446,24 @@ On the ``index.html`` page, include the partial like so:::
 
   {% include "_map.html" %}
 
-Include the Leaflet CSS and your new stylesheet before the content block on the index page::
+We'll need to set a height for this map in the CSS file created earlier called style.css with the following rule:
+
+.. code-block:: css
+
+  #map { height: 180px; }
+
+Include the Leaflet CSS and your new stylesheet before the content block:
+
+.. code-block:: django
 
   {% block css %}
   <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.css" />
   <link rel="stylesheet" href="css/styles.css" />
   {% endblock %}
 
-Then add the Javascript library after the content block::
+Then, after the content block, add the Leaflet Javascript library and a new file you will create:
+
+.. code-block:: django
 
   {% block scripts %}
   <script src="http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.js"></script>
@@ -447,10 +502,19 @@ and then the zoom level of the tile (the lower the number, the farther out the m
 
   var map = L.map('map').setView([41.838299, -87.706953], 6);
 
-This tells Leaflet to create a map and set the center of it to Chicago, with a default zoom level of 11.
+This tells Leaflet to create a map and set the center of it to Chicago, with a default zoom level of 6.
 
-Next we'll give Leaflet the URL of a tileset to ``addTo``, and set the max and min zoom levels for the tiles.
-We'll use Open Street Map's tileset::
+.. note::
+
+  Leaflet map objects give you a great deal of control over your map's appearance and behavior. The most basic settings
+  are made via the ``setView`` method, which controls latitude, longitude and zoom levels. Leaflet exposes many methods and properties
+  to manage the state of your map, though, and we definitely encourage you to check out `their docs <http://leafletjs.com/reference.html>_`
+  and continue experimenting at the end of this tutorial.
+
+Next we'll give Leaflet the URL of a tileset to ``addTo`` the map object we created. We will also set the
+max and min zoom levels for the tiles. We'll use Open Street Map's tileset:
+
+.. code-block:: javascript
 
   L.tileLayer(
     'http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
@@ -458,6 +522,7 @@ We'll use Open Street Map's tileset::
       maxZoom: 16,
       minZoom: 5
   }).addTo(map);
+
 
 .. note::
 
@@ -481,13 +546,12 @@ Now, when you click on Chicago, the popup should show the name of the city.
 
 .. image:: popup.png
 
-.. note::
 
-  Remember that we assigned the contents of your spreadsheet to the variable ``map_data``. Because we
-  converted that data to JSON, we can access the first element in the data by using the syntax ``[0]``. To
-  grab the second city, we'd use ``map_data[1]``, because in this instance, our counting is zero-indexed.
-  We can tell Javascript which column header we want to reference with the syntax ``.columname``. So
-  ``map_data[0].latitude`` translates to, "Give me the latitude column for the first city in the data."
+Remember that we assigned the contents of your spreadsheet to the variable ``map_data``. Because we
+converted that data to JSON, we can access the first element in the data by using the syntax ``[0]``. To
+grab the second city, we'd use ``map_data[1]``, because in this instance, our counting is zero-indexed.
+We can tell Javascript which column header we want to reference with the syntax ``.columname``. So
+``map_data[0].latitude`` translates to, "Give me the latitude column for the first city in the data."
 
 You can see how we could easily create markers for the other two cities::
 
@@ -503,7 +567,9 @@ You can see how we could easily create markers for the other two cities::
 .. image:: final_map.png
 
 Yay! But wait...what if we have *a lot* of other cities? This is going to take forever. There is a better way!
-Replace all the city marker code with this:::
+Replace all the city marker code with this:
+
+.. code-block:: javascript
 
   for (i=0; i <= map_data.length; i++){
       var marker = L.marker([map_data[i].latitude, map_data[i].longitude]);

@@ -42,7 +42,7 @@ Element  24.6
 
 You can access these variables in your spreadsheet with a loop:
 
-.. code-block:: html
+.. code-block:: django
 
     {% for car in cars %}
       <h3>{{ car.model }}</h3>
@@ -62,7 +62,7 @@ volvo  Volvo   Sweden
 
 You can access these variables by their key name:
 
-.. code-block:: html
+.. code-block:: django
 
     <p>{% manufacturers.ford.name %} is from {% manufacturers.ford.country %}</p>
 

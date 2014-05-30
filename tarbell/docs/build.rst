@@ -12,7 +12,7 @@ If you create a file in your project directory called ``chapter1.html``, you'll 
 Files and directories that start with an underscore (``_``) or a dot (``.``), like the ``_base`` directory containing the Tarbell blueprint files, will not be rendered by the preview server or included in the generated static HTML.
 
 Understanding Tarbell Blueprints
--------------------------------
+--------------------------------
 
 Blueprints are exactly what they sound like –– a basic structure for building projects upon. From the `Flask documentation <http://flask.pocoo.org/docs/blueprints/>`_:
 
@@ -55,7 +55,7 @@ If a blueprint defines a static file or template (e.g. ``_base/style.css``), it 
 See the basic Tarbell template for a simple implementation of a Blueprint.
 
 Template inheritance: Override files from Tarbell Blueprints by copying to your project directory
------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------
 
 Any file in a Tarbell Blueprint can be overridden in your project files.
 

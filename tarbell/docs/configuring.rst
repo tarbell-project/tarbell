@@ -25,6 +25,10 @@ the possible configuration variables:
 ``CONTEXT_SOURCE_FILE``
   If provided, Tarbell will use this data file for the template context. CSV, XLS, and XSLX files
   are supported. The value may use a relative path, an absolute path, or a remote (http) URL. (optional)
+``CREDENTIALS_PATH``
+  Path to a credentials file to authenticate with Google Drive.This is useful for for automated 
+  deployment. Take care not to commit or publish your credentials file. (optional) (experimental:
+  this option may be replaced by command line flag or environment variable)
 ``S3_BUCKETS``
   A dict of target->url pairs such as ``{ 'production': 'apps.myorg.com' }`` (required for publishing to S3)
 ``DEFAULT_CONTEXT``
@@ -71,6 +75,6 @@ This example shows every possible setting.
     Define S3 credentials using a ``bucket-uri->{ access_key_id: ..., secret_access_key: ...}`` data strucutre. 
 
 Google SDK client secrets (``~/.tarbell/client_secrets.json``)
------------------------------------------------------------------
+--------------------------------------------------------------
 
 Place a ``client_secrets.json`` file in ``~/.tarbell`` or use ``tarbell configure drive``.

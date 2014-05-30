@@ -20,7 +20,7 @@ import tempfile
 
 from apiclient import errors
 from apiclient.http import MediaFileUpload as _MediaFileUpload
-from clint import args
+from clint import arguments
 from clint.textui import colored, puts
 from subprocess import call
 
@@ -31,12 +31,20 @@ if __name__ == "__main__" and __package__ is None:
     __package__ = "tarbell.cli"
 
 from .app import pprint_lines, process_xlsx, copy_global_values
-from .oauth import get_drive_api
+from .oauth import get_drive_api_from_client_secrets
 from .contextmanagers import ensure_settings, ensure_project
 from .configure import tarbell_configure
 from .utils import list_get, black, split_sentences, show_error, get_config_from_args
 from .s3 import S3Url, S3Sync
 
+# Load readline if possible
+try:
+    import readline
+except ImportError:
+    show_error("Could not import readline.")
+
+# Set args
+args = arguments.Args()
 
 # --------
 # Dispatch
@@ -77,9 +85,10 @@ def display_info(args):
     for command in Command.all_commands():
         usage = command.usage or command.name
         help = command.help or ''
-        puts('{0:50} {1}'.format(
-                colored.green(usage),
-                split_sentences(help)))
+        puts('{0: <37} {1}\n'.format(
+                usage,
+                colored.yellow(split_sentences(help, 37))
+        ))
 
     config = get_config_from_args(args)
     if not os.path.isfile(config):
@@ -232,23 +241,31 @@ def tarbell_list(command, args):
             colored.yellow(projects_path)
         ))
 
+        longest_title = 0
+        projects = []
         for directory in os.listdir(projects_path):
             project_path = os.path.join(projects_path, directory)
             try:
                 filename, pathname, description = imp.find_module('tarbell_config', [project_path])
                 config = imp.load_module(directory, filename, pathname, description)
-                puts("{0:30} {1}".format(
-                    colored.red(config.NAME),
-                    colored.cyan(config.TITLE)
-                ))
-
-                puts("{0}".format(colored.yellow(project_path))),
-                puts("")
-
+                projects.append((project_path, config))
+                if len(config.TITLE) > longest_title:
+                    longest_title = len(config.TITLE)
             except ImportError:
                 pass
 
-        puts("Use {0} to switch to a project\n".format(
+        fmt = "{0: <"+str(longest_title+1)+"} {1}"
+        puts(fmt.format(
+            'title',
+            'path'
+        ))
+        for path, config in projects:
+            puts(colored.yellow(fmt.format(
+                config.TITLE,
+                colored.cyan(path)
+            )))
+
+        puts("\nUse {0} to switch to a project\n".format(
             colored.green("tarbell switch <projectname>")
             ))
 
@@ -287,16 +304,27 @@ def tarbell_publish(command, args):
                 colored.red(bucket_name),
                 colored.green(bucket_url)
             ))
+
             # Get creds
-            kwargs = settings.config['s3_credentials'].get(bucket_url.root)
-            if not kwargs:
-                kwargs = {
-                    'access_key_id': settings.config['default_s3_access_key_id'],
-                    'secret_access_key': settings.config['default_s3_secret_access_key'],
-                }
-                puts("Using default bucket credentials")
+            if settings.config:
+                # If settings has a config section, use it
+                kwargs = settings.config['s3_credentials'].get(bucket_url.root)
+                if not kwargs:
+                    kwargs = {
+                        'access_key_id': settings.config['default_s3_access_key_id'],
+                        'secret_access_key': settings.config['default_s3_secret_access_key'],
+                    }
+                    puts("Using default bucket credentials")
+                else:
+                    puts("Using custom bucket configuration for {0}".format(bucket_url.root))
             else:
-                puts("Using custom bucket configuration for {0}".format(bucket_url.root))
+                # If no configuration exists, read from environment variables if possible
+                puts("Attemping to use AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY")
+                kwargs = {
+                    'access_key_id': os.environ["AWS_ACCESS_KEY_ID"],
+                    'secret_access_key': os.environ["AWS_SECRET_ACCESS_KEY"],
+                }
+
 
             kwargs['excludes'] = site.project.EXCLUDES
             s3 = S3Sync(tempdir, bucket_url, **kwargs)
@@ -351,14 +379,8 @@ def tarbell_newproject(command, args):
         # Create spreadsheet
         key = _create_spreadsheet(name, title, path, settings)
 
-        # Add Google Analytics ID
-        use = raw_input("\nWould you like to use Google Analytics [Y/n]? ")
-        ga_id = ""
-        if use.lower() == "y":
-            ga_id = raw_input("\nWhat is the Google Analytics ID to use for this project? [Typically formatted like UA-XXXXXXX-Y] ")
-
         # Create config file
-        _copy_config_template(name, title, template, path, key, ga_id, settings)
+        _copy_config_template(name, title, template, path, key, settings)
 
         # Copy html files
         puts(colored.green("\nCopying html files..."))
@@ -487,11 +509,10 @@ def _create_spreadsheet(name, title, path, settings):
     if not settings.client_secrets:
         return None
 
-    create = raw_input("{0} found. Would you like to create a Google spreadsheet? [Y/n] ".format(
-        colored.cyan("client_secrets")
-    ))
+    create = raw_input("Would you like to create a Google spreadsheet? [Y/n] ")
+
     if create and not create.lower() == "y":
-        return puts("Not creating spreadsheet...")
+        return puts("Not creating spreadsheet.")
 
     email_message = (
         "What Google account should have access to this "
@@ -516,7 +537,7 @@ def _create_spreadsheet(name, title, path, settings):
         show_error("_base/_spreadsheet.xlsx doesn't exist!")
         return None
 
-    service = get_drive_api(settings.path)
+    service = get_drive_api_from_client_secrets(settings.path)
     body = {
         'title': '{0} (Tarbell)'.format(title),
         'description': '{0} ({1})'.format(title, name),
@@ -556,7 +577,7 @@ def _add_user_to_file(file_id, service, user_email,
         print 'An error occurred: %s' % error
 
 
-def _copy_config_template(name, title, template, path, key, ga_id, settings):
+def _copy_config_template(name, title, template, path, key, settings):
         """Get and render tarbell_config.py.template from base"""
         puts("\nCopying configuration file")
         context = settings.config
@@ -569,7 +590,6 @@ def _copy_config_template(name, title, template, path, key, ga_id, settings):
             "title": title,
             "template_repo_url": template.get('url'),
             "key": key,
-            "ga_id": ga_id
         })
 
         # @TODO refactor this a bit
