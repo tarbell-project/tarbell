@@ -243,7 +243,6 @@ class TarbellSite:
     def load_project(self, path):
         base = None
         base_dir = os.path.join(path, "_base/")
-
         # Get the base as register it as a blueprint
         if os.path.exists(os.path.join(base_dir, "base.py")):
             filename, pathname, description = imp.find_module('base', [base_dir])
