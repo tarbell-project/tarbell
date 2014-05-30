@@ -401,7 +401,7 @@ Set up the spreadsheet
 ^^^^^^^^^^^^^^^^^^^^^^
 
 First, we need to create that Google spreadsheet to power the map. Go to the spreadsheet you created when you started
-your project, and edit the ``data`` workbook to contain columns named ``city``, ``latitude`` and ``longitude``.
+your project, and edit the ``data`` tab to contain columns named ``city``, ``latitude`` and ``longitude``.
 Then, select the visible cells with your mouse, and choose Format -> Number -> Plain text.
 (This will prevent Google from automatically converting your lat/longs to dates.)
 Enter the following data:
@@ -427,7 +427,7 @@ contain your map::
 .. note::
   Partials are always prefaced with an underscore ``_``. This tells Tarbell to refrain from
   compiling them as independent pages. Otherwise, your project would end up with pages like
-  `yoursite.com/_footer.html`. Anything you write in a partial could also be written directly on
+  `yoursite.com/footer.html`. Anything you write in a partial could also be written directly on
   a page, but using a partial makes it easier to reuse code. For instance, we may want to use our map on
   every page on our site, but using a partial means we only store the code in one file, making it
   easy to update and maintain.
@@ -452,13 +452,13 @@ We'll need to set a height for this map in the CSS file created earlier called s
 
   #map { height: 180px; }
 
-Include the Leaflet CSS and your new stylesheet before the content block:
+Include the Leaflet CSS and your new stylesheet (if you haven't already) before the content block:
 
 .. code-block:: django
 
   {% block css %}
   <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.css" />
-  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="css/style.css" />
   {% endblock %}
 
 Then, after the content block, add the Leaflet Javascript library and a new file you will create:
@@ -466,8 +466,8 @@ Then, after the content block, add the Leaflet Javascript library and a new file
 .. code-block:: django
 
   {% block scripts %}
-  <script src="http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.js"></script>
-  <script src="js/map.js"></script>
+  <script type="text/javascript" src="http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.js"></script>
+  <script type="text/javascript" src="js/map.js"></script>
   {% endblock %}
 
 You'll need to create a ``js`` directory in your project root. Within that, create a
@@ -496,8 +496,9 @@ This will turn the columns from the workbook called ``data`` into something that
 We can reference our city data in the rest of our Javascript now. So let's make the map!
 
 When we include ``leaflet.js`` on the page, it will create a Javascript object named ``L`` that allows us to access
-all the Leaflet functionality we need. We need to store that object in a variable that references the ``map`` div
-in ``_map.html``. We'll set the latitude and longitude to that of the first city (from the ``map_data`` variable),
+all the Leaflet functionality we need. We need to store that object in a variable that references the div
+in ``_map.html`` with the ID ``map``, which will contain out map. Note that we refernce the div ID by wrapping the ID
+name, ``map``, in quotes. We'll set the latitude and longitude to that of the first city (from the ``map_data`` variable),
 and then the zoom level of the tile (the lower the number, the farther out the map will be zoomed to start)::
 
   var map = L.map('map').setView([41.838299, -87.706953], 6);
@@ -508,7 +509,7 @@ This tells Leaflet to create a map and set the center of it to Chicago, with a d
 
   Leaflet map objects give you a great deal of control over your map's appearance and behavior. The most basic settings
   are made via the ``setView`` method, which controls latitude, longitude and zoom levels. Leaflet exposes many methods and properties
-  to manage the state of your map, though, and we definitely encourage you to check out `their docs <http://leafletjs.com/reference.html>_`
+  to manage the state of your map, though, and we definitely encourage you to check out `their docs <http://leafletjs.com/reference.html>`_
   and continue experimenting at the end of this tutorial.
 
 Next we'll give Leaflet the URL of a tileset to ``addTo`` the map object we created. We will also set the
@@ -547,11 +548,11 @@ Now, when you click on Chicago, the popup should show the name of the city.
 .. image:: popup.png
 
 
-Remember that we assigned the contents of your spreadsheet to the variable ``map_data``. Because we
-converted that data to JSON, we can access the first element in the data by using the syntax ``[0]``. To
-grab the second city, we'd use ``map_data[1]``, because in this instance, our counting is zero-indexed.
-We can tell Javascript which column header we want to reference with the syntax ``.columname``. So
-``map_data[0].latitude`` translates to, "Give me the latitude column for the first city in the data."
+Remember that we assigned the contents of your spreadsheet to the variable ``map_data``. Now we can access the first 
+element in the JSON data by using the syntax ``[0]``. To grab the second city, we'd use ``map_data[1]``, because in this 
+instance, our counting is zero-indexed. We can tell Javascript which column header we want to reference with the 
+syntax ``.columname``. So ``map_data[0].latitude`` translates to, "Give me the latitude column for the first city 
+in the data."
 
 You can see how we could easily create markers for the other two cities::
 
