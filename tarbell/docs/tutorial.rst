@@ -39,12 +39,12 @@ You will be asked to choose which blueprint you wish to be the foundation of you
     [1] Basic Bootstrap 3 template
         https://github.com/newsapps/tarbell-template
 
-    [2] Searchable map template   
+  [2] Searchable map template   
         https://github.com/eads/tarbell-map-template
 
   Which template would you like to use? [1] 1
 
-  Cloning into '_base'...
+  Cloning into '_blueprint'...
 
   Checking connectivity... done
 
@@ -73,7 +73,7 @@ Now Tarbell installs your project's files and creates a git repo for your code::
   5 files changed, 58 insertions(+)
   create mode 100644 .gitignore
   create mode 100644 .gitmodules
-  create mode 160000 _base
+  create mode 160000 _blueprint
   create mode 100644 index.html
   create mode 100644 tarbell_config.py
 
@@ -122,7 +122,7 @@ You're ready to start editing your template.
 Structure your project
 ======================
 It's a good idea to organize your project's files according to convention. That way everyone knows 
-where to find things. Make directories named css, data, images and js in your project root directory (i.e., not in _base) 
+where to find things. Make directories named css, data, images and js in your project root directory (i.e., not in _blueprint) 
 to keep your project uncluttered. See the section for `creating and installing projects <create.html>`_ for 
 more detail about best practices when creating your projects.
 
@@ -241,7 +241,7 @@ Adding CSS
 Out of the box, Tarbell gives you Bootstrap 3 CSS. Chances are, you'll want to extend
 this to add your own CSS to your project.
 
-To this point, we've ignored the ``_base`` directory in your project. Now's the time to
+To this point, we've ignored the ``_blueprint`` directory in your project. Now's the time to
 dive in! You may have noticed this line up at the top of your ``index.html`` file:
 
 .. code-block:: django
@@ -249,7 +249,7 @@ dive in! You may have noticed this line up at the top of your ``index.html`` fil
   {% extends "_base.html" %}
 
 The ``_base.html`` file is where all of the CSS, JavaScript and other goodies live. By "extending"
-``_base.html``, index.html has access to all of the things that live in the base. You can
+``_base.html``, index.html has access to all of the things that live in the blueprint. You can
 `read more about how template inheritance works here. <http://jinja.pocoo.org/docs/templates/#template-inheritance>`_
 
 .. note::
@@ -277,7 +277,7 @@ it right now. The second block is what you'll want to extend.
   You'll only need to touch the library_css block if you need to do something like override the version of Bootstrap
   included here. Otherwise, for adding project-wide styles, edit the base.css file.
 
-In your project root (i.e., not in base), create a css folder, if you haven't done so already. Inside that, create a new style.css file and
+In your project root (i.e., not in _blueprint), create a css folder, if you haven't done so already. Inside that, create a new style.css file and
 add some CSS rules:
 
 .. code-block:: css
@@ -365,7 +365,7 @@ While the Tarbell blueprint (`see more on blueprints <http://tarbell.readthedocs
 contains some very handy things, you may find you need to override some of the provided templates. One of 
 the most common cases in which this occurs is the navigation.
 
-In the ``_base/_base.html`` template, you can see that the nav is included just before the content starts:
+In the ``_blueprint/base.html`` template, you can see that the nav is included just before the content starts:
 
 .. code-block:: django
 
@@ -376,7 +376,7 @@ In the ``_base/_base.html`` template, you can see that the nav is included just 
   {% block content %}{% endblock content %}
 
 To override the default nav, create a new ``_nav.html`` file in your project root (at the same
-level as ``index.html``, not within the ``_base`` directory). Type in a message to yourself:
+level as ``index.html``, not within the ``_blueprint`` directory). Type in a message to yourself:
 
 .. code-block:: django
 
@@ -385,7 +385,7 @@ level as ``index.html``, not within the ``_base`` directory). Type in a message 
 Reload your test page. Bingo!
 
 Now, such a message probably isn't very helpful to your users, so to create a more functional
-nav, copy the code out of ``_base/_nav.html``, paste it into ``_nav.html``,
+nav, copy the code out of ``_blueprint/nav.html``, paste it into ``_nav.html``,
 and rejigger the code as desired. It's all Bootstrap 3, so you might find it helpful to
 `view the Bootstrap navbar docs <http://getbootstrap.com/components/#navbar>`_.
 
