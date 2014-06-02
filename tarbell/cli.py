@@ -173,7 +173,7 @@ def tarbell_install(command, args):
             git = sh.git.bake(_cwd=path)
             puts(git.clone(project_url, '.'))
             puts(git.submodule.update(*['--init', '--recursive']))
-            submodule = sh.git.bake(_cwd=os.path.join(path, '_base'))
+            submodule = sh.git.bake(_cwd=os.path.join(path, '_blueprint'))
             puts(submodule.fetch())
             puts(submodule.checkout(VERSION))
             message = "\n- Done installing project in {0}".format(colored.yellow(path))
@@ -211,15 +211,15 @@ def tarbell_install_template(command, args):
         puts(git.clone(template_url, '.'))
         puts(git.fetch())
         puts(git.checkout(VERSION))
-        filename, pathname, description = imp.find_module('base', [tempdir])
-        base = imp.load_module('base', filename, pathname, description)
-        puts("\n- Found _base/base.py")
+        filename, pathname, description = imp.find_module('blueprint', [tempdir])
+        blueprint = imp.load_module('blueprint', filename, pathname, description)
+        puts("\n- Found _blueprint/blueprint.py")
         try:
-            name = base.NAME
-            puts("\n- Name specified in base.py: {0}".format(colored.yellow(name)))
+            name = blueprint.NAME
+            puts("\n- Name specified in blueprint.py: {0}".format(colored.yellow(name)))
         except AttributeError:
             name = template_url.split("/")[-1]
-            puts("\n- No name specified in base.py, using '{0}'".format(colored.yellow(name)))
+            puts("\n- No name specified in blueprint.py, using '{0}'".format(colored.yellow(name)))
 
         settings.config["project_templates"].append({"name": name, "url": template_url})
         settings.save()
@@ -368,11 +368,11 @@ def tarbell_newproject(command, args):
         puts(git.init())
 
         # Create submodule
-        puts(git.submodule.add(template['url'], '_base'))
+        puts(git.submodule.add(template['url'], '_blueprint'))
         puts(git.submodule.update(*['--init']))
 
         # Get submodule branches, switch to current version
-        submodule = sh.git.bake(_cwd=os.path.join(path, '_base'))
+        submodule = sh.git.bake(_cwd=os.path.join(path, '_blueprint'))
         puts(submodule.fetch())
         puts(submodule.checkout(VERSION))
 
@@ -384,14 +384,14 @@ def tarbell_newproject(command, args):
 
         # Copy html files
         puts(colored.green("\nCopying html files..."))
-        files = glob.iglob(os.path.join(path, "_base", "*.html"))
+        files = glob.iglob(os.path.join(path, "_blueprint", "*.html"))
         for file in files:
             if os.path.isfile(file):
                 dir, filename = os.path.split(file)
                 if not filename.startswith("_") and not filename.startswith("."):
                     puts("Copying {0} to {1}".format(filename, path))
                     shutil.copy2(file, path)
-        ignore = os.path.join(path, "_base", ".gitignore")
+        ignore = os.path.join(path, "_blueprint", ".gitignore")
         if os.path.isfile(ignore):
             shutil.copy2(ignore, path)
 
@@ -531,10 +531,10 @@ def _create_spreadsheet(name, title, path, settings):
             email = raw_input(email_message)
 
     try:
-        media_body = _MediaFileUpload(os.path.join(path, '_base/_spreadsheet.xlsx'),
+        media_body = _MediaFileUpload(os.path.join(path, '_blueprint/_spreadsheet.xlsx'),
                                       mimetype='application/vnd.ms-excel')
     except IOError:
-        show_error("_base/_spreadsheet.xlsx doesn't exist!")
+        show_error("_blueprint/_spreadsheet.xlsx doesn't exist!")
         return None
 
     service = get_drive_api_from_client_secrets(settings.path)
@@ -578,7 +578,7 @@ def _add_user_to_file(file_id, service, user_email,
 
 
 def _copy_config_template(name, title, template, path, key, settings):
-        """Get and render tarbell_config.py.template from base"""
+        """Get and render tarbell_config.py.template from blueprint"""
         puts("\nCopying configuration file")
         context = settings.config
         context.update({
@@ -594,10 +594,10 @@ def _copy_config_template(name, title, template, path, key, settings):
 
         # @TODO refactor this a bit
         if not key:
-            spreadsheet_path = os.path.join(path, '_base/', '_spreadsheet.xlsx')
+            spreadsheet_path = os.path.join(path, '_blueprint/', '_spreadsheet.xlsx')
             with open(spreadsheet_path, "rb") as f:
                 try:
-                    puts("Copying _base/_spreadsheet.xlsx to tarbell_config.py's DEFAULT_CONTEXT") 
+                    puts("Copying _blueprint/_spreadsheet.xlsx to tarbell_config.py's DEFAULT_CONTEXT") 
                     data = process_xlsx(f.read())
                     if 'values' in data:
                         data = copy_global_values(data)
@@ -659,8 +659,8 @@ def tarbell_switch(command, args):
 def tarbell_update(command, args):
     """Update the current tarbell project."""
     with ensure_settings(command, args) as settings, ensure_project(command, args) as site:
-        puts("Updating to latest base template\n")
-        git = sh.git.bake(_cwd=os.path.join(site.path, '_base'))
+        puts("Updating to latest blueprint\n")
+        git = sh.git.bake(_cwd=os.path.join(site.path, '_blueprint'))
         git.fetch()
         puts(colored.yellow("Checking out {0}".format(VERSION)))
         puts(git.checkout(VERSION))
@@ -797,7 +797,7 @@ def_cmd(
     name='update',
     fn=tarbell_update,
     usage='update',
-    help='Update base template in current project.')
+    help='Update blueprint in current project.')
 
 
 def_cmd(

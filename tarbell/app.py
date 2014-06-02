@@ -242,14 +242,14 @@ class TarbellSite:
 
     def load_project(self, path):
         base = None
-        base_dir = os.path.join(path, "_base/")
-        # Get the base as register it as a blueprint
-        if os.path.exists(os.path.join(base_dir, "base.py")):
-            filename, pathname, description = imp.find_module('base', [base_dir])
-            base = imp.load_module('base', filename, pathname, description)
+        base_dir = os.path.join(path, "_blueprint/")
+        # Get the blueprint template and register it as a blueprint
+        if os.path.exists(os.path.join(base_dir, "blueprint.py")):
+            filename, pathname, description = imp.find_module('blueprint', [base_dir])
+            base = imp.load_module('blueprint', filename, pathname, description)
             self.app.register_blueprint(base.blueprint)
         else:
-            puts("No _base/base.py file found")
+            puts("No _blueprint/blueprint.py file found")
 
         filename, pathname, description = imp.find_module('tarbell_config', [path])
         project = imp.load_module('project', filename, pathname, description)
@@ -318,7 +318,7 @@ class TarbellSite:
         filepath = None
         for root, dirs, files in filter_files(self.path):
             # Does it exist under _base?
-            basepath = os.path.join(root, "_base", path)
+            basepath = os.path.join(root, "_blueprint", path)
             try:
                 with open(basepath):
                     mimetype, encoding = mimetypes.guess_type(basepath)
@@ -478,11 +478,11 @@ class TarbellSite:
         return content
 
     def generate_static_site(self, output_root, extra_context):
-        base_dir = os.path.join(self.path, "_base/")
+        base_dir = os.path.join(self.path, "_blueprint/")
 
         for root, dirs, files in filter_files(base_dir):
             for filename in files:
-                self._copy_file(root.replace("_base/", ""), filename, output_root, extra_context)
+                self._copy_file(root.replace("_blueprint/", ""), filename, output_root, extra_context)
 
         for root, dirs, files in filter_files(self.path):
             #don't copy stuff in the file that we just created
