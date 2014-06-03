@@ -497,21 +497,23 @@ class TarbellSite:
     def generate_static_site(self, output_root, extra_context):
         if self.base:
             base_dir = os.path.join(self.path, self.blueprint_name)
-
             for root, dirs, files in filter_files(base_dir):
                 for filename in files:
                     self._copy_file(root.replace(self.blueprint_name, ""), filename, output_root, extra_context)
 
         for root, dirs, files in filter_files(self.path):
             #don't copy stuff in the file that we just created
-            #TODO: figure out if _base/index.html and index.html can coexist
             if root != os.path.abspath(output_root):
                 for filename in files:
                     self._copy_file(root, filename, output_root, extra_context)
 
     def _copy_file(self, root, filename, output_root, extra_context=None):
+        # Remove double slashes if they exist
+        root = root.replace("//", "/")
+
         # Strip out full filesystem paths
         rel_path = os.path.join(root.replace(self.path, ""), filename)
+
         if rel_path.startswith("/"):
             rel_path = rel_path[1:]
 
