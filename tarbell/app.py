@@ -242,14 +242,30 @@ class TarbellSite:
 
     def load_project(self, path):
         base = None
-        base_dir = os.path.join(path, "_blueprint/")
-        # Get the blueprint template and register it as a blueprint
-        if os.path.exists(os.path.join(base_dir, "blueprint.py")):
-            filename, pathname, description = imp.find_module('blueprint', [base_dir])
-            base = imp.load_module('blueprint', filename, pathname, description)
+
+        # Slightly ugly DRY violation for backwards compatibility with old
+        # "_base" convention
+        if os.path.isdir(os.path.join(path, "_blueprint")):
+            base_dir = os.path.join(path, "_blueprint/")
+            # Get the blueprint template and register it as a blueprint
+            if os.path.exists(os.path.join(base_dir, "blueprint.py")):
+                filename, pathname, description = imp.find_module('blueprint', [base_dir])
+                base = imp.load_module('blueprint', filename, pathname, description)
+                self.blueprint_name = "_blueprint"
+            else:
+                puts("No _blueprint/blueprint.py file found")
+        elif os.path.isdir(os.path.join(path, "_base")):
+            puts("Using old '_base' convention")
+            base_dir = os.path.join(path, "_base/")
+            if os.path.exists(os.path.join(base_dir, "base.py")):
+                filename, pathname, description = imp.find_module('base', [base_dir])
+                base = imp.load_module('base', filename, pathname, description)
+                self.blueprint_name = "_base"
+            else:
+                puts("No _base/base.py file found")
+
+        if base:
             self.app.register_blueprint(base.blueprint)
-        else:
-            puts("No _blueprint/blueprint.py file found")
 
         filename, pathname, description = imp.find_module('tarbell_config', [path])
         project = imp.load_module('project', filename, pathname, description)
@@ -317,14 +333,15 @@ class TarbellSite:
         ## Detect files
         filepath = None
         for root, dirs, files in filter_files(self.path):
-            # Does it exist under _base?
-            basepath = os.path.join(root, "_blueprint", path)
-            try:
-                with open(basepath):
-                    mimetype, encoding = mimetypes.guess_type(basepath)
-                    filepath = basepath
-            except IOError:
-                pass
+            # Does it exist in Tarbell blueprint?
+            if self.base:
+                basepath = os.path.join(root, self.blueprint_name, path)
+                try:
+                    with open(basepath):
+                        mimetype, encoding = mimetypes.guess_type(basepath)
+                        filepath = basepath
+                except IOError:
+                    pass
 
             # Does it exist under regular path?
             fullpath = os.path.join(root, path)
@@ -478,11 +495,12 @@ class TarbellSite:
         return content
 
     def generate_static_site(self, output_root, extra_context):
-        base_dir = os.path.join(self.path, "_blueprint/")
+        if self.base:
+            base_dir = os.path.join(self.path, self.blueprint_name)
 
-        for root, dirs, files in filter_files(base_dir):
-            for filename in files:
-                self._copy_file(root.replace("_blueprint/", ""), filename, output_root, extra_context)
+            for root, dirs, files in filter_files(base_dir):
+                for filename in files:
+                    self._copy_file(root.replace(self.blueprint_name, ""), filename, output_root, extra_context)
 
         for root, dirs, files in filter_files(self.path):
             #don't copy stuff in the file that we just created
