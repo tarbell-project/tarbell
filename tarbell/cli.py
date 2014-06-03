@@ -173,7 +173,10 @@ def tarbell_install(command, args):
             git = sh.git.bake(_cwd=path)
             puts(git.clone(project_url, '.'))
             puts(git.submodule.update(*['--init', '--recursive']))
-            submodule = sh.git.bake(_cwd=os.path.join(path, '_blueprint'))
+            if os.path.isdir(os.path.join(path, '_blueprint')):
+                submodule = sh.git.bake(_cwd=os.path.join(path, '_blueprint'))
+            elif os.path.isdir(os.path.join(path, '_base')):
+                submodule = sh.git.bake(_cwd=os.path.join(path, '_base'))
             puts(submodule.fetch())
             puts(submodule.checkout(VERSION))
             message = "\n- Done installing project in {0}".format(colored.yellow(path))
