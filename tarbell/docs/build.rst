@@ -9,7 +9,7 @@ Tarbell projects consist of simple HTML pages that may use `Jinja2 <http://jinja
 
 If you create a file in your project directory called ``chapter1.html``, you'll be able to preview the file at http://localhost:5000/chapter1.html and publish to the same file. This file can be straight up HTML, or it can inherit from a Tarbell blueprint file. 
 
-Files and directories that start with an underscore (``_``) or a dot (``.``), like the ``_base`` directory containing the Tarbell blueprint files, will not be rendered by the preview server or included in the generated static HTML.
+Files and directories that start with an underscore (``_``) or a dot (``.``), like the ``_blueprint`` directory containing the Tarbell blueprint files, will not be rendered by the preview server or included in the generated static HTML.
 
 Understanding Tarbell Blueprints
 --------------------------------
@@ -18,10 +18,10 @@ Blueprints are exactly what they sound like –– a basic structure for buildin
 
   Flask uses a concept of blueprints for making application components and supporting common patterns. Blueprints can greatly simplify how large applications work, but a blueprint is not actually an application. Rather it is a blueprint of how to construct or extend an application.
 
-Tarbell ships with a default blueprint called _base. This folder contains boilerplate code like advertising, analytics, and common page elements. Tarbell projects should inherit from blueprints.
+Tarbell ships with a default blueprint called _blueprint. This folder contains boilerplate code like advertising, analytics, and common page elements. Tarbell projects should inherit from blueprints.
 
 
-Here's a simple ``_base/_base.html`` example.
+Here's a simple ``_blueprint/_blueprint.html`` example.
 
 .. code-block:: django
 
@@ -50,7 +50,7 @@ To inherit from this template, you use the "extend" syntax in ``index.html`` or 
 
 You might notice we're using the ``|markdown`` filter. Blueprint templates also define filters, enabled by Jinja2. See building blueprint templates for more, and the `Jinja2 <http://jinja.pocoo.org/docs/>`_ docs for more on Jinja2.
 
-If a blueprint defines a static file or template (e.g. ``_base/style.css``), it will be available relative to the project's base path (e.g. http://127.0.0.1:5000/style.css). If a project defines a file with the same name, the project's version will be used instead.
+If a blueprint defines a static file or template (e.g. ``_blueprint.css``), it will be available relative to the project's base path (e.g. http://127.0.0.1:5000/style.css). If a project defines a file with the same name, the project's version will be used instead.
 
 See the basic Tarbell template for a simple implementation of a Blueprint.
 
@@ -59,7 +59,7 @@ Template inheritance: Override files from Tarbell Blueprints by copying to your 
 
 Any file in a Tarbell Blueprint can be overridden in your project files.
 
-For example, if your blueprint includes a file ``_base/_nav.html``, you can create a file named ``_nav.html`` in your project directory and it will be published instead of the blueprint version.
+For example, if your blueprint includes a file ``_blueprint/_nav.html``, you can create a file named ``_nav.html`` in your project directory and it will be published instead of the blueprint version.
 
 This works for all files, static or templates.
 
@@ -71,7 +71,7 @@ To suppress a file from publishing, use a filename like ``_filename.txt``.
 Configuring projects
 --------------------
 
-Project configuration is kept in the `tarbell_config.py` file in your project's base directory.
+Project configuration is kept in the `tarbell_config.py` file in your project's blueprint directory.
 See :ref:`tarbell-config` for configuration documentation.
 
 Creating JSON
@@ -212,14 +212,14 @@ tarbell_config.py
   `Configuring projects section above <#configuring-projects>`_.
 
 
-**Files in the _base/ directory:**
+**Files in the _blueprint directory:**
 
-Keep in mind that you rarely want to edit the blueprint files in the ``_base/`` directory - if you want
+Keep in mind that you rarely want to edit the blueprint files in the ``_blueprint/`` directory - if you want
 to change something, copy the file to the root directory and make the change there. If a file of the
-same name exists in both the root directory and the ``_base/`` directory, Tarbell will rely on the
+same name exists in both the root directory and the ``_blueprint/`` directory, Tarbell will rely on the
 one in the root directory.
 
-The only time you should edit the files in the ``_base/`` directory is when 
+The only time you should edit the files in the ``_blueprint/`` directory is when 
 `you'd like to create or update the blueprint itself <base_templates.html>`_.
 
 _base.html
@@ -235,16 +235,16 @@ _nav.html
 
 _spreadsheet.xlsx
   This is the template file that `Google spreadsheets will be based upon
-  <google_spreadsheets.html>`_. Unlike most other files in ``_base/``, overriding it in your root
+  <google_spreadsheets.html>`_. Unlike most other files in ``_blueprint``, overriding it in your root
   directory won't do anything. However, if you want future projects to be created with a different
   spreadsheet template, you can edit this file and commit it to a repository you control; learn more
-  about this feature in the `Developing blueprint templates <base_templates.html>`_ section.
+  about this feature in the `Developing blueprints <base_templates.html>`_ section.
 
 base.css
   The base CSS file imported by the blueprint for this project. Override this file in your root
   directory if you'd like to make CSS changes.
 
-base.py
+blueprint.py
   A Python file that contains a default set of template filters for use in this project. Override
   this file in your root directory if you'd like to alter the behavior of these filters, or add your
   own. If you'd like to make your changes available to other projects, check out the `Developing
