@@ -1,9 +1,9 @@
-=================================
-Developing Tarbell base templates
-=================================
+=============================
+Developing Tarbell blueprints
+=============================
 
-Fork a base template or create your own
----------------------------------------
+Fork a blueprint or create your own
+-----------------------------------
 
 Blueprints should consist of `_blueprint/blueprint.py` and any additional files.
 

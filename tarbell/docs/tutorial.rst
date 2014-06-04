@@ -32,9 +32,9 @@ You'll need to answer a few questions. What will its name be, where on your comp
 
   What is the project's full title? (e.g. My awesome project) Ethel Payne: A life in journalism
 
-You will be asked to choose which base template you wish to be the foundation of your project. base templates can be expanded upon but are very useful for setting the basic configurations necessary for the kinds of projects they have been designed for. See `this page <http://flask.pocoo.org/docs/base templates/>`_ for more about base templates, and go ahead and pick one::
+You will be asked to choose which blueprint you wish to be the foundation of your project. Blueprints can be expanded upon but are very useful for setting the basic configurations necessary for the kinds of projects they have been designed for. See `this page <http://flask.pocoo.org/docs/blueprints/>`_ for more about blueprints, and go ahead and pick one::
   
-  Pick a Tarbell base template
+  Pick a Tarbell blueprint:
 
     [1] Basic Bootstrap 3 template
         https://github.com/newsapps/tarbell-template
@@ -249,7 +249,7 @@ dive in! You may have noticed this line up at the top of your ``index.html`` fil
   {% extends "_base.html" %}
 
 The ``_base.html`` file is where all of the CSS, JavaScript and other goodies live. By "extending"
-``_base.html``, index.html has access to all of the things that live in the blueprint. You can
+``_base.html``, index.html has access to all of the things that live in the base. You can
 `read more about how template inheritance works here. <http://jinja.pocoo.org/docs/templates/#template-inheritance>`_
 
 .. note::
@@ -361,7 +361,7 @@ Without ``super()``, you would merely end up with:
 Overriding default templates
 ============================
 
-While the Tarbell base template (`see more on base templates <http://tarbell.readthedocs.org/en/0.9-beta5/build.html>`_) 
+While the Tarbell base.html template (`see more on templates <http://tarbell.readthedocs.org/en/0.9-beta6/build.html>`_) 
 contains some very handy things, you may find you need to override some of the provided templates. One of 
 the most common cases in which this occurs is the navigation.
 

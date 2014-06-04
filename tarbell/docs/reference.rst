@@ -51,7 +51,7 @@ Publish a Tarbell project to Amazon S3 using optional target (configured in ``ta
 
 **Usage:** ``tarbell update``
 
-Updates base template with git submodule update.
+Updates blueprint with git submodule update.
 
 ``tarbell generate``
 --------------------
