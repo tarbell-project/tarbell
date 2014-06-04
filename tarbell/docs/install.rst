@@ -1,6 +1,13 @@
-============
-Installation
-============
+=======================
+Installation & upgrades
+=======================
+
+Upgrade existing Tarbell installation
+-------------------------------------
+
+If you've already installed Tarbell, you can upgrade easily:::
+
+  pip install -U tarbell
 
 
 Install Tarbell with `pip install tarbell`
