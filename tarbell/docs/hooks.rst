@@ -4,7 +4,7 @@ Hooks
 
 Tarbell hooks allow project and base template developers to take actions during Tarbell project creation, projection installation, generation, and publishing.
 
-To define a hook, edit ``tarbell_config.py`` or ``base.py``:
+To define a hook, edit ``tarbell_config.py`` or ``blueprint.py``:
 
 .. code-block:: python
 
@@ -82,7 +82,7 @@ listicle app:
 
   import jinja2
 
-  from base import _ping_facebook
+  from blueprint import _ping_facebook
   from boto.s3.key import Key
   from clint.textui import puts, colored
   from tarbell.hooks import register_hook
