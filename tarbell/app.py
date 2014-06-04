@@ -235,9 +235,8 @@ class TarbellSite:
 
     def call_hook(self, hook, *args, **kwargs):
         if len(self.hooks[hook]):
-            puts("-- Calling {0} hooks --".format(colored.red(hook)))
+            puts("Executing {0} hooks".format(hook))
         for function in self.hooks[hook]:
-            puts("--- Calling {0}".format(colored.green(function.__name__)))
             function.__call__(*args, **kwargs)
 
     def load_project(self, path):
