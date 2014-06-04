@@ -358,13 +358,13 @@ def _delete_dir(dir):
 def tarbell_newproject(command, args):
     """Create new Tarbell project."""
     with ensure_settings(command, args) as settings:
-
-        # Create directory or bail
+        # Set it up and make the directory
         name = _get_project_name(args)
         puts("Creating {0}".format(colored.cyan(name)))
         path = _get_path(name, settings)
         title = _get_project_title()
         template = _get_template(settings)
+        _mkdir(path)
 
         # Init repo
         git = sh.git.bake(_cwd=path)
@@ -452,6 +452,7 @@ def _clean_suffix(string, suffix):
         # leave unharmed
         return string
 
+
 def _get_path(name, settings, mkdir=True):
     """Generate a project path."""
     default_projects_path = settings.config.get("projects_path")
@@ -465,19 +466,19 @@ def _get_path(name, settings, mkdir=True):
         while not path:
             path = raw_input("\nWhere would you like to create this project? (e.g. ~/tarbell/) ")
 
-    path = os.path.expanduser(path)
+    return os.path.expanduser(path)
 
-    if mkdir:
-        try:
-            os.mkdir(path)
-        except OSError, e:
-            if e.errno == 17:
-                show_error("ABORTING: Directory {0} already exists.".format(path))
-            else:
-                show_error("ABORTING: OSError {0}".format(e))
-            sys.exit()
 
-    return path
+def _mkdir(path):
+    """Make a directory or bail."""
+    try:
+        os.mkdir(path)
+    except OSError, e:
+        if e.errno == 17:
+            show_error("ABORTING: Directory {0} already exists.".format(path))
+        else:
+            show_error("ABORTING: OSError {0}".format(e))
+        sys.exit()
 
 
 def _get_template(settings):
