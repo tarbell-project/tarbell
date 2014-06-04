@@ -32,9 +32,9 @@ You'll need to answer a few questions. What will its name be, where on your comp
 
   What is the project's full title? (e.g. My awesome project) Ethel Payne: A life in journalism
 
-You will be asked to choose which blueprint you wish to be the foundation of your project. Blueprints can be expanded upon but are very useful for setting the basic configurations necessary for the kinds of projects they have been designed for. See `this page <http://flask.pocoo.org/docs/blueprints/>`_ for more about blueprints, and go ahead and pick one::
+You will be asked to choose which base template you wish to be the foundation of your project. base templates can be expanded upon but are very useful for setting the basic configurations necessary for the kinds of projects they have been designed for. See `this page <http://flask.pocoo.org/docs/base templates/>`_ for more about base templates, and go ahead and pick one::
   
-  Pick a Tarbell Blueprint
+  Pick a Tarbell base template
 
     [1] Basic Bootstrap 3 template
         https://github.com/newsapps/tarbell-template
@@ -361,7 +361,7 @@ Without ``super()``, you would merely end up with:
 Overriding default templates
 ============================
 
-While the Tarbell blueprint (`see more on blueprints <http://tarbell.readthedocs.org/en/0.9-beta5/build.html>`_) 
+While the Tarbell base template (`see more on base templates <http://tarbell.readthedocs.org/en/0.9-beta5/build.html>`_) 
 contains some very handy things, you may find you need to override some of the provided templates. One of 
 the most common cases in which this occurs is the navigation.
 
