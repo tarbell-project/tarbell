@@ -1,6 +1,19 @@
-============
-Installation
-============
+=======================
+Installation & upgrades
+=======================
+
+Upgrade existing Tarbell installation
+-------------------------------------
+
+If you've already installed Tarbell, you can upgrade easily:::
+
+  pip install -U tarbell
+
+.. note::
+
+  In version 0.9-beta6, some naming conventions changed. The ``_base`` folder and ``base.py`` file are
+  now called ``_blueprint`` and ``blueprint.py``. Though we have implemented backwards compatibility,
+  you may encounter issues upgrading older versions of Tarbell in the future.
 
 
 Install Tarbell with `pip install tarbell`
@@ -8,13 +21,13 @@ Install Tarbell with `pip install tarbell`
 
 .. code-block:: bash
 
-    pip install -e git+https://github.com/newsapps/flask-tarbell@0.9-beta5#egg=tarbell
+    pip install -e git+https://github.com/newsapps/flask-tarbell@0.9-beta6#egg=tarbell
 
 .. note::
 
-    0.9-beta5 is the current development version. It should only be used by advanced users because
+    0.9-beta6 is the current development version. It should only be used by advanced users because
     it may be unstable. If you are using this version, you'll need to run
-    ``pip install -U -e git+https://github.com/newsapps/flask-tarbell@0.9-beta5#egg=tarbell`` from
+    ``pip install -U -e git+https://github.com/newsapps/flask-tarbell@0.9-beta6#egg=tarbell`` from
     time to time to pick up the latest changes.
 
 A note on virtualenvs
