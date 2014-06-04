@@ -11,6 +11,7 @@ If you create a file in your project directory called ``chapter1.html``, you'll 
 
 Files and directories that start with an underscore (``_``) or a dot (``.``), like the ``_blueprint`` directory containing the Tarbell blueprint files, will not be rendered by the preview server or included in the generated static HTML.
 
+
 Understanding Tarbell base templates
 --------------------------------
 
@@ -19,7 +20,6 @@ base templates are exactly what they sound like –– a basic structure for bui
   Flask uses a concept of base templates for making application components and supporting common patterns. base templates can greatly simplify how large applications work, but a base template is not actually an application. Rather it is a base template of how to construct or extend an application.
 
 Tarbell ships with a default blueprint called _blueprint. This folder contains boilerplate code like advertising, analytics, and common page elements. Tarbell projects should inherit from blueprints.
-
 
 Here's a simple ``_blueprint/_blueprint.html`` example.
 
