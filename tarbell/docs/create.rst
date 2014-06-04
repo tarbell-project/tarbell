@@ -27,7 +27,12 @@ file.
 
 Install an existing project with `tarbell install <repository-url>`
 -------------------------------------------------------------------
-The project must include a tarbell_config.py file and be able to be cloned with Git.
+
+.. note::
+
+  The project must include a tarbell_config.py file and be able to be cloned with Git.
+  If the project uses Google spreadsheets, your Google account must be able to access
+  the spreadsheet in question.
 
 Run
 
