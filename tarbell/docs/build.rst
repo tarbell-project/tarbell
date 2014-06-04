@@ -112,8 +112,10 @@ Optionally, you can use the `CONTEXT_SOURCE_FILE` setting in `tarbell_config.py`
 which can be a URL, local file, CSV or Excel file.
 
 .. note::
-  The `data.json` file is created on the fly and will not appear in your project root. You can view and access
-  it locally at `127.0.0.1:5000/data.json`.
+
+  The ``data.json`` file is created on the fly and will not appear in your project root. You can view and access
+  it locally at ``127.0.0.1:5000/data.json``. If JSON creation is enabled, it will override any local file named
+  ``data.json``.
 
 
 Using context variables
