@@ -50,7 +50,6 @@ Reference
 =========
 
 .. toctree::
-    base_templates
     hooks
     reference
     configuring
