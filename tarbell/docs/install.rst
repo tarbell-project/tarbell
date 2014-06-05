@@ -16,32 +16,9 @@ Install Tarbell with `pip install tarbell`
     ``pip install -U -e git+https://github.com/newsapps/flask-tarbell@0.9-beta6#egg=tarbell`` from
     time to time to pick up the latest changes.
 
-A note on virtualenvs
----------------------
-
 .. note::
- 
-  If you've never heard of virtualenvs or know you're not using one with
-  Tarbell, skip this section.
 
-Virtual environments (`virtualenv <http://www.virtualenv.org/>`_) are useful for
-developers and advanced users managing many Python packages. Tarbell can be installed
-globally or within a virtualenv.
-
-If you'll be working on Tarbell itself, extending its functionality
-or otherwise manipulating the guts of the system, then it might make sense to
-install it inside a virtualenv.
-
-Here are some things to keep in mind if you use a virtualenv:
-
-* The Tarbell settings file ``(~/.tarbell/settings.yaml)`` is global, meaning all
-  Tarbell projects - whether inside a virtualenv or not - share the same
-  settings. This includes the path that Tarbell expects to find all your
-  projects (i.e., where Tarbell will look when you run ``tarbell list`` and
-  ``tarbell switch``.)
-* The ``client_secrets.json`` file used to authenticate to Google is also global,
-  so you may run into problems using multiple Google accounts to access spreadsheets.
-
+  Tarbell does not work on Windows machines.
 
 Configure Tarbell with `tarbell configure`
 ------------------------------------------
@@ -218,4 +195,29 @@ and `tarbell switch`.
 .. image:: project_path.png
    :width: 700px
 
+Using Tarbell with virtualenv
+-----------------------------
+
+.. note::
+ 
+  If you've never heard of virtualenvs or know you're not using one with
+  Tarbell, skip this section.
+
+Virtual environments (`virtualenv <http://www.virtualenv.org/>`_) are useful for
+developers and advanced users managing many Python packages. Tarbell can be installed
+globally or within a virtualenv.
+
+If you'll be working on Tarbell itself, extending its functionality
+or otherwise manipulating the guts of the system, then it might make sense to
+install it inside a virtualenv.
+
+Here are some things to keep in mind if you use a virtualenv:
+
+* The Tarbell settings file ``(~/.tarbell/settings.yaml)`` is global, meaning all
+  Tarbell projects - whether inside a virtualenv or not - share the same
+  settings. This includes the path that Tarbell expects to find all your
+  projects (i.e., where Tarbell will look when you run ``tarbell list`` and
+  ``tarbell switch``.)
+* The ``client_secrets.json`` file used to authenticate to Google is also global,
+  so you may run into problems using multiple Google accounts to access spreadsheets.
 

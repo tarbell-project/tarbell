@@ -11,10 +11,6 @@ All of the commands we'll show you here will need to be typed into the command p
 First you need to `install <install.html>`_ and `configure <install.html#configure-tarbell-with-tarbell-configure>`_
 Tarbell. (Make sure to set up a Google spreadsheet.) Go ahead. We'll wait.
 
-.. note::
-
-  Tarbell currently does not work on Windows machines.
-
 Set up a new project
 ====================
 
