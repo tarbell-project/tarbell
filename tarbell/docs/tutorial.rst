@@ -300,7 +300,7 @@ Using Javascript
 ================
 
 You can include JavaScript on your page much the way you would include CSS. By default,
-these are the blocks available in _base.html:
+these are the blocks available in ``_base.html``:
 
 .. code-block:: django
 
@@ -322,7 +322,7 @@ your project root to hold all of your Javascript files. Then you can include the
 .. code-block:: django
 
   {% block scripts %}
-  <script type="text/javascript" rel="js/project.css"></script>
+  <script src="js/app.js"></script>
   {% endblock %}
 
 
@@ -352,12 +352,12 @@ Without ``super()``, you would merely end up with:
 
 .. code-block:: html
 
-  <script src="js/app.js"></script>
+  <script type="text/javascript" src="js/app.js"></script>
 
 Overriding default templates
 ============================
 
-While the Tarbell base.html template (`see more on templates <http://tarbell.readthedocs.org/en/0.9-beta6/build.html>`_) 
+While the Tarbell ``base.html`` template (`see more on templates <http://tarbell.readthedocs.org/en/0.9-beta6/build.html>`_) 
 contains some very handy things, you may find you need to override some of the provided templates. One of 
 the most common cases in which this occurs is the navigation.
 
@@ -421,6 +421,7 @@ contain your map::
     <div id="map"></div>
 
 .. note::
+
   Partials are always prefaced with an underscore ``_``. This tells Tarbell to refrain from
   compiling them as independent pages. Otherwise, your project would end up with pages like
   `yoursite.com/footer.html`. Anything you write in a partial could also be written directly on
