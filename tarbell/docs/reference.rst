@@ -89,4 +89,4 @@ Install a Tarbell project from the Git repository url specified.
 
 **Usage:** ``tarbell install-template <git repository url>``
 
-Install a blueprint from the given repository url.
+Install a base template from the given repository url.

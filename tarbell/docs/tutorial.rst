@@ -11,10 +11,6 @@ All of the commands we'll show you here will need to be typed into the command p
 First you need to `install <install.html>`_ and `configure <install.html#configure-tarbell-with-tarbell-configure>`_
 Tarbell. (Make sure to set up a Google spreadsheet.) Go ahead. We'll wait.
 
-.. note::
-
-  Tarbell currently does not work on Windows machines.
-
 Set up a new project
 ====================
 
@@ -34,7 +30,7 @@ You'll need to answer a few questions. What will its name be, where on your comp
 
 You will be asked to choose which blueprint you wish to be the foundation of your project. Blueprints can be expanded upon but are very useful for setting the basic configurations necessary for the kinds of projects they have been designed for. See `this page <http://flask.pocoo.org/docs/blueprints/>`_ for more about blueprints, and go ahead and pick one::
   
-  Pick a Tarbell Blueprint
+  Pick a Tarbell blueprint:
 
     [1] Basic Bootstrap 3 template
         https://github.com/newsapps/tarbell-template
@@ -249,7 +245,7 @@ dive in! You may have noticed this line up at the top of your ``index.html`` fil
   {% extends "_base.html" %}
 
 The ``_base.html`` file is where all of the CSS, JavaScript and other goodies live. By "extending"
-``_base.html``, index.html has access to all of the things that live in the blueprint. You can
+``_base.html``, index.html has access to all of the things that live in the base. You can
 `read more about how template inheritance works here. <http://jinja.pocoo.org/docs/templates/#template-inheritance>`_
 
 .. note::
@@ -304,7 +300,7 @@ Using Javascript
 ================
 
 You can include JavaScript on your page much the way you would include CSS. By default,
-these are the blocks available in _base.html:
+these are the blocks available in ``_base.html``:
 
 .. code-block:: django
 
@@ -326,7 +322,7 @@ your project root to hold all of your Javascript files. Then you can include the
 .. code-block:: django
 
   {% block scripts %}
-  <script type="text/javascript" rel="js/project.css"></script>
+  <script src="js/app.js"></script>
   {% endblock %}
 
 
@@ -356,12 +352,12 @@ Without ``super()``, you would merely end up with:
 
 .. code-block:: html
 
-  <script src="js/app.js"></script>
+  <script type="text/javascript" src="js/app.js"></script>
 
 Overriding default templates
 ============================
 
-While the Tarbell blueprint (`see more on blueprints <http://tarbell.readthedocs.org/en/0.9-beta5/build.html>`_) 
+While the Tarbell ``base.html`` template (`see more on templates <http://tarbell.readthedocs.org/en/0.9-beta6/build.html>`_) 
 contains some very handy things, you may find you need to override some of the provided templates. One of 
 the most common cases in which this occurs is the navigation.
 
@@ -425,6 +421,7 @@ contain your map::
     <div id="map"></div>
 
 .. note::
+
   Partials are always prefaced with an underscore ``_``. This tells Tarbell to refrain from
   compiling them as independent pages. Otherwise, your project would end up with pages like
   `yoursite.com/footer.html`. Anything you write in a partial could also be written directly on
@@ -491,7 +488,7 @@ your spreadsheet and convert it to JSON in one fell swoop with a very handy Jinj
 
 This will turn the columns from the workbook called ``data`` into something that looks like this::
 
-  .. image:: map_data.png
+.. image:: map_data.png
 
 We can reference our city data in the rest of our Javascript now. So let's make the map!
 
