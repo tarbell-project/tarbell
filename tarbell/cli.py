@@ -179,11 +179,14 @@ def tarbell_install(command, args):
                 submodule = sh.git.bake(_cwd=os.path.join(path, '_base'))
             puts(submodule.fetch())
             puts(submodule.checkout(VERSION))
-            message = "\n- Done installing project in {0}".format(colored.yellow(path))
+            requirements_installed = _install_requirements(path)
 
-            # Get site, run hook
-            with ensure_project(command, args, path) as site:
-                site.call_hook("install", site, git)
+            if requirements_installed:
+                # Get site, run hook
+                with ensure_project(command, args, path) as site:
+                    site.call_hook("install", site, git)
+
+            message = "\n- Done installing project in {0}".format(colored.yellow(path))
 
         except sh.ErrorReturnCode_128:
             error = "Not a Tarbell project!"
@@ -403,60 +406,63 @@ def tarbell_newproject(command, args):
         puts(git.add('.'))
         puts(git.commit(m='Created {0} from {1}'.format(name, template['url'])))
 
-        # Check for requirements.txt
-        if os.path.join(path, "_blueprint", "_requirements.txt"):
-            install_reqs = raw_input("\nRequirements file found. Install requirements now with pip install -r _requirements.txt? [Y/n] ")
-            if install_reqs.lower() == 'y':
-                pip = sh.pip.bake(_cwd=os.path.join(path, "_blueprint"))
-                pip("install", "-r", "_requirements.txt")
-                puts("\nInstalling requirements...")
-                # Get site, run hook
-                with ensure_project(command, args, path) as site:
-                    site.call_hook("newproject", site, git)
+        requirements_installed = _install_requirements(path)
 
-                # Messages
-                puts("\nAll done! To preview your new project, type:\n")
-                puts("{0} {1}".format(colored.green("tarbell switch"), colored.green(name)))
-                puts("\nor\n")
-                puts("{0}".format(colored.green("cd %s" % path)))
-                puts("{0}".format(colored.green("tarbell serve\n")))
-
-                puts("\nYou got this!\n")
-
-            else:
-                puts("Not installing requirements. Please do this manually before continuing.")
-        else:
+        if requirements_installed:
             # Get site, run hook
             with ensure_project(command, args, path) as site:
                 site.call_hook("newproject", site, git)
 
-            # Messages
-            puts("\nAll done! To preview your new project, type:\n")
-            puts("{0} {1}".format(colored.green("tarbell switch"), colored.green(name)))
-            puts("\nor\n")
-            puts("{0}".format(colored.green("cd %s" % path)))
-            puts("{0}".format(colored.green("tarbell serve\n")))
+        # Messages
+        puts("\nAll done! To preview your new project, type:\n")
+        puts("{0} {1}".format(colored.green("tarbell switch"), colored.green(name)))
+        puts("\nor\n")
+        puts("{0}".format(colored.green("cd %s" % path)))
+        puts("{0}".format(colored.green("tarbell serve\n")))
 
-            puts("\nYou got this!\n")
+        puts("\nYou got this!\n")
+
+
+def _install_requirements(path):
+    """Install requirements.txt"""
+    locations = [os.path.join(path, "_blueprint", "requirements.txt"), os.path.join(path, "requirements.txt")] 
+    success = True
+
+    for location in locations:
+        try:
+            with open(location):
+                puts("\nRequirements file found at {0}".format(location))
+                install_reqs = raw_input("Install requirements now with pip install -r requirements.txt? [Y/n] ")
+                if not install_reqs or install_reqs.lower() == 'y':
+                    pip = sh.pip.bake(_cwd=os.path.join(path, "_blueprint"))
+                    puts("\nInstalling requirements...")
+                    pip("install", "-r", "requirements.txt")
+                else:
+                    success = False
+                    puts("Not installing requirements. This may break everything! Vaya con dios.")
+        except IOError:
+            pass
+
+    return success
 
 
 def _get_project_name(args):
-        """Get project name"""
-        name = args.get(0)
-        puts("")
-        while not name:
-            name = raw_input("What is the project's short directory name? (e.g. my_project) ")
-        return name
+    """Get project name"""
+    name = args.get(0)
+    puts("")
+    while not name:
+        name = raw_input("What is the project's short directory name? (e.g. my_project) ")
+    return name
 
 
 def _get_project_title():
-        """Get project title"""
-        title = None
-        puts("")
-        while not title:
-            title = raw_input("What is the project's full title? (e.g. My awesome project) ")
+    """Get project title"""
+    title = None
+    puts("")
+    while not title:
+        title = raw_input("What is the project's full title? (e.g. My awesome project) ")
 
-        return title
+    return title
 
 
 def _clean_suffix(string, suffix):
