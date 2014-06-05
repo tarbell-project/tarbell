@@ -420,13 +420,13 @@ def tarbell_newproject(command, args):
 
 def _install_requirements(path):
     """Install requirements.txt"""
-    locations = [os.path.join(path, "_blueprint"), path] 
+    locations = [os.path.join(path, "_blueprint"), os.path.join(path, "_base"), path] 
     success = True
 
     for location in locations:
         try:
             with open(os.path.join(location, "requirements.txt")):
-                puts("\nRequirements file found at {0}".format(location))
+                puts("\nRequirements file found at {0}".format(os.path.join(location, "requirements.txt")))
                 install_reqs = raw_input("Install requirements now with pip install -r requirements.txt? [Y/n] ")
                 if not install_reqs or install_reqs.lower() == 'y':
                     pip = sh.pip.bake(_cwd=location)
