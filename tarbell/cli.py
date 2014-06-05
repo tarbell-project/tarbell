@@ -169,7 +169,8 @@ def tarbell_install(command, args):
             puts(testgit.clone(project_url, '.', *['--depth=1', '--bare']))
             config = testgit.show("HEAD:tarbell_config.py")
             puts("\n- Found tarbell_config.py")
-            path = _get_path(_clean_suffix(project_name, ".git"), settings, mkdir=True)
+            path = _get_path(_clean_suffix(project_name, ".git"), settings)
+            _mkdir(path)
             git = sh.git.bake(_cwd=path)
             puts(git.clone(project_url, '.'))
             puts(git.submodule.update(*['--init', '--recursive']))
@@ -179,11 +180,14 @@ def tarbell_install(command, args):
                 submodule = sh.git.bake(_cwd=os.path.join(path, '_base'))
             puts(submodule.fetch())
             puts(submodule.checkout(VERSION))
-            message = "\n- Done installing project in {0}".format(colored.yellow(path))
+            requirements_installed = _install_requirements(path)
 
-            # Get site, run hook
-            with ensure_project(command, args, path) as site:
-                site.call_hook("install", site, git)
+            if requirements_installed:
+                # Get site, run hook
+                with ensure_project(command, args, path) as site:
+                    site.call_hook("install", site, git)
+
+            message = "\n- Done installing project in {0}".format(colored.yellow(path))
 
         except sh.ErrorReturnCode_128:
             error = "Not a Tarbell project!"
@@ -403,9 +407,12 @@ def tarbell_newproject(command, args):
         puts(git.add('.'))
         puts(git.commit(m='Created {0} from {1}'.format(name, template['url'])))
 
-        # Get site, run hook
-        with ensure_project(command, args, path) as site:
-            site.call_hook("newproject", site, git)
+        requirements_installed = _install_requirements(path)
+
+        if requirements_installed:
+            # Get site, run hook
+            with ensure_project(command, args, path) as site:
+                site.call_hook("newproject", site, git)
 
         # Messages
         puts("\nAll done! To preview your new project, type:\n")
@@ -417,23 +424,46 @@ def tarbell_newproject(command, args):
         puts("\nYou got this!\n")
 
 
+def _install_requirements(path):
+    """Install requirements.txt"""
+    locations = [os.path.join(path, "_blueprint"), path] 
+    success = True
+
+    for location in locations:
+        try:
+            with open(os.path.join(location, "requirements.txt")):
+                puts("\nRequirements file found at {0}".format(location))
+                install_reqs = raw_input("Install requirements now with pip install -r requirements.txt? [Y/n] ")
+                if not install_reqs or install_reqs.lower() == 'y':
+                    pip = sh.pip.bake(_cwd=location)
+                    puts("\nInstalling requirements...")
+                    puts(pip("install", "-r", "requirements.txt"))
+                else:
+                    success = False
+                    puts("Not installing requirements. This may break everything! Vaya con dios.")
+        except IOError:
+            pass
+
+    return success
+
+
 def _get_project_name(args):
-        """Get project name"""
-        name = args.get(0)
-        puts("")
-        while not name:
-            name = raw_input("What is the project's short directory name? (e.g. my_project) ")
-        return name
+    """Get project name"""
+    name = args.get(0)
+    puts("")
+    while not name:
+        name = raw_input("What is the project's short directory name? (e.g. my_project) ")
+    return name
 
 
 def _get_project_title():
-        """Get project title"""
-        title = None
-        puts("")
-        while not title:
-            title = raw_input("What is the project's full title? (e.g. My awesome project) ")
+    """Get project title"""
+    title = None
+    puts("")
+    while not title:
+        title = raw_input("What is the project's full title? (e.g. My awesome project) ")
 
-        return title
+    return title
 
 
 def _clean_suffix(string, suffix):
@@ -809,3 +839,4 @@ def_cmd(
     fn=tarbell_unpublish,
     usage='unpublish <target (default: staging)>',
     help='Remove the current project from <target>.')
+
