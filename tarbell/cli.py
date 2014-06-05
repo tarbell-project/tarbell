@@ -403,18 +403,41 @@ def tarbell_newproject(command, args):
         puts(git.add('.'))
         puts(git.commit(m='Created {0} from {1}'.format(name, template['url'])))
 
-        # Get site, run hook
-        with ensure_project(command, args, path) as site:
-            site.call_hook("newproject", site, git)
+        # Check for requirements.txt
+        if os.path.join(path, "_blueprint", "_requirements.txt"):
+            install_reqs = raw_input("\nRequirements file found. Install requirements now with pip install -r _requirements.txt? [Y/n] ")
+            if install_reqs.lower() == 'y':
+                pip = sh.pip.bake(_cwd=os.path.join(path, "_blueprint"))
+                pip("install", "-r", "_requirements.txt")
+                puts("\nInstalling requirements...")
+                # Get site, run hook
+                with ensure_project(command, args, path) as site:
+                    site.call_hook("newproject", site, git)
 
-        # Messages
-        puts("\nAll done! To preview your new project, type:\n")
-        puts("{0} {1}".format(colored.green("tarbell switch"), colored.green(name)))
-        puts("\nor\n")
-        puts("{0}".format(colored.green("cd %s" % path)))
-        puts("{0}".format(colored.green("tarbell serve\n")))
+                # Messages
+                puts("\nAll done! To preview your new project, type:\n")
+                puts("{0} {1}".format(colored.green("tarbell switch"), colored.green(name)))
+                puts("\nor\n")
+                puts("{0}".format(colored.green("cd %s" % path)))
+                puts("{0}".format(colored.green("tarbell serve\n")))
 
-        puts("\nYou got this!\n")
+                puts("\nYou got this!\n")
+
+            else:
+                puts("Not installing requirements. Please do this manually before continuing.")
+        else:
+            # Get site, run hook
+            with ensure_project(command, args, path) as site:
+                site.call_hook("newproject", site, git)
+
+            # Messages
+            puts("\nAll done! To preview your new project, type:\n")
+            puts("{0} {1}".format(colored.green("tarbell switch"), colored.green(name)))
+            puts("\nor\n")
+            puts("{0}".format(colored.green("cd %s" % path)))
+            puts("{0}".format(colored.green("tarbell serve\n")))
+
+            puts("\nYou got this!\n")
 
 
 def _get_project_name(args):
@@ -809,3 +832,4 @@ def_cmd(
     fn=tarbell_unpublish,
     usage='unpublish <target (default: staging)>',
     help='Remove the current project from <target>.')
+
