@@ -406,6 +406,9 @@ def tarbell_newproject(command, args):
         puts(git.add('.'))
         puts(git.commit(m='Created {0} from {1}'.format(name, template['url'])))
 
+        puts("ARGGGGH")
+
+        import ipdb; ipdb.set_trace();
         requirements_installed = _install_requirements(path)
 
         if requirements_installed:
@@ -436,7 +439,8 @@ def _install_requirements(path):
                 if not install_reqs or install_reqs.lower() == 'y':
                     pip = sh.pip.bake(_cwd=os.path.join(path, "_blueprint"))
                     puts("\nInstalling requirements...")
-                    pip("install", "-r", "requirements.txt")
+                    import ipdb; ipdb.set_trace();
+                    puts(pip("install", "-r", "requirements.txt"))
                 else:
                     success = False
                     puts("Not installing requirements. This may break everything! Vaya con dios.")
