@@ -169,7 +169,8 @@ def tarbell_install(command, args):
             puts(testgit.clone(project_url, '.', *['--depth=1', '--bare']))
             config = testgit.show("HEAD:tarbell_config.py")
             puts("\n- Found tarbell_config.py")
-            path = _get_path(_clean_suffix(project_name, ".git"), settings, mkdir=True)
+            path = _get_path(_clean_suffix(project_name, ".git"), settings)
+            _mkdir(path)
             git = sh.git.bake(_cwd=path)
             puts(git.clone(project_url, '.'))
             puts(git.submodule.update(*['--init', '--recursive']))
@@ -406,9 +407,6 @@ def tarbell_newproject(command, args):
         puts(git.add('.'))
         puts(git.commit(m='Created {0} from {1}'.format(name, template['url'])))
 
-        puts("ARGGGGH")
-
-        import ipdb; ipdb.set_trace();
         requirements_installed = _install_requirements(path)
 
         if requirements_installed:
@@ -428,18 +426,17 @@ def tarbell_newproject(command, args):
 
 def _install_requirements(path):
     """Install requirements.txt"""
-    locations = [os.path.join(path, "_blueprint", "requirements.txt"), os.path.join(path, "requirements.txt")] 
+    locations = [os.path.join(path, "_blueprint"), path] 
     success = True
 
     for location in locations:
         try:
-            with open(location):
+            with open(os.path.join(location, "requirements.txt")):
                 puts("\nRequirements file found at {0}".format(location))
                 install_reqs = raw_input("Install requirements now with pip install -r requirements.txt? [Y/n] ")
                 if not install_reqs or install_reqs.lower() == 'y':
-                    pip = sh.pip.bake(_cwd=os.path.join(path, "_blueprint"))
+                    pip = sh.pip.bake(_cwd=location)
                     puts("\nInstalling requirements...")
-                    import ipdb; ipdb.set_trace();
                     puts(pip("install", "-r", "requirements.txt"))
                 else:
                     success = False
