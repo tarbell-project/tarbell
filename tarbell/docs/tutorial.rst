@@ -488,7 +488,7 @@ your spreadsheet and convert it to JSON in one fell swoop with a very handy Jinj
 
 This will turn the columns from the workbook called ``data`` into something that looks like this::
 
-  .. image:: map_data.png
+.. image:: map_data.png
 
 We can reference our city data in the rest of our Javascript now. So let's make the map!
 
