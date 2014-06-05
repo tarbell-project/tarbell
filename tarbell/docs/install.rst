@@ -1,20 +1,6 @@
-=======================
-Installation & upgrades
-=======================
-
-Upgrade existing Tarbell installation
--------------------------------------
-
-If you've already installed Tarbell, you can upgrade easily:::
-
-  pip install -U tarbell
-
-.. note::
-
-  In version 0.9-beta6, some naming conventions changed. The ``_base`` folder and ``base.py`` file are
-  now called ``_blueprint`` and ``blueprint.py``. Though we have implemented backwards compatibility,
-  you may encounter issues upgrading older versions of Tarbell in the future.
-
+============
+Installation
+============
 
 Install Tarbell with `pip install tarbell`
 ------------------------------------------
@@ -233,4 +219,3 @@ and `tarbell switch`.
    :width: 700px
 
 
-We're set! Let's start building awesome sites!

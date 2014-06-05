@@ -40,6 +40,7 @@ Using Tarbell
 .. toctree::
    tutorial
    install
+   upgrade
    create
    build
    google_spreadsheets
