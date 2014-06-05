@@ -1,25 +1,28 @@
-=================
-Building projects
-=================
+=========================
+Introduction to templates
+=========================
 
 Editing templates
 -----------------
 
-Tarbell projects consist of simple HTML pages that may use `Jinja2 <http://jinja.pocoo.org/docs/>`_ templating features.
+Tarbell projects consist of text files that may use `Jinja2 <http://jinja.pocoo.org/docs/>`_ templating features and any static assets.
 
 If you create a file in your project directory called ``chapter1.html``, you'll be able to preview the file at http://localhost:5000/chapter1.html and publish to the same file. This file can be straight up HTML, or it can inherit from a Tarbell base template file. 
 
 Files and directories that start with an underscore (``_``) or a dot (``.``), like the ``_blueprint`` directory containing the Tarbell blueprint files, will not be rendered by the preview server or included in the generated static HTML.
 
 
-Understanding Tarbell base templates
+Understanding Tarbell blueprints
 --------------------------------
 
-base templates are exactly what they sound like –– a basic structure for building projects upon. From the `Flask documentation <http://flask.pocoo.org/docs/base templates/>`_:
+Tarbell blueprints provide a foundation for building projects. Blueprints allow an individual or organization
+to start and develop projects with the same basic structure.
+
+Tarbell blueprints are Flask blueprints. From the `Flask documentation <http://flask.pocoo.org/docs/base templates/>`_:
 
   Flask uses a concept of base templates for making application components and supporting common patterns. base templates can greatly simplify how large applications work, but a base template is not actually an application. Rather it is a base template of how to construct or extend an application.
 
-Tarbell ships with a default blueprint called _blueprint. This folder contains boilerplate code like advertising, analytics, and common page elements. Tarbell projects should inherit from blueprints.
+Tarbell ships with a default, Twitter Bootstrap-based blueprint. It contains boilerplate code with a header, footer, basic analytics and social media support.
 
 Here's a simple ``_blueprint/_blueprint.html`` example.
 
@@ -37,7 +40,7 @@ Here's a simple ``_blueprint/_blueprint.html`` example.
     </body>
   </html>
 
-To inherit from this template, you use the "extend" syntax in ``index.html`` or other project files you create. All your ``index.html`` needs to contain is:
+To inherit from this template, use Jinja's "extends" syntax in ``index.html`` or other project files you create. All your ``index.html`` needs to contain is:
 
 .. code-block:: django
 
@@ -48,20 +51,20 @@ To inherit from this template, you use the "extend" syntax in ``index.html`` or 
   {{ content|markdown }}
   {% endblock content %}
 
-You might notice we're using the ``|markdown`` filter. base template templates also define filters, enabled by Jinja2. See building base template templates for more, and the `Jinja2 <http://jinja.pocoo.org/docs/>`_ docs for more on Jinja2.
+Notice the ``|markdown`` filter, which is built into Tarbell for convenience. Tarbell Blueprints and projects may define filters, enabled by Jinja2. See :doc:`blueprints` for more
 
 If a blueprint defines a static file or template (e.g. ``_blueprint.css``), it will be available relative to the project's base path (e.g. http://127.0.0.1:5000/style.css). If a project defines a file with the same name, the project's version will be used instead.
 
-See the basic Tarbell template for a simple implementation of a base template.
+See the `open source Tarbell template <https://github.com/newsapps/tarbell-template>`_ for a simple implementation of a Tarbell blueprint.
 
-Template inheritance: Override files from Tarbell base templates by copying to your project directory
+Template inheritance: Override files from Tarbell blueprints by copying to your project directory
 -------------------------------------------------------------------------------------------------
 
-Any file in a Tarbell base template can be overridden in your project files.
+Any file in a Tarbell blueprint can be overridden by a project file.
 
 For example, if your blueprint includes a file ``_blueprint/_nav.html``, you can create a file named ``_nav.html`` in your project directory and it will be published instead of the blueprint version.
 
-This works for all files, static or templates.
+This works for static files as well as templates.
 
 Files prefixed with underscores (``_``) will not be generated or published
 --------------------------------------------------------------------------

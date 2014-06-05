@@ -50,7 +50,7 @@ Reference
 =========
 
 .. toctree::
-    base_templates
+    blueprints
     hooks
     reference
     configuring
