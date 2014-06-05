@@ -2,12 +2,9 @@
 Upgrading
 =========
 
-Upgrade an existing Tarbell installation
-----------------------------------------
-
 If you've already installed Tarbell, you can upgrade with:
 
-..code-block:: bash
+.. code-block:: bash
 
   pip install -U tarbell
 
