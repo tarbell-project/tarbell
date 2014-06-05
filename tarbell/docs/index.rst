@@ -1,9 +1,6 @@
-.. This file should at least contain the root `toctree` directive.
-
-==========================================
-Tarbell: Simple static sites for newsrooms
-==========================================
-*Build stories, not websites.*
+============
+Introduction
+============
 
 Tarbell makes it simple to put your work on the web, whether you’re a team of one or
 a dozen. With Tarbell, you can collaboratively build beautiful websites and publish them with ease.
@@ -11,7 +8,7 @@ a dozen. With Tarbell, you can collaboratively build beautiful websites and publ
 Tarbell makes use of familiar, flexible tools to take the magic (and frustration) out
 of publishing to the web. Google spreadsheets handle content management, so
 changes to your stories are easy to make without touching a line of code. Step-by-step
-prompts help you set up and configure your project, so that publishing it is a breeze.
+prompts help you set up and configure your project, so that publishing is a breeze.
 
 New here? Read the `Tarbell tutorial <tutorial.html>`_ or `install and configure Tarbell <install.rst>`_ to get started.
 
@@ -38,8 +35,9 @@ Using Tarbell
 =============
 
 .. toctree::
-   tutorial
    install
+   upgrade
+   tutorial
    create
    build
    google_spreadsheets
@@ -50,7 +48,8 @@ Reference
 =========
 
 .. toctree::
-    base_templates
+
+    blueprints
     hooks
     reference
     configuring

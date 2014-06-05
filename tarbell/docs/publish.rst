@@ -2,7 +2,7 @@
 Publishing
 ==========
 
-Manually publish projects with ``tarbell generate <output_dir>``
+Manually publish projects with ``tarbell generate``
 ----------------------------------------------------------------
 
 Generate HTML in a temporary directory::
@@ -14,7 +14,7 @@ Generate HTML in a specific directory::
   tarbell generate ~/output/myproject
 
 
-Publish projects with ``tarbell publish <staging/production/target>``
+Publish projects with ``tarbell publish <target>``
 ---------------------------------------------------------------------
 
 If Amazon S3 is configured, you can publish with::
@@ -27,7 +27,7 @@ You can specify a bucket when publishing (defined in ``tarbell_config.py``)::
 
   tarbell publish production
 
-Remove projects with ``tarbell unpublish <staging/production/target>``
+Remove projects with ``tarbell unpublish <target>``
 ----------------------------------------------------------------------
 
 Not implemented.
