@@ -48,7 +48,7 @@ The following timeline is simply tentative to provide some sense of direction wi
     <th>Developer</th>
   </tr>
   <tr>
-    <td>6/30<td>
+    <td>6/30</td>
     <td>Basic functionality implemented</td>
     <td>Sarah</td>
   </tr>
