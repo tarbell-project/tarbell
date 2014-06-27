@@ -54,22 +54,22 @@ The following timeline is simply tentative to provide some sense of direction wi
   <tr>
     <td>6/30</td>
     <td>Basic functionality implemented</td>
-    <td>Sarah</td>
+    <td>Sarah/Alex</td>
   </tr>
   <tr>
     <td>7/7</td>
     <td>CSS stylesheets/basic design templates started</td>
-    <td>Tom</td>
+    <td>Tom/Alex</td>
   </tr>
   <tr>
     <td>7/14</td>
     <td>Functionality tested/completed and design updated</td>
-    <td>Sarah/Tom</td>
+    <td>Sarah/Tom/Alex</td>
   </tr>
   <tr>
     <td>7/21</td>
     <td>Final wrap-up/advanced functionality added if time permits</td>
-    <td>Sarah/Tom</td>
+    <td>Sarah/Tom/Alex</td>
   </tr>
 </table>
 
