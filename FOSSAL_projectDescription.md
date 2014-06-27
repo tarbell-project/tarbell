@@ -14,6 +14,10 @@
     <td>Tom</td>
     <td>Programmer/Design</td>
   </tr>
+  <tr>
+    <td>Alex</td>
+    <td>Programmer/Functionality</td>
+  </tr>
 </table>
 
 ##### Background
