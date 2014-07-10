@@ -1,5 +1,8 @@
 ### Tarbell Web Interface Proposal
 
+####UPDATE
+Due to various time constraints and other factors, we are shifting the focus of our contributions to Tarbell.  Instead of working on a web interface, we will create display pages for common errors that users often run into when developing with Tarbell.  Currently, the error template that users see can be confusing.  It is not very descriptive or visually appealing, and it is not always clear what is causing the error.  We will create more useful error pages that will better direct users to the source of their issues.
+
 ##### Team Members
 <table>
   <tr>
