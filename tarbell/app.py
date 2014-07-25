@@ -1,4 +1,4 @@
-import os
+ximport os
 import json
 import imp
 import mimetypes
