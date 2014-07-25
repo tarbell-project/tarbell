@@ -28,7 +28,7 @@ Use them in your templates:
 Named worksheets
 ----------------
 
-Other worksheets can hold any kind of data support by Google spreadsheets. These variables can be accessed by their worksheet name.
+Other worksheets can hold any kind of data supported by Google spreadsheets. These variables can be accessed by their worksheet name.
 
 If there is no `key` column in the worksheet, the worksheet can be accessed as a list. Imagine a spreadsheet named `cars` with these values:
 
@@ -42,7 +42,7 @@ Element  24.6
 
 You can access these variables in your spreadsheet with a loop:
 
-.. code-block:: html
+.. code-block:: django
 
     {% for car in cars %}
       <h3>{{ car.model }}</h3>
@@ -62,7 +62,7 @@ volvo  Volvo   Sweden
 
 You can access these variables by their key name:
 
-.. code-block:: html
+.. code-block:: django
 
     <p>{% manufacturers.ford.name %} is from {% manufacturers.ford.country %}</p>
 

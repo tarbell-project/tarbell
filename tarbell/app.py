@@ -1,4 +1,4 @@
-import os
+ximport os
 import json
 import imp
 import mimetypes
@@ -7,6 +7,8 @@ import csv
 import re
 import requests
 import time
+import sys
+import traceback
 
 from httplib import BadStatusLine
 from flask import Flask, render_template, send_from_directory, Response
@@ -22,10 +24,13 @@ from werkzeug.wsgi import FileWrapper
 from utils import filter_files
 from clint.textui import puts, colored
 
-from .oauth import get_drive_api
-
+from .oauth import get_drive_api_from_client_secrets, get_drive_api_from_file
+from .hooks import hooks
 # in seconds
-SPREADSHEET_CACHE_TTL = 4 
+SPREADSHEET_CACHE_TTL = 4
+
+# all spreadsheet values except empty string
+VALID_CELL_TYPES = range(1, 5)
 
 # pass template variables to files with these mimetypes
 TEMPLATE_TYPES = [
@@ -158,7 +163,7 @@ def make_worksheet_data(headers, worksheet):
         row_dict = {}
         while cell_idx < worksheet.ncols:
             cell_type = worksheet.cell_type(row_idx, cell_idx)
-            if cell_type > 0 and cell_type < 5:
+            if cell_type in VALID_CELL_TYPES:
                 cell_value = worksheet.cell_value(row_idx, cell_idx)
                 try:
                     row_dict[headers[cell_idx]] = cell_value
@@ -191,7 +196,7 @@ def make_worksheet_data(headers, worksheet):
                 # Magic values worksheet
                 if worksheet.name == "values":
                     value = row.get('value')
-                    if value:
+                    if value not in ("", None):
                         keyed_data[key] = value
                 else:
                     keyed_data[key] = row
@@ -202,8 +207,10 @@ def make_worksheet_data(headers, worksheet):
 
 
 class TarbellSite:
-    def __init__(self, path, client_secrets_path=None):
+    def __init__(self, path, client_secrets_path=None, quiet=False):
         self.app = Flask(__name__)
+
+        self.quiet = quiet
 
         self.app.jinja_env.finalize = silent_none  # Don't print "None"
         self.app.debug = True  # Always debug
@@ -212,6 +219,7 @@ class TarbellSite:
         self.project, self.base = self.load_project(path)
 
         self.data = {}
+        self.hooks = self.process_hooks(hooks)
         self.expires = 0
 
         self.app.add_url_rule('/', view_func=self.preview)
@@ -219,24 +227,60 @@ class TarbellSite:
         self.app.add_template_filter(slughifi, 'slugify')
         self.app.add_template_filter(pprint_lines, 'pprint_lines')
 
+    def process_hooks(self, hooks):
+        try:
+            enabled_hooks = self.project.HOOKS
+        except AttributeError:
+            return hooks
+
+    def call_hook(self, hook, *args, **kwargs):
+        if len(self.hooks[hook]):
+            puts("Executing {0} hooks".format(hook))
+        for function in self.hooks[hook]:
+            function.__call__(*args, **kwargs)
+
     def load_project(self, path):
         base = None
-        base_dir = os.path.join(path, "_base/")
 
-        # Get the base as register it as a blueprint
-        if os.path.exists(os.path.join(base_dir, "base.py")):
-            filename, pathname, description = imp.find_module('base', [base_dir])
-            base = imp.load_module('base', filename, pathname, description)
+        # Slightly ugly DRY violation for backwards compatibility with old
+        # "_base" convention
+        if os.path.isdir(os.path.join(path, "_blueprint")):
+            base_dir = os.path.join(path, "_blueprint/")
+            # Get the blueprint template and register it as a blueprint
+            if os.path.exists(os.path.join(base_dir, "blueprint.py")):
+                filename, pathname, description = imp.find_module('blueprint', [base_dir])
+                base = imp.load_module('blueprint', filename, pathname, description)
+                self.blueprint_name = "_blueprint"
+            else:
+                puts("No _blueprint/blueprint.py file found")
+        elif os.path.isdir(os.path.join(path, "_base")):
+            puts("Using old '_base' convention")
+            base_dir = os.path.join(path, "_base/")
+            if os.path.exists(os.path.join(base_dir, "base.py")):
+                filename, pathname, description = imp.find_module('base', [base_dir])
+                base = imp.load_module('base', filename, pathname, description)
+                self.blueprint_name = "_base"
+            else:
+                puts("No _base/base.py file found")
+
+        if base:
             self.app.register_blueprint(base.blueprint)
-        else:
-            puts("No _base/base.py file found")
 
         filename, pathname, description = imp.find_module('tarbell_config', [path])
         project = imp.load_module('project', filename, pathname, description)
 
+        # @TODO factor into command line flag?
+        try:
+            project.CREDENTIALS_PATH
+        except AttributeError:
+            project.CREDENTIALS_PATH = None
+
         try:
             self.key = project.SPREADSHEET_KEY
-            self.client = get_drive_api(self.path)
+            if project.CREDENTIALS_PATH:
+                self.client = get_drive_api_from_file(project.CREDENTIALS_PATH)
+            else:
+                self.client = get_drive_api_from_client_secrets(self.path)
         except AttributeError:
             self.key = None
             self.client = None
@@ -244,12 +288,22 @@ class TarbellSite:
         try:
             project.CREATE_JSON
         except AttributeError:
-            project.CREATE_JSON = True
+            project.CREATE_JSON = False
 
         try:
             project.DEFAULT_CONTEXT
         except AttributeError:
             project.DEFAULT_CONTEXT = {}
+
+        try:
+            project.S3_BUCKETS
+        except AttributeError:
+            project.S3_BUCKETS = {}
+
+        try:
+            project.EXCLUDES
+        except AttributeError:
+            project.EXCLUDES = []
 
         try:
             self.app.register_blueprint(project.blueprint)
@@ -278,14 +332,15 @@ class TarbellSite:
         ## Detect files
         filepath = None
         for root, dirs, files in filter_files(self.path):
-            # Does it exist under _base?
-            basepath = os.path.join(root, "_base", path)
-            try:
-                with open(basepath):
-                    mimetype, encoding = mimetypes.guess_type(basepath)
-                    filepath = basepath
-            except IOError:
-                pass
+            # Does it exist in Tarbell blueprint?
+            if self.base:
+                basepath = os.path.join(root, self.blueprint_name, path)
+                try:
+                    with open(basepath):
+                        mimetype, encoding = mimetypes.guess_type(basepath)
+                        filepath = basepath
+                except IOError:
+                    pass
 
             # Does it exist under regular path?
             fullpath = os.path.join(root, path)
@@ -305,6 +360,7 @@ class TarbellSite:
                 "ROOT_URL": "127.0.0.1:5000",
                 "PATH": path,
                 "SPREADSHEET_KEY": self.key,
+                "BUCKETS": self.project.S3_BUCKETS,
             })
             if extra_context:
                 context.update(extra_context)
@@ -312,7 +368,16 @@ class TarbellSite:
                 rendered = render_template(path, **context)
                 return Response(rendered, mimetype=mimetype)
             except TemplateSyntaxError:
-                puts("{0} can't be parsed by Jinja, serving static".format(colored.yellow(filepath)))
+                ex_type, ex, tb = sys.exc_info()
+                stack = traceback.extract_tb(tb)
+                error = stack[-1]
+                puts("\n{0} can't be parsed by Jinja, serving static".format(colored.red(filepath)))
+                puts("\nLine {0}:".format(colored.green(error[1])))
+                puts("  {0}".format(colored.yellow(error[3])))
+                puts("\nFull traceback:")
+                traceback.print_tb(tb)
+                puts("")
+                del tb
 
         if filepath:
             dir, filename = os.path.split(filepath)
@@ -335,11 +400,32 @@ class TarbellSite:
                 context.update(self.get_context_from_csv())
             # Excel
             if re.search(r'(xlsx|XLSX|xls|XLS)$', file):
-                pass
+                context.update(self.get_context_from_xlsx())
         except AttributeError:
             context.update(self.get_context_from_gdoc())
 
         return context
+
+    def get_context_from_xlsx(self):
+        if re.search('^(http|https)://', self.project.CONTEXT_SOURCE_FILE):
+            resp = requests.get(self.project.CONTEXT_SOURCE_FILE)
+            content = resp.content
+        else:
+            try:
+                with open(self.project.CONTEXT_SOURCE_FILE) as xlsxfile:
+                    content = xlsxfile.read()
+            except IOError:
+                filepath = "%s/%s" % (
+                    os.path.abspath(self.path),
+                    self.project.CONTEXT_SOURCE_FILE)
+                with open(filepath) as xlsxfile:
+                    content = xlsxfile.read()
+
+        data = process_xlsx(content)
+        if 'values' in data:
+            data = copy_global_values(data)
+
+        return data
 
     def get_context_from_csv(self):
         """
@@ -374,7 +460,9 @@ class TarbellSite:
             if not self.data or start > self.expires:
                 self.data = self._get_context_from_gdoc(self.project.SPREADSHEET_KEY)
                 end = int(time.time())
-                self.expires = end + SPREADSHEET_CACHE_TTL
+                ttl = getattr(self.project, 'SPREADSHEET_CACHE_TTL',
+                              SPREADSHEET_CACHE_TTL)
+                self.expires = end + ttl
             return self.data
         except AttributeError:
             return {}
@@ -390,7 +478,10 @@ class TarbellSite:
         except BadStatusLine:
             # Stale connection, reset API and data
             puts("Connection reset, reloading drive API")
-            self.client = get_drive_api(self.path)
+            if self.CREDENTIALS_PATH:
+                self.client = get_drive_api_from_file(self.CREDENTIALS_PATH)
+            else:
+                self.client = get_drive_api_from_client_secrets(self.path)
             self.data = {}
             return self._get_context_from_gdoc(key)
 
@@ -403,25 +494,33 @@ class TarbellSite:
         return content
 
     def generate_static_site(self, output_root, extra_context):
-        base_dir = os.path.join(self.path, "_base/")
-
-        for root, dirs, files in filter_files(base_dir):
-            for filename in files:
-                self._copy_file(root.replace("_base/", ""), filename, output_root, extra_context)
+        if self.base:
+            base_dir = os.path.join(self.path, self.blueprint_name)
+            for root, dirs, files in filter_files(base_dir):
+                for filename in files:
+                    self._copy_file(root.replace(self.blueprint_name, ""), filename, output_root, extra_context)
 
         for root, dirs, files in filter_files(self.path):
-            for filename in files:
-                self._copy_file(root, filename, output_root, extra_context)
+            #don't copy stuff in the file that we just created
+            if root != os.path.abspath(output_root):
+                for filename in files:
+                    self._copy_file(root, filename, output_root, extra_context)
 
     def _copy_file(self, root, filename, output_root, extra_context=None):
+        # Remove double slashes if they exist
+        root = root.replace("//", "/")
+
         # Strip out full filesystem paths
         rel_path = os.path.join(root.replace(self.path, ""), filename)
+
         if rel_path.startswith("/"):
             rel_path = rel_path[1:]
+
         output_path = os.path.join(output_root, rel_path)
         output_dir = os.path.dirname(output_path)
 
-        puts("Writing {0}".format(output_path))
+        if not self.quiet:
+            puts("Writing {0}".format(output_path))
         with self.app.test_request_context():
             preview = self.preview(rel_path, extra_context=extra_context, publish=True)
             if not os.path.exists(output_dir):

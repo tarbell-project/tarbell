@@ -7,7 +7,7 @@ from setuptools import setup, find_packages
 
 
 APP_NAME = 'tarbell'
-VERSION = '0.9b2'
+VERSION = '0.9b6'
 
 settings = dict()
 
@@ -30,33 +30,29 @@ settings.update(
     include_package_data=True,
     install_requires=[
         "Flask==0.10.1",
-        "GitPython==0.3.2.RC1",
-        "Jinja2==2.7.1",
-        "MarkupSafe==0.18",
-        "PyYAML==3.10",
-        "Werkzeug==0.9.4",
-        "async==0.6.1",
-        "clint==0.3.1",
-        "gitdb==0.5.4",
-        "itsdangerous==0.23",
-        "ordereddict==1.1",
-        "requests==1.2.3",
-        "smmap==0.8.2",
-        "unicodecsv==0.9.4",
-        "wsgiref==0.1.2",
-        "google-api-python-client==1.2",
-        "keyring==3.0.2",
-        "xlrd==0.9.2",
-        "python-dateutil==2.2",
+        "Jinja2==2.7.2",
+        "Markdown==2.4.1",
+        "MarkupSafe==0.23",
+        "PyYAML==3.11",
+        "boto==2.28.0",
+        "clint==0.3.7",
         "docutils==0.11",
+        "google-api-python-client==1.2",
+        "keyring==3.8",
+        "python-dateutil>=2.2",
+        "readline==6.2.4.1",
+        "requests==2.3.0",
         "sh==1.09",
-        "Markdown==2.3.1"],
+        "sphinx_rtd_theme==0.1.6",
+        "wsgiref==0.1.2",
+        "xlrd==0.9.3",
+    ],
     entry_points={
         'console_scripts': [
             'tarbell = tarbell.cli:main',
         ],
     },
-    keywords=['Development Status :: 3 - alpha',
+    keywords=['Development Status :: 4 - beta',
           'License :: OSI Approved :: MIT License',
           'Operating System :: OS Independent',
           'Programming Language :: Python',

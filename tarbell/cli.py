@@ -7,42 +7,50 @@ tarbell.cli
 This module provides the CLI interface to tarbell.
 """
 
-import os
+import codecs
 import glob
-import sh
-import sys
 import imp
 import jinja2
-import codecs
-import tempfile
-import shutil
+import os
 import pkg_resources
-
-from subprocess import call
-from clint import args
-from clint.textui import colored, puts
+import sh
+import shutil
+import sys
+import tempfile
 
 from apiclient import errors
 from apiclient.http import MediaFileUpload as _MediaFileUpload
-
-from git import Repo
+from clint import arguments
+from clint.textui import colored, puts
+from subprocess import call
 
 from tarbell import __VERSION__ as VERSION
 
+# Handle relative imports from binary, see https://github.com/newsapps/flask-tarbell/issues/87
+if __name__ == "__main__" and __package__ is None:
+    __package__ = "tarbell.cli"
+
 from .app import pprint_lines, process_xlsx, copy_global_values
-from .oauth import get_drive_api
+from .oauth import get_drive_api_from_client_secrets
 from .contextmanagers import ensure_settings, ensure_project
 from .configure import tarbell_configure
 from .utils import list_get, black, split_sentences, show_error, get_config_from_args
-from .s3 import S3Sync
+from .s3 import S3Url, S3Sync
 
+# Load readline if possible
+try:
+    import readline
+except ImportError:
+    show_error("Could not import readline.")
+
+# Set args
+args = arguments.Args()
 
 # --------
 # Dispatch
 # --------
 def main():
     """Primary Tarbell command dispatch."""
-
     command = Command.lookup(args.get(0))
 
     if len(args) == 0 or args.contains(('-h', '--help', 'help')):
@@ -56,7 +64,7 @@ def main():
     elif command:
         arg = args.get(0)
         args.remove(arg)
-        command.__call__(args)
+        command.__call__(command, args)
         sys.exit()
 
     else:
@@ -77,22 +85,13 @@ def display_info(args):
     for command in Command.all_commands():
         usage = command.usage or command.name
         help = command.help or ''
-        puts('{0:50} {1}'.format(
-                colored.green(usage),
-                split_sentences(help)))
-
-    puts('\nOptions\n')
-    puts('{0:50} {1}'.format(
-        colored.green("--reset-creds"),
-        'Reset Google Drive OAuth2 credentials'
-    ))
-    puts('{0:50} {1}'.format(
-        colored.green("--settings <path>"),
-        'Path to settings directory.'
-    ))
+        puts('{0: <37} {1}\n'.format(
+                usage,
+                colored.yellow(split_sentences(help, 37))
+        ))
 
     config = get_config_from_args(args)
-    if not os.path.isdir(config):
+    if not os.path.isfile(config):
         puts('\n---\n\n{0}: {1}'.format(
             colored.red("Warning"),
             "No Tarbell configuration found. Run:"
@@ -111,55 +110,91 @@ def display_info(args):
 
 def display_version():
     """Displays Tarbell version/release."""
-
-    puts('{0} v{1}'.format(
-        colored.yellow('Tarbell'),
-        __version__
+    puts('You are using Tarbell v{0}'.format(
+        colored.green(VERSION)
     ))
 
 
-def tarbell_generate(args, skip_args=False, extra_context=None):
+def tarbell_generate(command, args, skip_args=False, extra_context=None, quiet=False):
     """Generate static files."""
 
     output_root = None
-    with ensure_settings(args) as settings, ensure_project(args) as site:
+    with ensure_settings(command, args) as settings, ensure_project(command, args) as site:
         if not skip_args:
             output_root = list_get(args, 0, False)
+            is_folder = os.path.exists(output_root)
+        if quiet:
+            site.quiet = True
         if not output_root:
             output_root = tempfile.mkdtemp(prefix="{0}-".format(site.project.__name__))
+            is_folder = False
 
         if args.contains('--context'):
             site.project.CONTEXT_SOURCE_FILE = args.value_after('--context')
 
-        site.generate_static_site(output_root, extra_context)
-        puts("\nCreated site in {0}".format(output_root))
+        #check to see if the folder we're trying to create already exists
+        if is_folder:
+            output_file = raw_input(("\nA folder named {0} already exists! Do you want to delete it? [Y/n] ").format(
+                colored.cyan(output_root)
+            ))
+            if output_file and not output_file.lower() == "y":
+                return puts("\nNot creating static site files.")
+            elif output_file and output_file.lower() == "y":
+                puts(("\nDeleting {0} and creating static site files...\n").format(
+                    colored.cyan(output_root)
+                ))
+                _delete_dir(output_root)
+        else:
+            site.generate_static_site(output_root, extra_context)
+            if not quiet:
+                puts("\nCreated site in {0}".format(output_root))
+
+        site.call_hook("generate", site, output_root)
         return output_root
 
 
-def tarbell_install(args):
+def tarbell_install(command, args):
     """Install a project."""
-    with ensure_settings(args) as settings:
+    with ensure_settings(command, args) as settings:
         project_url = args.get(0)
-        puts("\n- Getting project information for {0}".format(project_url)) 
+        puts("\n- Getting project information for {0}".format(project_url))
+        project_name = project_url.split("/").pop()
+        message = None
+        error = None
+
+        # Create a tempdir and clone
         tempdir = tempfile.mkdtemp()
-        Repo.clone_from(project_url, tempdir)
-        filename, pathname, description = imp.find_module('tarbell', [tempdir])
-        config = imp.load_module('tarbell', filename, pathname, description)
-        puts("\n- Found config.py")
-        path = _get_path(config.NAME, settings)
-        repo = Repo.clone_from(project_url, path)
         try:
-            puts("\n- Adding remote 'updated_project_template' using {0}".format(config.TEMPLATE_REPO_URL))
-            repo.create_remote("update_project_template", config.TEMPLATE_REPO_URL)
-        except AttributeError:
-            pass
-        _delete_dir(tempdir)
-        puts("\n- Done installing project in {0}".format(path))
+            testgit = sh.git.bake(_cwd=tempdir, _tty_out=False)
+            puts(testgit.clone(project_url, '.', *['--depth=1', '--bare']))
+            config = testgit.show("HEAD:tarbell_config.py")
+            puts("\n- Found tarbell_config.py")
+            path = _get_path(_clean_suffix(project_name, ".git"), settings)
+            _mkdir(path)
+            git = sh.git.bake(_cwd=path)
+            puts(git.clone(project_url, '.'))
+            puts(git.submodule.update(*['--init', '--recursive']))
+            requirements_installed = _install_requirements(path)
 
+            if requirements_installed:
+                # Get site, run hook
+                with ensure_project(command, args, path) as site:
+                    site.call_hook("install", site, git)
 
-def tarbell_install_template(args):
+            message = "\n- Done installing project in {0}".format(colored.yellow(path))
+
+        except sh.ErrorReturnCode_128:
+            error = "Not a Tarbell project!"
+        finally:
+            _delete_dir(tempdir)
+            if message:
+                puts(message)
+            if error:
+                show_error(error)
+
+def tarbell_install_template(command, args):
     """Install a project template."""
-    with ensure_settings(args) as settings:
+    with ensure_settings(command, args) as settings:
         template_url = args.get(0)
 
         matches = [template for template in settings.config["project_templates"] if template["url"] == template_url]
@@ -172,17 +207,20 @@ def tarbell_install_template(args):
         puts("\nInstalling {0}".format(colored.cyan(template_url))) 
         tempdir = tempfile.mkdtemp()
         puts("\n- Cloning repo to {0}".format(colored.green(tempdir))) 
-        Repo.clone_from(template_url, tempdir)
-        base_path = os.path.join(tempdir, "_base/")
-        filename, pathname, description = imp.find_module('base', [base_path])
-        base = imp.load_module('base', filename, pathname, description)
-        puts("\n- Found _base/base.py")
+        tempdir = tempfile.mkdtemp()
+        git = sh.git.bake(_cwd=tempdir)
+        puts(git.clone(template_url, '.'))
+        puts(git.fetch())
+        puts(git.checkout(VERSION))
+        filename, pathname, description = imp.find_module('blueprint', [tempdir])
+        blueprint = imp.load_module('blueprint', filename, pathname, description)
+        puts("\n- Found _blueprint/blueprint.py")
         try:
-            name = base.NAME
-            puts("\n- Name specified in base.py: {0}".format(colored.yellow(name)))
+            name = blueprint.NAME
+            puts("\n- Name specified in blueprint.py: {0}".format(colored.yellow(name)))
         except AttributeError:
             name = template_url.split("/")[-1]
-            puts("\n- No name specified in base.py, using '{0}'".format(colored.yellow(name)))
+            puts("\n- No name specified in blueprint.py, using '{0}'".format(colored.yellow(name)))
 
         settings.config["project_templates"].append({"name": name, "url": template_url})
         settings.save()
@@ -192,9 +230,9 @@ def tarbell_install_template(args):
         puts("\n+ Added new project template: {0}".format(colored.yellow(name)))
 
 
-def tarbell_list(args):
+def tarbell_list(command, args):
     """List tarbell projects."""
-    with ensure_settings(args) as settings:
+    with ensure_settings(command, args) as settings:
         projects_path = settings.config.get("projects_path")
         if not projects_path:
             show_error("{0} does not exist".format(projects_path))
@@ -204,88 +242,110 @@ def tarbell_list(args):
             colored.yellow(projects_path)
         ))
 
-        for dir in os.listdir(projects_path):
-            project_path = os.path.join(projects_path, dir)
+        longest_title = 0
+        projects = []
+        for directory in os.listdir(projects_path):
+            project_path = os.path.join(projects_path, directory)
             try:
-                filename, pathname, description = imp.find_module('tarbell', [project_path])
-                config = imp.load_module(dir, filename, pathname, description)
-
-                puts("{0:37} {1}".format(
-                    colored.red(config.NAME),
-                    colored.cyan(config.TITLE)
-                ))
-
-                puts("- {0:25} {1}".format("Project path:", colored.yellow(project_path))),
-                repo = Repo(project_path)
-
-                try:
-                    origin = repo.remotes.origin.config_reader.get_value("url")
-                    puts("- {0:25} {1}".format("Project repository:", origin))
-                except AttributeError:
-                    pass
-
-                try:
-                    update_project_template = repo.remotes.update_project_template.config_reader.get_value("url")
-                    puts("- {0:25} {1}".format("Base update repository:", update_project_template))
-                except AttributeError:
-                    pass
-
-                puts("")
-
+                filename, pathname, description = imp.find_module('tarbell_config', [project_path])
+                config = imp.load_module(directory, filename, pathname, description)
+                projects.append((project_path, config))
+                if len(config.TITLE) > longest_title:
+                    longest_title = len(config.TITLE)
             except ImportError:
                 pass
 
-        puts("Use {0} to switch to a project\n".format(
+        fmt = "{0: <"+str(longest_title+1)+"} {1}"
+        puts(fmt.format(
+            'title',
+            'path'
+        ))
+        for path, config in projects:
+            puts(colored.yellow(fmt.format(
+                config.TITLE,
+                colored.cyan(path)
+            )))
+
+        puts("\nUse {0} to switch to a project\n".format(
             colored.green("tarbell switch <projectname>")
             ))
 
 
-def tarbell_list_templates(args):
-    with ensure_settings(args) as settings:
+def tarbell_list_templates(command, args):
+    with ensure_settings(command, args) as settings:
         puts("\nAvailable project templates\n")
         _list_templates(settings)
         puts("")
 
 
-def tarbell_publish(args):
+def tarbell_publish(command, args):
     """Publish a site by calling s3cmd"""
-    with ensure_settings(args) as settings, ensure_project(args) as site:
+    with ensure_settings(command, args) as settings, ensure_project(command, args) as site:
         bucket_name = list_get(args, 0, "staging")
-        bucket_uri = site.project.S3_BUCKETS.get(bucket_name, False)
-        creds = settings.config.get('s3_creds')
 
-        root_url = bucket_uri[5:]
+        try:
+            bucket_url = S3Url(site.project.S3_BUCKETS[bucket_name])
+        except KeyError:
+            show_error(
+                "\nThere's no bucket configuration called '{0}' in "
+                "tarbell_config.py.".format(colored.yellow(bucket_name)))
+            sys.exit(1)
+
         extra_context = {
-            "ROOT_URL": root_url,
+            "ROOT_URL": bucket_url,
+            "S3_BUCKET": bucket_url.root,
+            "BUCKET_NAME": bucket_name,
         }
 
-        tempdir = "{0}/".format(tarbell_generate(args, extra_context=extra_context, skip_args=True))
+        tempdir = "{0}/".format(tarbell_generate(command,
+            args, extra_context=extra_context, skip_args=True, quiet=True))
         try:
-            if bucket_uri and creds:
-                puts("\nDeploying {0} to {1} ({2})\n".format(
-                      colored.yellow(site.project.TITLE),
-                      colored.red(bucket_name),
-                      colored.green(bucket_uri)
-                     ))
-                if creds:
-                    s3 = S3Sync(tempdir, bucket_uri, creds['default']['key_id'], creds['default']['key'])
-                    s3.deploy_to_s3()
+            puts("\nDeploying {0} to {1} ({2})\n".format(
+                colored.yellow(site.project.TITLE),
+                colored.red(bucket_name),
+                colored.green(bucket_url)
+            ))
+
+            # Get creds
+            if settings.config:
+                # If settings has a config section, use it
+                kwargs = settings.config['s3_credentials'].get(bucket_url.root)
+                if not kwargs:
+                    kwargs = {
+                        'access_key_id': settings.config['default_s3_access_key_id'],
+                        'secret_access_key': settings.config['default_s3_secret_access_key'],
+                    }
+                    puts("Using default bucket credentials")
+                else:
+                    puts("Using custom bucket configuration for {0}".format(bucket_url.root))
             else:
-                show_error(("\nThere's no bucket configuration called '{0}' "
-                            "in tarbell_config.py.".format(colored.yellow(bucket_name))))
+                # If no configuration exists, read from environment variables if possible
+                puts("Attemping to use AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY")
+                kwargs = {
+                    'access_key_id': os.environ["AWS_ACCESS_KEY_ID"],
+                    'secret_access_key': os.environ["AWS_SECRET_ACCESS_KEY"],
+                }
+
+
+            kwargs['excludes'] = site.project.EXCLUDES
+            s3 = S3Sync(tempdir, bucket_url, **kwargs)
+            s3.deploy_to_s3()
+            site.call_hook("publish", site, s3)
+
+            puts("\nIf you have website hosting enabled, you can see your project at:")
+            puts(colored.green("http://{0}\n".format(bucket_url)))
         except KeyboardInterrupt:
             show_error("ctrl-c pressed, bailing out!")
+        except KeyError:
+            show_error("Credentials for bucket {0} not configured -- run {1} or add credentials to {2}".format(colored.red(bucket_url), colored.yellow("tarbell configure s3"), colored.yellow("~/.tarbell/settings.yaml")))
         finally:
             _delete_dir(tempdir)
-            puts("\nIf you have website hosting enabled, you can see your project at:")
-            puts(colored.green("http://{0}\n".format(root_url)))
 
 
 def _delete_dir(dir):
     """Delete tempdir"""
     try:
         shutil.rmtree(dir)  # delete directory
-        puts("\nDeleted {0}".format(dir))
     except OSError as exc:
         if exc.errno != 2:  # code 2 - no such file or directory
             raise  # re-raise exception
@@ -293,27 +353,27 @@ def _delete_dir(dir):
         pass
 
 
-def tarbell_newproject(args):
+def tarbell_newproject(command, args):
     """Create new Tarbell project."""
-    with ensure_settings(args) as settings:
-
-        # Create directory or bail
+    with ensure_settings(command, args) as settings:
+        # Set it up and make the directory
         name = _get_project_name(args)
         puts("Creating {0}".format(colored.cyan(name)))
         path = _get_path(name, settings)
         title = _get_project_title()
         template = _get_template(settings)
+        _mkdir(path)
 
         # Init repo
         git = sh.git.bake(_cwd=path)
         puts(git.init())
 
         # Create submodule
-        puts(git.submodule.add(template['url'], '_base'))
+        puts(git.submodule.add(template['url'], '_blueprint'))
         puts(git.submodule.update(*['--init']))
 
         # Get submodule branches, switch to current version
-        submodule = sh.git.bake(_cwd=os.path.join(path, '_base'))
+        submodule = sh.git.bake(_cwd=os.path.join(path, '_blueprint'))
         puts(submodule.fetch())
         puts(submodule.checkout(VERSION))
 
@@ -325,28 +385,28 @@ def tarbell_newproject(args):
 
         # Copy html files
         puts(colored.green("\nCopying html files..."))
-        files = glob.iglob(os.path.join(path, "_base", "*.html"))
+        files = glob.iglob(os.path.join(path, "_blueprint", "*.html"))
         for file in files:
             if os.path.isfile(file):
                 dir, filename = os.path.split(file)
                 if not filename.startswith("_") and not filename.startswith("."):
                     puts("Copying {0} to {1}".format(filename, path))
                     shutil.copy2(file, path)
+        ignore = os.path.join(path, "_blueprint", ".gitignore")
+        if os.path.isfile(ignore):
+            shutil.copy2(ignore, path)
 
         # Commit
         puts(colored.green("\nInitial commit"))
         puts(git.add('.'))
         puts(git.commit(m='Created {0} from {1}'.format(name, template['url'])))
 
-        # Set up remote url
-        remote_url = raw_input("\nWhat is the URL of your project repository? (e.g. git@github.com:myaccount/myproject.git, leave blank to skip) ")
-        if remote_url:
-            puts("\nCreating new remote 'origin' to track {0}.".format(colored.yellow(remote_url)))
-            git.remote.add(*["origin", remote_url])
-            puts("\n{0}: Don't forget! It's up to you to create this remote and push to it.".format(colored.cyan("Warning")))
-        else:
-            puts("\n- Not setting up remote repository. Use your own version control!")
+        requirements_installed = _install_requirements(path)
 
+        if requirements_installed:
+            # Get site, run hook
+            with ensure_project(command, args, path) as site:
+                site.call_hook("newproject", site, git)
 
         # Messages
         puts("\nAll done! To preview your new project, type:\n")
@@ -358,26 +418,66 @@ def tarbell_newproject(args):
         puts("\nYou got this!\n")
 
 
+def _install_requirements(path):
+    """Install requirements.txt"""
+    locations = [os.path.join(path, "_blueprint"), os.path.join(path, "_base"), path] 
+    success = True
+
+    for location in locations:
+        try:
+            with open(os.path.join(location, "requirements.txt")):
+                puts("\nRequirements file found at {0}".format(os.path.join(location, "requirements.txt")))
+                install_reqs = raw_input("Install requirements now with pip install -r requirements.txt? [Y/n] ")
+                if not install_reqs or install_reqs.lower() == 'y':
+                    pip = sh.pip.bake(_cwd=location)
+                    puts("\nInstalling requirements...")
+                    puts(pip("install", "-r", "requirements.txt"))
+                else:
+                    success = False
+                    puts("Not installing requirements. This may break everything! Vaya con dios.")
+        except IOError:
+            pass
+
+    return success
+
+
 def _get_project_name(args):
-        """Get project name"""
-        name = args.get(0)
-        puts("")
-        while not name:
-            name = raw_input("What is the project's short directory name? (e.g. my_project) ")
-        return name
+    """Get project name"""
+    name = args.get(0)
+    puts("")
+    while not name:
+        name = raw_input("What is the project's short directory name? (e.g. my_project) ")
+    return name
 
 
 def _get_project_title():
-        """Get project title"""
-        title = None
-        puts("")
-        while not title:
-            title = raw_input("What is the project's full title? (e.g. My awesome project) ")
+    """Get project title"""
+    title = None
+    puts("")
+    while not title:
+        title = raw_input("What is the project's full title? (e.g. My awesome project) ")
 
-        return title
+    return title
 
 
-def _get_path(name, settings):
+def _clean_suffix(string, suffix):
+    """If string endswith the suffix, remove it. Else leave it alone"""
+    suffix_len = len(suffix)
+
+    if len(string) < suffix_len:
+        # the string param was shorter than the suffix
+        raise ValueError("A suffix can not be bigger than string argument.")
+    if string.endswith(suffix):
+        # return from the beginning up to
+        # but not including the first letter
+        # in the suffix
+        return string[0:-suffix_len]   
+    else:
+        # leave unharmed
+        return string
+
+
+def _get_path(name, settings, mkdir=True):
     """Generate a project path."""
     default_projects_path = settings.config.get("projects_path")
     path = None
@@ -390,6 +490,11 @@ def _get_path(name, settings):
         while not path:
             path = raw_input("\nWhere would you like to create this project? (e.g. ~/tarbell/) ")
 
+    return os.path.expanduser(path)
+
+
+def _mkdir(path):
+    """Make a directory or bail."""
     try:
         os.mkdir(path)
     except OSError, e:
@@ -398,8 +503,6 @@ def _get_path(name, settings):
         else:
             show_error("ABORTING: OSError {0}".format(e))
         sys.exit()
-
-    return path
 
 
 def _get_template(settings):
@@ -434,11 +537,10 @@ def _create_spreadsheet(name, title, path, settings):
     if not settings.client_secrets:
         return None
 
-    create = raw_input("{0} found. Would you like to create a Google spreadsheet? [Y/n] ".format(
-        colored.cyan("client_secrets")
-    ))
+    create = raw_input("Would you like to create a Google spreadsheet? [Y/n] ")
+
     if create and not create.lower() == "y":
-        return puts("Not creating spreadsheet...")
+        return puts("Not creating spreadsheet.")
 
     email_message = (
         "What Google account should have access to this "
@@ -457,13 +559,13 @@ def _create_spreadsheet(name, title, path, settings):
             email = raw_input(email_message)
 
     try:
-        media_body = _MediaFileUpload(os.path.join(path, '_base/_spreadsheet.xlsx'),
+        media_body = _MediaFileUpload(os.path.join(path, '_blueprint/_spreadsheet.xlsx'),
                                       mimetype='application/vnd.ms-excel')
     except IOError:
-        show_error("_base/_spreadsheet.xlsx doesn't exist!")
+        show_error("_blueprint/_spreadsheet.xlsx doesn't exist!")
         return None
 
-    service = get_drive_api(settings.path)
+    service = get_drive_api_from_client_secrets(settings.path)
     body = {
         'title': '{0} (Tarbell)'.format(title),
         'description': '{0} ({1})'.format(title, name),
@@ -504,7 +606,7 @@ def _add_user_to_file(file_id, service, user_email,
 
 
 def _copy_config_template(name, title, template, path, key, settings):
-        """Get and render tarbell_config.py.template from base"""
+        """Get and render tarbell_config.py.template from blueprint"""
         puts("\nCopying configuration file")
         context = settings.config
         context.update({
@@ -520,10 +622,10 @@ def _copy_config_template(name, title, template, path, key, settings):
 
         # @TODO refactor this a bit
         if not key:
-            spreadsheet_path = os.path.join(path, '_base/', '_spreadsheet.xlsx')
+            spreadsheet_path = os.path.join(path, '_blueprint/', '_spreadsheet.xlsx')
             with open(spreadsheet_path, "rb") as f:
                 try:
-                    puts("Copying _base/_spreadsheet.xlsx to tarbell_config.py's DEFAULT_CONTEXT") 
+                    puts("Copying _blueprint/_spreadsheet.xlsx to tarbell_config.py's DEFAULT_CONTEXT") 
                     data = process_xlsx(f.read())
                     if 'values' in data:
                         data = copy_global_values(data)
@@ -534,11 +636,11 @@ def _copy_config_template(name, title, template, path, key, settings):
         s3_buckets = settings.config.get("s3_buckets")
         if s3_buckets:
             puts("")
-            for bucket, url in s3_buckets.items():
+            for bucket, bucket_conf in s3_buckets.items():
                 puts("Configuring {0} bucket at {1}\n".format(
-                        colored.green(bucket),
-                        colored.yellow("{0}/{1}".format(url, name))
-                    ))
+                    colored.green(bucket),
+                    colored.yellow("{0}/{1}".format(bucket_conf['uri'], name))
+                ))
 
         puts("\n- Creating {0} project configuration file".format(
             colored.cyan("tarbell_config.py")
@@ -552,24 +654,19 @@ def _copy_config_template(name, title, template, path, key, settings):
         puts("\n- Done copying configuration file")
 
 
-def tarbell_serve(args):
+def tarbell_serve(command, args):
     """Serve the current Tarbell project."""
-    with ensure_project(args) as site:
+    with ensure_project(command, args) as site:
         address = list_get(args, 0, "").split(":")
         ip = list_get(address, 0, '127.0.0.1')
         port = list_get(address, 1, '5000')
         puts("Press {0} to stop the server".format(colored.red("ctrl-c")))
-        script = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'scripts/runserver.py')
-        command = ['python', script, site.path, ip, port]
-        try:
-            call(command)
-        except KeyboardInterrupt:
-            puts(colored.red("Quitting with ctrl-c..."))
+        site.app.run(ip, port=int(port))
 
 
-def tarbell_switch(args):
+def tarbell_switch(command, args):
     """Switch to a project"""
-    with ensure_settings(args) as settings:
+    with ensure_settings(command, args) as settings:
         projects_path = settings.config.get("projects_path")
         if not projects_path:
             show_error("{0} does not exist".format(projects_path))
@@ -582,22 +679,28 @@ def tarbell_switch(args):
             puts("\nSwitching to {0}".format(colored.red(project)))
             puts("Edit this project's templates at {0}".format(colored.yellow(project_path)))
             puts("Running preview server...")
-            tarbell_serve(args)
+            tarbell_serve(command, args)
         else:
             show_error("{0} isn't a tarbell project".format(project_path))
 
 
-def tarbell_update(args):
+def tarbell_update(command, args):
     """Update the current tarbell project."""
-    with ensure_settings(args) as settings, ensure_project(args) as site:
-        repo = Repo(site.path)
-        repo.remotes.update_project_template.fetch()
-        repo.remotes.update_project_template.pull("master")
-        # @TODO make this chatty
+    with ensure_settings(command, args) as settings, ensure_project(command, args) as site:
+        puts("Updating to latest blueprint\n")
+        git = sh.git.bake(_cwd=os.path.join(site.path, '_blueprint'))
+        git.fetch()
+        puts(colored.yellow("Checking out {0}".format(VERSION)))
+        puts(git.checkout(VERSION))
+        puts(colored.yellow("Stashing local changes"))
+        puts(git.stash())
+        puts(colored.yellow("Pull latest changes"))
+        puts(git.pull('origin', VERSION))
 
 
-def tarbell_unpublish(args):
-    with ensure_settings(args) as settings, ensure_project(args) as site:
+
+def tarbell_unpublish(command, args):
+    with ensure_settings(command, args) as settings, ensure_project(command, args) as site:
         """Delete a project."""
         show_error("Not implemented!")
 
@@ -648,8 +751,8 @@ def def_cmd(name=None, short=None, fn=None, usage=None, help=None):
 def_cmd(
     name='configure',
     fn=tarbell_configure,
-    usage='configure',
-    help='Configure Tarbell')
+    usage='configure <subcommand (optional)>',
+    help="Configure Tarbell. Subcommand can be one of 'drive', 's3', 'path', or 'templates'.")
 
 
 def_cmd(
@@ -722,7 +825,7 @@ def_cmd(
     name='update',
     fn=tarbell_update,
     usage='update',
-    help='Update base template in current project.')
+    help='Update blueprint in current project.')
 
 
 def_cmd(
@@ -730,3 +833,4 @@ def_cmd(
     fn=tarbell_unpublish,
     usage='unpublish <target (default: staging)>',
     help='Remove the current project from <target>.')
+
