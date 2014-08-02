@@ -372,7 +372,7 @@ class TarbellSite:
                 stack = traceback.extract_tb(tb)
                 error = stack[-1]
                 puts("\n{0} can't be parsed by Jinja, serving static".format(colored.red(filepath)))
-                puts("\nLine {0}:".format(colored.green(error[1])))
+                puts("\nLine {0}:".format(colored.green(str(error[1]))))
                 puts("  {0}".format(colored.yellow(error[3])))
                 puts("\nFull traceback:")
                 traceback.print_tb(tb)
