@@ -319,7 +319,7 @@ class TarbellSite:
 
         return project, base
 
-    def preview(self, path=None, extra_context=None, publish=False):
+    def preview(self, path=None, extra_context=None, publish=False, allow_failure=False):
         """ Preview a project path """
         if path is None:
             path = 'index.html'
@@ -372,12 +372,16 @@ class TarbellSite:
                 stack = traceback.extract_tb(tb)
                 error = stack[-1]
                 puts("\n{0} can't be parsed by Jinja, serving static".format(colored.red(filepath)))
-                puts("\nLine {0}:".format(colored.green(error[1])))
+                puts("\nLine {0}:".format(colored.green(str(error[1]))))
                 puts("  {0}".format(colored.yellow(error[3])))
                 puts("\nFull traceback:")
                 traceback.print_tb(tb)
                 puts("")
                 del tb
+
+                if allow_failure:
+                    sys.exit(1)
+
 
         if filepath:
             dir, filename = os.path.split(filepath)
@@ -522,7 +526,7 @@ class TarbellSite:
         if not self.quiet:
             puts("Writing {0}".format(output_path))
         with self.app.test_request_context():
-            preview = self.preview(rel_path, extra_context=extra_context, publish=True)
+            preview = self.preview(rel_path, extra_context=extra_context, publish=True, allow_failure=True)
             if not os.path.exists(output_dir):
                 os.makedirs(output_dir)
             with open(output_path, "wb") as f:
