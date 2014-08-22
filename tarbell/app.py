@@ -166,6 +166,8 @@ def make_worksheet_data(headers, worksheet):
             if cell_type in VALID_CELL_TYPES:
                 cell_value = worksheet.cell_value(row_idx, cell_idx)
                 try:
+                    if cell_type == 2 and cell_value.is_integer():
+                        cell_value = int(cell_value)
                     row_dict[headers[cell_idx]] = cell_value
                 except KeyError:
                     try:
@@ -234,8 +236,6 @@ class TarbellSite:
             return hooks
 
     def call_hook(self, hook, *args, **kwargs):
-        if len(self.hooks[hook]):
-            puts("Executing {0} hooks".format(hook))
         for function in self.hooks[hook]:
             function.__call__(*args, **kwargs)
 
@@ -321,6 +321,8 @@ class TarbellSite:
 
     def preview(self, path=None, extra_context=None, publish=False, allow_failure=False):
         """ Preview a project path """
+        self.call_hook("preview", self)
+
         if path is None:
             path = 'index.html'
 
