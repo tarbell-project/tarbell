@@ -4,6 +4,7 @@ hooks = {
     'generate': [],          # (site, tempdir)
     'publish': [],           # (site, s3)
     'install': [],           # (site, project)
+    'preview': [],           # (site)
 }
 
 

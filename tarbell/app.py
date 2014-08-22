@@ -236,8 +236,6 @@ class TarbellSite:
             return hooks
 
     def call_hook(self, hook, *args, **kwargs):
-        if len(self.hooks[hook]):
-            puts("Executing {0} hooks".format(hook))
         for function in self.hooks[hook]:
             function.__call__(*args, **kwargs)
 
@@ -323,6 +321,8 @@ class TarbellSite:
 
     def preview(self, path=None, extra_context=None, publish=False):
         """ Preview a project path """
+        self.call_hook("preview", self)
+
         if path is None:
             path = 'index.html'
 
