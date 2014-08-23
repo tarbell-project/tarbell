@@ -670,9 +670,13 @@ def tarbell_serve(command, args):
     with ensure_project(command, args) as site:
         address = list_get(args, 0, "").split(":")
         ip = list_get(address, 0, '127.0.0.1')
-        port = list_get(address, 1, '5000')
-        puts("Press {0} to stop the server".format(colored.red("ctrl-c")))
-        site.app.run(ip, port=int(port))
+        port = int(list_get(address, 1, '5000'))
+        puts("Running local server. Press {0} to stop the server".format(colored.red("ctrl-c")))
+        try:
+            site.app.run(ip, port=port)
+        except socket.error:
+            show_error("Address {0} is already in use, please try another port or address."
+                 .format(colored.yellow("{0}:{1}".format(ip, port))))
 
 
 def tarbell_switch(command, args):
