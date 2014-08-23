@@ -554,20 +554,20 @@ def _create_spreadsheet(name, title, path, settings):
         return puts("Not creating spreadsheet.")
 
     email_message = (
-        "What Google account should have access to this "
+        "What Google account(s) should have access to this "
         "this spreadsheet? (Use a full email address, such as "
-        "your.name@gmail.com or the Google account equivalent.) ") 
+        "your.name@gmail.com. Separate multiple addresses with commas.)")
 
     if settings.config.get("google_account"):
-        email = raw_input("\n{0}(Default: {1}) ".format(email_message,
+        emails = raw_input("\n{0}(Default: {1}) ".format(email_message,
                                              settings.config.get("google_account")
                                             ))
-        if not email:
-            email = settings.config.get("google_account")
+        if not emails:
+            emails = settings.config.get("google_account")
     else:
-        email = None
-        while not email:
-            email = raw_input(email_message)
+        emails = None
+        while not emails:
+            emails = raw_input(email_message)
 
     try:
         media_body = _MediaFileUpload(os.path.join(path, '_blueprint/_spreadsheet.xlsx'),
@@ -585,7 +585,8 @@ def _create_spreadsheet(name, title, path, settings):
     try:
         newfile = service.files()\
             .insert(body=body, media_body=media_body, convert=True).execute()
-        _add_user_to_file(newfile['id'], service, user_email=email)
+        for email in emails.split(","):
+            _add_user_to_file(newfile['id'], service, user_email=email.strip())
         puts("\n{0}! View the spreadsheet at {1}".format(
             colored.green("Success"),
             colored.yellow("https://docs.google.com/spreadsheet/ccc?key={0}"
@@ -598,7 +599,7 @@ def _create_spreadsheet(name, title, path, settings):
 
 
 def _add_user_to_file(file_id, service, user_email,
-                      perm_type='user', role='reader'):
+                      perm_type='user', role='writer'):
     """
     Grants the given set of permissions for a given file_id. service is an
     already-credentialed Google Drive service instance.
