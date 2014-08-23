@@ -5,6 +5,8 @@ hooks = {
     'publish': [],           # (site, s3)
     'install': [],           # (site, project)
     'preview': [],           # (site)
+    'server_start': [],
+    'server_stop': [],
 }
 
 
