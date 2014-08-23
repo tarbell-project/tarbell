@@ -47,7 +47,7 @@ def split_sentences(s, pad=0):
 def show_error(msg):
     """Displays error message."""
     sys.stdout.flush()
-    sys.stderr.write("{0}: {1}".format(colored.red("Error"), msg + '\n'))
+    sys.stderr.write("\n{0}: {1}".format(colored.red("Error"), msg + '\n'))
 
 
 def get_config_from_args(args):
