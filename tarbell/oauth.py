@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
 from oauth2client import client
 from oauth2client import keyring_storage
