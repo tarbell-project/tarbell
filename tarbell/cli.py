@@ -205,6 +205,9 @@ def tarbell_install_template(command, args):
         puts(git.clone(template_url, '.'))
         puts(git.fetch())
         puts(git.checkout(VERSION))
+
+        _install_requirements(tempdir)
+
         filename, pathname, description = imp.find_module('blueprint', [tempdir])
         blueprint = imp.load_module('blueprint', filename, pathname, description)
         puts("\n- Found _blueprint/blueprint.py")
