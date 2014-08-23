@@ -18,7 +18,7 @@ class Settings:
         except IOError:
             show_error("No Tarbell configuration found, please run `{0}`."
                        .format(colored.yellow('tarbell configure')))
-            sys.exit()
+            sys.exit(1)
 
         self.client_secrets = False
         client_secrets_path = os.path.join(os.path.dirname(self.path), "client_secrets.json")
