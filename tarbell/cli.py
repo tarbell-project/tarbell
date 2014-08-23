@@ -23,7 +23,7 @@ import tempfile
 from apiclient import errors
 from apiclient.http import MediaFileUpload as _MediaFileUpload
 from clint import arguments
-from clint.textui import colored, puts as _puts
+from clint.textui import colored
 
 from tarbell import __VERSION__ as VERSION
 
@@ -36,19 +36,11 @@ from .oauth import get_drive_api_from_client_secrets
 from .contextmanagers import ensure_settings, ensure_project
 from .configure import tarbell_configure
 from .utils import list_get, split_sentences, show_error, get_config_from_args
+from .utils import puts, is_werkzeug_process
 from .s3 import S3Url, S3Sync
 
 # Set args
 args = arguments.Args()
-
-
-# -------
-# Utility
-# -------
-def puts(*args, **kwargs):
-    """Wrap puts to avoid getting called twice by Werkzeug reloader"""
-    if os.environ.get('WERKZEUG_RUN_MAIN') != 'true':
-        return _puts(*args, **kwargs)
 
 
 # --------
@@ -664,7 +656,14 @@ def tarbell_serve(command, args):
         port = int(list_get(address, 1, '5000'))
         puts("Running local server. Press {0} to stop the server".format(colored.red("ctrl-c")))
         try:
+            if not is_werkzeug_process():
+                site.call_hook("server_start", site)
+
             site.app.run(ip, port=port)
+
+            if not is_werkzeug_process():
+                site.call_hook("server_stop", site)
+
         except socket.error:
             show_error("Address {0} is already in use, please try another port or address."
                  .format(colored.yellow("{0}:{1}".format(ip, port))))

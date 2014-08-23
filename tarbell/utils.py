@@ -9,7 +9,18 @@ This module provides utilities for Tarbell.
 
 import os
 import sys
-from clint.textui import colored
+from clint.textui import colored, puts as _puts
+
+
+def is_werkzeug_process():
+    """Is the current process the werkzeug reloader thread? Return True if so."""
+    return os.environ.get('WERKZEUG_RUN_MAIN') == 'true'
+
+
+def puts(*args, **kwargs):
+    """Wrap puts to avoid getting called twice by Werkzeug reloader"""
+    if not is_werkzeug_process():
+        return _puts(*args, **kwargs)
 
 
 def list_get(l, idx, default=None):
