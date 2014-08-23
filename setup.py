@@ -40,7 +40,7 @@ settings.update(
         "google-api-python-client==1.2",
         "keyring==3.8",
         "python-dateutil>=2.2",
-        "readline==6.2.4.1",
+        "gnureadline==6.3.3",
         "requests==2.3.0",
         "sh==1.09",
         "sphinx_rtd_theme==0.1.6",
