@@ -135,9 +135,10 @@ def _setup_google_spreadsheets(settings, path, prompt=True):
 
     ret = {}
     default_account = settings.get("google_account", "")
-    account = raw_input(("What Google account should have access to new spreadsheets? "
+    account = raw_input(("What Google account(s) should have access to new spreadsheets? "
                          "(e.g. somebody@gmail.com, leave blank to specify for each new "
-                         "project) [{0}] ".format(default_account)
+                         "project, separate multiple addresses with commas) [{0}] "
+                            .format(default_account)
                         ))
     if default_account != "" and account == "":
         account = default_account
