@@ -15,13 +15,14 @@ import os
 import pkg_resources
 import sh
 import shutil
+import socket
 import sys
 import tempfile
 
 from apiclient import errors
 from apiclient.http import MediaFileUpload as _MediaFileUpload
 from clint import arguments
-from clint.textui import colored, puts
+from clint.textui import colored, puts as _puts
 from subprocess import call
 
 from tarbell import __VERSION__ as VERSION
@@ -45,6 +46,16 @@ except ImportError:
 
 # Set args
 args = arguments.Args()
+
+
+# -------
+# Utility
+# -------
+def puts(*args, **kwargs):
+    """Wrap puts to avoid getting called twice by Werkzeug reloader"""
+    if os.environ.get('WERKZEUG_RUN_MAIN') != 'true':
+        return _puts(*args, **kwargs)
+
 
 # --------
 # Dispatch
