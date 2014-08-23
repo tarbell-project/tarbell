@@ -17,7 +17,7 @@ from clint.textui import puts
 from .utils import show_error
 
 EXCLUDES = ['.git', '^\.']
-
+GZIP_TIMESTAMP = 326073600 # Timestamp of Eads' birthday
 
 class S3Url(str):
     def __new__(self, content):
@@ -70,7 +70,7 @@ class S3Sync:
             key_parts = keyname.split('/')
             filename = key_parts.pop()
             temp_path = os.path.join(self.tempdir, filename)
-            gzfile = gzip.open(temp_path, 'wb')
+            gzfile = gzip.GzipFile(temp_path, 'wb', 9, None, GZIP_TIMESTAMP)
             gzfile.write(upload.read())
             gzfile.close()
             absolute_path = temp_path
