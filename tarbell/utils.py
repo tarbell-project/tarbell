@@ -23,14 +23,6 @@ def list_get(l, idx, default=None):
         return default
 
 
-def black(s):
-    """Black text."""
-    #if settings.allow_black_foreground:
-        #return colored.black(s)
-    #else:
-    return s.encode('utf-8')
-
-
 def split_sentences(s, pad=0):
     """Split sentences for formatting."""
     sentences = []

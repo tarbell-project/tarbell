@@ -23,7 +23,6 @@ from apiclient import errors
 from apiclient.http import MediaFileUpload as _MediaFileUpload
 from clint import arguments
 from clint.textui import colored, puts as _puts
-from subprocess import call
 
 from tarbell import __VERSION__ as VERSION
 
@@ -35,7 +34,7 @@ from .app import pprint_lines, process_xlsx, copy_global_values
 from .oauth import get_drive_api_from_client_secrets
 from .contextmanagers import ensure_settings, ensure_project
 from .configure import tarbell_configure
-from .utils import list_get, black, split_sentences, show_error, get_config_from_args
+from .utils import list_get, split_sentences, show_error, get_config_from_args
 from .s3 import S3Url, S3Sync
 
 # Load readline if possible
@@ -87,9 +86,7 @@ def main():
 
 def display_info(args):
     """Displays Tarbell info."""
-    puts('\n{0}\n'.format(
-        black('Tarbell: Simple web publishing'),
-    ))
+    puts('\nTarbell: Simple web publishing\n')
 
     puts('Usage: {0}\n'.format(colored.cyan('tarbell <command>')))
     puts('Commands:\n')
@@ -114,9 +111,7 @@ def display_info(args):
             "to configure Tarbell."
         ))
 
-    puts('\n{0}'.format(
-        black(u'Crafted by the Chicago Tribune News Applications team\n')
-    ))
+    puts('\nCrafted by the Chicago Tribune News Applications team\n')
 
 
 def display_version():

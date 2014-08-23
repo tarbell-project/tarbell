@@ -3,7 +3,7 @@ import yaml
 import os
 import sys
 
-from clint.textui import colored, puts
+from clint.textui import colored
 from .utils import show_error
 
 class Settings:

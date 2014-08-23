@@ -18,7 +18,7 @@ from clint.textui import colored, puts
 
 from .settings import Settings
 from .oauth import get_drive_api_from_client_secrets
-from .utils import list_get, get_config_from_args, show_error
+from .utils import get_config_from_args, show_error
 
 
 def tarbell_configure(command, args):

@@ -12,9 +12,7 @@ import tempfile
 from boto.exception import S3ResponseError
 from boto.s3.connection import S3Connection
 from boto.s3.key import Key
-from clint.textui import puts, colored
-from urllib import quote_plus
-from urllib2 import urlopen
+from clint.textui import puts
 
 from .utils import show_error
 
