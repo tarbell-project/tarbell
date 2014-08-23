@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 hooks = {
     'newproject': [],        # (site)
-    'generate': [],          # (site, tempdir)
+    'generate': [],          # (site, dir, quiet)
     'publish': [],           # (site, s3)
     'install': [],           # (site, project)
     'preview': [],           # (site)
