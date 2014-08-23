@@ -14,10 +14,8 @@ from clint.textui import colored, puts
 
 from .app import TarbellSite
 from .settings import Settings
-from .utils import show_error, get_config_from_args, list_get
-from .configure import tarbell_configure
+from .utils import show_error, get_config_from_args
 
-from copy import copy
 
 class EnsureSettings():
     """Ensure the user has a Tarbell configuration."""
