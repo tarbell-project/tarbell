@@ -168,12 +168,11 @@ def tarbell_install(command, args):
             git = sh.git.bake(_cwd=path)
             puts(git.clone(project_url, '.'))
             puts(git.submodule.update(*['--init', '--recursive']))
-            requirements_installed = _install_requirements(path)
+            _install_requirements(path)
 
-            if requirements_installed:
-                # Get site, run hook
-                with ensure_project(command, args, path) as site:
-                    site.call_hook("install", site, git)
+            # Get site, run hook
+            with ensure_project(command, args, path) as site:
+                site.call_hook("install", site, git)
 
             message = "\n- Done installing project in {0}".format(colored.yellow(path))
 
@@ -206,6 +205,9 @@ def tarbell_install_template(command, args):
         puts(git.clone(template_url, '.'))
         puts(git.fetch())
         puts(git.checkout(VERSION))
+
+        _install_requirements(tempdir)
+
         filename, pathname, description = imp.find_module('blueprint', [tempdir])
         blueprint = imp.load_module('blueprint', filename, pathname, description)
         puts("\n- Found _blueprint/blueprint.py")
@@ -395,12 +397,11 @@ def tarbell_newproject(command, args):
         puts(git.add('.'))
         puts(git.commit(m='Created {0} from {1}'.format(name, template['url'])))
 
-        requirements_installed = _install_requirements(path)
+        _install_requirements(path)
 
-        if requirements_installed:
-            # Get site, run hook
-            with ensure_project(command, args, path) as site:
-                site.call_hook("newproject", site, git)
+        # Get site, run hook
+        with ensure_project(command, args, path) as site:
+            site.call_hook("newproject", site, git)
 
         # Messages
         puts("\nAll done! To preview your new project, type:\n")
