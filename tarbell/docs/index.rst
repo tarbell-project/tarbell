@@ -35,14 +35,15 @@ Using Tarbell
 =============
 
 .. toctree::
-   tutorial
    install
+   tutorial
    upgrade
    create
    build
    google_spreadsheets
    publish
    managingprojects
+   blueprints
 
 Reference
 =========
