@@ -34,7 +34,7 @@ settings.update(
         "Markdown==2.4.1",
         "MarkupSafe==0.23",
         "PyYAML==3.11",
-        "boto==2.28.0",
+        "boto==2.31.1",
         "clint==0.3.7",
         "google-api-python-client==1.2",
         "keyring==3.8",
