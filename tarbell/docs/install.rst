@@ -11,6 +11,8 @@ Install Tarbell with `pip install tarbell`
 
 .. note::
 
+  Tarbell requires Python 2.7 and Git (v1.5.2+). Tarbell does not currently support Python 3.
+
   Tarbell does not work on Windows machines.
 
 Configure Tarbell with `tarbell configure`
@@ -46,14 +48,6 @@ Now click the "APIs & auth" tab. (Click on the "APIs" tab below that if it
 doesn't open automatically.) Enable Google Drive API.
 
 .. image:: create_2_new.png
-   :width: 700px
-
-
-You'll also want to ensure that BigQuery API, Google Cloud SQL, Google Cloud 
-Storage and Google Cloud Storage JSON API are enabled. (They should be by default, 
-but things will break if they aren't.)
-
-.. image:: create_2-5_new.png
    :width: 700px
 
 

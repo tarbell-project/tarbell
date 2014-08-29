@@ -18,6 +18,13 @@ Need help? `File a ticket tagged "support" in Github <https://github.com/newsapp
 1904 The History of the Standard Oil Company is a masterpiece of investigative
 reporting.* `Read more about her on Wikipedia <http://en.wikipedia.org/wiki/Ida_Tarbell>`_.
 
+Requirements
+============
+
+Tarbell requires Python 2.7 and Git (v1.5.2+). Tarbell does not currently support Python 3.
+
+Tarbell does not work on Windows machines.
+
 Anatomy of a Tarbell project
 ============================
 
@@ -25,7 +32,7 @@ Tarbell projects are made up of four pieces:
 
 * The `core Tarbell library <https://github.com/newsapps/flask-tarbell>`_, installed when you run `pip install tarbell`
 
-* A Tarbell blueprint directory (included in the core library)
+* A Tarbell blueprint directory
 
 * Your project template files
 
@@ -42,13 +49,13 @@ Using Tarbell
    build
    google_spreadsheets
    publish
-   managingprojects
    blueprints
 
 Reference
 =========
 
 .. toctree::
+    managingprojects
     hooks
     reference
     configuring

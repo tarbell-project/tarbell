@@ -29,6 +29,8 @@ Most Tarbell blueprints will want to define some standard files:
 - ``_spreadsheet.xlsx``: This Excel file is used to create the default Google spreadsheet
   your project will use.
 
+(Optional) If your blueprint defines a ``.gitignore`` file, it will be copied to new projects when
+created.
 
 ----------------------------
 Adding filters and functions
