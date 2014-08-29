@@ -15,6 +15,7 @@ import shutil
 from subprocess import call
 from datetime import datetime
 from clint.textui import colored, puts
+from tarbell import LONG_VERSION
 
 from .settings import Settings
 from .oauth import get_drive_api_from_client_secrets
@@ -99,12 +100,11 @@ def _setup_google_spreadsheets(settings, path, prompt=True):
             write_secrets = False
 
     if write_secrets:
-        puts(("\nLogin in to Google and go to {0} to create an app and generate the "
-              "\n{1} authentication file. You should create credentials for an `installed app`. See "
-              "\n{2} for more information."
+        puts(("\nLogin in to Google and go to {0} to create an app and generate a "
+              "\nclient_secrets authentication file. You should create credentials for an `installed app`. See "
+              "\n{1} for more information."
               .format(colored.red("https://console.developers.google.com/project"),
-                      colored.yellow("client_secrets.json"),
-                      colored.red("http://tarbell.readthedocs.org/en/latest/install.html#configure-google-spreadsheet-access-optional")
+                      colored.red("http://tarbell.readthedocs.org/en/{0}/install.html#configure-google-spreadsheet-access-optional".format(LONG_VERSION))
                      )
             ))
 
