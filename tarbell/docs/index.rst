@@ -32,7 +32,7 @@ Tarbell projects are made up of four pieces:
 
 * The `core Tarbell library <https://github.com/newsapps/flask-tarbell>`_, installed when you run `pip install tarbell`
 
-* A Tarbell blueprint directory (included in the core library)
+* A Tarbell blueprint directory
 
 * Your project template files
 
