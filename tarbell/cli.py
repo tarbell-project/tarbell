@@ -598,7 +598,7 @@ def _add_user_to_file(file_id, service, user_email,
             .insert(fileId=file_id, body=new_permission)\
             .execute()
     except errors.HttpError, error:
-        print 'An error occurred: %s' % error
+        show_error('An error adding users to spreadsheet: {0}'.format(error))
 
 
 def _copy_config_template(name, title, template, path, key, settings):
