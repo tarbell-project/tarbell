@@ -11,6 +11,8 @@ Install Tarbell with `pip install tarbell`
 
 .. note::
 
+  Tarbell requires Python 2.7 and Git (v1.5.2+). Tarbell does not currently support Python 3.
+
   Tarbell does not work on Windows machines.
 
 Configure Tarbell with `tarbell configure`
