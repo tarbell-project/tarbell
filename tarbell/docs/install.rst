@@ -51,14 +51,6 @@ doesn't open automatically.) Enable Google Drive API.
    :width: 700px
 
 
-You'll also want to ensure that BigQuery API, Google Cloud SQL, Google Cloud 
-Storage and Google Cloud Storage JSON API are enabled. (They should be by default, 
-but things will break if they aren't.)
-
-.. image:: create_2-5_new.png
-   :width: 700px
-
-
 Click the "Credentials" tab (right below "APIs") to create a client ID:
 
 .. image:: create_3_new.png
