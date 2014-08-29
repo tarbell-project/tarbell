@@ -42,13 +42,13 @@ Using Tarbell
    build
    google_spreadsheets
    publish
-   managingprojects
    blueprints
 
 Reference
 =========
 
 .. toctree::
+    managingprojects
     hooks
     reference
     configuring
