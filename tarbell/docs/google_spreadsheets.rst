@@ -88,5 +88,13 @@ Names that will not be transformed:
 Worksheets, columns, and keys names preceded by `_` (underscore) are ignored
 ----------------------------------------------------------------------------
 
-Precede any worksheet name, column name, or key with an underscore to hide it from 
+Precede any worksheet name, column name, or key with an underscore to hide it from
 your templates and JSON data.
+
+
+Merged cells raise an error
+---------------------------
+
+Because merged cells exhibit unpredictable behavior, if merged cells are encountered
+while Tarbell is processing a spreadsheet, an error is raised containing the merged
+ranges.
