@@ -25,8 +25,10 @@ from werkzeug.wsgi import FileWrapper
 from utils import filter_files
 from clint.textui import puts, colored
 
+from .errors import MergedCellError
 from .oauth import get_drive_api_from_client_secrets, get_drive_api_from_file
 from .hooks import hooks
+
 # in seconds
 SPREADSHEET_CACHE_TTL = 4
 
@@ -121,6 +123,11 @@ def process_xlsx(content):
     worksheets = workbook.sheet_names()
     for worksheet_name in worksheets:
         worksheet = workbook.sheet_by_name(worksheet_name)
+
+        merged_cells = worksheet.merged_cells
+        if len(merged_cells):
+            raise MergedCellError(worksheet.name, merged_cells)
+
         worksheet.name = slughifi(worksheet.name)
         headers = make_headers(worksheet)
         worksheet_data = make_worksheet_data(headers, worksheet)
