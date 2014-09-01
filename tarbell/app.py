@@ -362,6 +362,7 @@ class TarbellSite:
             except IOError:
                 pass
 
+        # Serve dynamic
         if filepath and mimetype and mimetype in TEMPLATE_TYPES:
             context = self.get_context(publish)
             # Mix in defaults
@@ -393,10 +394,17 @@ class TarbellSite:
                 if allow_failure:
                     sys.exit(1)
 
-
+        # Serve static
         if filepath:
             dir, filename = os.path.split(filepath)
             return send_from_directory(dir, filename)
+
+        # Last ditch effort -- see if path has "index.html" underneath it
+        if not path.endswith("index.html"):
+            if not path.endswith("/"):
+                path = "{0}/".format(path)
+            path = "{0}{1}".format(path, "index.html")
+            return self.preview(path)
 
         return Response(status=404)
 
