@@ -12,7 +12,7 @@ import sys
 import traceback
 
 from httplib import BadStatusLine
-from flask import Flask, render_template, send_from_directory, Response
+from flask import Flask, render_template, send_from_directory, Response, g
 from jinja2 import Markup, TemplateSyntaxError
 from jinja2.loaders import BaseLoader
 from jinja2.utils import open_if_exists
@@ -236,6 +236,10 @@ class TarbellSite:
         self.app.add_url_rule('/<path:path>', view_func=self.preview)
         self.app.add_template_filter(slughifi, 'slugify')
         self.app.add_template_filter(pprint_lines, 'pprint_lines')
+        self.app.before_request(self.add_site_to_context)
+
+    def add_site_to_context(self):
+        g.current_site = self
 
     def process_hooks(self, hooks):
         try:
