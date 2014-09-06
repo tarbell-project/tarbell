@@ -247,7 +247,8 @@ class TarbellSite:
         for function in self.hooks[hook]:
             function.__call__(*args, **kwargs)
 
-    def load_project(self, path):
+    def _get_base(self, path):
+        """Get base"""
         base = None
 
         # Slightly ugly DRY violation for backwards compatibility with old
@@ -272,7 +273,14 @@ class TarbellSite:
                 puts("No _base/base.py file found")
 
         if base:
+            base.base_dir = base_dir
             self.app.register_blueprint(base.blueprint)
+
+        return base
+
+    def load_project(self, path):
+        """Load a Tarbell project"""
+        base = self._get_base(path)
 
         filename, pathname, description = imp.find_module('tarbell_config', [path])
         project = imp.load_module('project', filename, pathname, description)
@@ -299,11 +307,6 @@ class TarbellSite:
             project.CREATE_JSON = False
 
         try:
-            project.DEFAULT_CONTEXT
-        except AttributeError:
-            project.DEFAULT_CONTEXT = {}
-
-        try:
             project.S3_BUCKETS
         except AttributeError:
             project.S3_BUCKETS = {}
@@ -322,33 +325,37 @@ class TarbellSite:
         project.EXCLUDES = base.EXCLUDES + list(set(project.EXCLUDES) - set(base.EXCLUDES))
 
         try:
+            project.DEFAULT_CONTEXT
+        except AttributeError:
+            project.DEFAULT_CONTEXT = {}
+
+        project.DEFAULT_CONTEXT.update({
+            "PROJECT_PATH": self.path,
+            "ROOT_URL": "127.0.0.1:5000",
+            "SPREADSHEET_KEY": self.key,
+            "BUCKETS": project.S3_BUCKETS,
+            "SITE": self,
+        })
+
+        try:
             self.app.register_blueprint(project.blueprint)
         except AttributeError:
             pass
 
         # Set up template loaders
         template_dirs = [path]
-        if os.path.isdir(base_dir):
-            template_dirs.append(base_dir)
+        if base:
+            template_dirs.append(base.base_dir)
 
         self.app.jinja_loader = TarbellFileSystemLoader(template_dirs)
 
         return project, base
 
-    def preview(self, path=None, extra_context=None, publish=False, allow_failure=False):
-        """ Preview a project path """
-        self.call_hook("preview", self)
-
-        if path is None:
-            path = 'index.html'
-
-        ## Serve JSON
-        if self.project.CREATE_JSON and path == 'data.json':
-            context = self.get_context(publish)
-            return Response(json.dumps(context), mimetype="application/json")
-
-        ## Detect files
+    def _resolve_path(self, path):
+        """Resolve the correct file path"""
         filepath = None
+        mimetype = None
+
         for root, dirs, files in filter_files(self.path):
             # Does it exist in Tarbell blueprint?
             if self.base:
@@ -369,35 +376,52 @@ class TarbellSite:
             except IOError:
                 pass
 
+        return filepath, mimetype
+
+    def _print_template_error(self, path):
+        """Print a template syntax error"""
+        ex_type, ex, tb = sys.exc_info()
+        stack = traceback.extract_tb(tb)
+        error = stack[-1]
+        puts("\n{0} can't be parsed by Jinja, serving static".format(colored.red(path)))
+        puts("\nLine {0}:".format(colored.green(str(error[1]))))
+        puts("  {0}".format(colored.yellow(error[3])))
+        puts("\nFull traceback:")
+        traceback.print_tb(tb)
+        puts("")
+        del tb
+
+
+    def preview(self, path=None, extra_context=None, publish=False, allow_failure=False):
+        """ Preview a project path """
+        self.call_hook("preview", self)
+
+        if path is None:
+            path = 'index.html'
+
+        # Serve JSON
+        if self.project.CREATE_JSON and path == 'data.json':
+            context = self.get_context(publish)
+            return Response(json.dumps(context), mimetype="application/json")
+
+        # Detect files
+        filepath, mimetype = self._resolve_path(path)
+
         # Serve dynamic
         if filepath and mimetype and mimetype in TEMPLATE_TYPES:
             context = self.get_context(publish)
-            # Mix in defaults
             context.update({
-                "PROJECT_PATH": self.path,
-                "PREVIEW_SERVER": not publish,
-                "ROOT_URL": "127.0.0.1:5000",
                 "PATH": path,
-                "SPREADSHEET_KEY": self.key,
-                "BUCKETS": self.project.S3_BUCKETS,
+                "PREVIEW_SERVER": not publish,
             })
             if extra_context:
                 context.update(extra_context)
+
             try:
                 rendered = render_template(path, **context)
                 return Response(rendered, mimetype=mimetype)
             except TemplateSyntaxError:
-                ex_type, ex, tb = sys.exc_info()
-                stack = traceback.extract_tb(tb)
-                error = stack[-1]
-                puts("\n{0} can't be parsed by Jinja, serving static".format(colored.red(filepath)))
-                puts("\nLine {0}:".format(colored.green(str(error[1]))))
-                puts("  {0}".format(colored.yellow(error[3])))
-                puts("\nFull traceback:")
-                traceback.print_tb(tb)
-                puts("")
-                del tb
-
+                self._print_template_error(filepath)
                 if allow_failure:
                     sys.exit(1)
 
