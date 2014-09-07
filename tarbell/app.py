@@ -316,17 +316,18 @@ class TarbellSite:
             project.S3_BUCKETS = {}
 
         try:
-            base.EXCLUDES
-        except AttributeError:
-            base.EXCLUDES = []
-
-        try:
             project.EXCLUDES
         except AttributeError:
             project.EXCLUDES = []
 
-        # Merge excludes
-        project.EXCLUDES = base.EXCLUDES + list(set(project.EXCLUDES) - set(base.EXCLUDES))
+        if base:
+            try:
+                base.EXCLUDES
+            except AttributeError:
+                base.EXCLUDES = []
+
+            # Merge excludes
+            project.EXCLUDES = base.EXCLUDES + list(set(project.EXCLUDES) - set(base.EXCLUDES))
 
         try:
             project.DEFAULT_CONTEXT
