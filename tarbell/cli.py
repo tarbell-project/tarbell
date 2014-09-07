@@ -138,6 +138,9 @@ def tarbell_generate(command, args, skip_args=False, extra_context=None, quiet=F
                     colored.cyan(output_root)
                 ))
                 _delete_dir(output_root)
+            else:
+                puts("\nNot overwriting. See ya!")
+                sys.exit()
 
         site.generate_static_site(output_root, extra_context)
         if not quiet:
