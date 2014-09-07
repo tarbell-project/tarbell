@@ -130,7 +130,7 @@ def tarbell_generate(command, args, skip_args=False, extra_context=None, quiet=F
 
         #check to see if the folder we're trying to create already exists
         if is_folder:
-            output_file = raw_input(("\nA folder named {0} already exists! Do you want to delete it? If you choose no, directory will be overwritten. [y/N] ").format(
+            output_file = raw_input(("\nA folder named {0} already exists! Do you want to delete it or quit? [y/N] ").format(
                 colored.cyan(output_root)
             ))
             if output_file and output_file.lower() == "y":
@@ -138,6 +138,9 @@ def tarbell_generate(command, args, skip_args=False, extra_context=None, quiet=F
                     colored.cyan(output_root)
                 ))
                 _delete_dir(output_root)
+            else:
+                puts("\nNot overwriting. See ya!")
+                sys.exit()
 
         site.generate_static_site(output_root, extra_context)
         if not quiet:
