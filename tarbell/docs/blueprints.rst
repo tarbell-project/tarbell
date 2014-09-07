@@ -14,8 +14,8 @@ branding, and default data to get started.
 Basic blueprint ingredients
 ---------------------------
 
-All Tarbell blueprints must include a file named ``blueprint.py``. At bare minimum, this file 
-must include a variable called ``NAME``:
+All Tarbell blueprints must include a file named ``blueprint.py``. This file may be
+empty, but should include a variable called ``NAME`` when running ``tarbell newproject``:
 
 .. code-block:: python
 
