@@ -363,14 +363,30 @@ def tarbell_newproject(command, args):
         name = _get_project_name(args)
         puts("Creating {0}".format(colored.cyan(name)))
         path = _get_path(name, settings)
-        title = _get_project_title()
-        template = _get_template(settings)
         _mkdir(path)
 
-        # Init repo
-        git = sh.git.bake(_cwd=path)
-        puts(git.init())
+        try:
+            _newproject(command, path, name, settings)
+        except KeyboardInterrupt:
+            _delete_dir(path)
+            show_error("ctrl-c pressed, not creating new project.")
+        except:
+            _delete_dir(path)
+            show_error("Unexpected error: {0}".format(sys.exc_info()[0]))
+            raise
 
+
+def _newproject(command, path, name, settings):
+    """Actual heavy lifting for project creation."""
+    key = None
+    title = _get_project_title()
+    template = _get_template(settings)
+
+    # Init repo
+    git = sh.git.bake(_cwd=path)
+    puts(git.init())
+
+    if template.get("url"):
         # Create submodule
         puts(git.submodule.add(template['url'], '_blueprint'))
         puts(git.submodule.update(*['--init']))
@@ -382,9 +398,6 @@ def tarbell_newproject(command, args):
 
         # Create spreadsheet
         key = _create_spreadsheet(name, title, path, settings)
-
-        # Create config file
-        _copy_config_template(name, title, template, path, key, settings)
 
         # Copy html files
         puts(colored.green("\nCopying html files..."))
@@ -398,26 +411,32 @@ def tarbell_newproject(command, args):
         ignore = os.path.join(path, "_blueprint", ".gitignore")
         if os.path.isfile(ignore):
             shutil.copy2(ignore, path)
+    else:
+        empty_index_path = os.path.join(path, "index.html")
+        open(empty_index_path, "w")
 
-        # Commit
-        puts(colored.green("\nInitial commit"))
-        puts(git.add('.'))
-        puts(git.commit(m='Created {0} from {1}'.format(name, template['url'])))
+    # Create config file
+    _copy_config_template(name, title, template, path, key, settings)
 
-        _install_requirements(path)
+    # Commit
+    puts(colored.green("\nInitial commit"))
+    puts(git.add('.'))
+    puts(git.commit(m='Created {0} from {1}'.format(name, template['name'])))
 
-        # Get site, run hook
-        with ensure_project(command, args, path) as site:
-            site.call_hook("newproject", site, git)
+    _install_requirements(path)
 
-        # Messages
-        puts("\nAll done! To preview your new project, type:\n")
-        puts("{0} {1}".format(colored.green("tarbell switch"), colored.green(name)))
-        puts("\nor\n")
-        puts("{0}".format(colored.green("cd %s" % path)))
-        puts("{0}".format(colored.green("tarbell serve\n")))
+    # Get site, run hook
+    with ensure_project(command, args, path) as site:
+        site.call_hook("newproject", site, git)
 
-        puts("\nYou got this!\n")
+    # Messages
+    puts("\nAll done! To preview your new project, type:\n")
+    puts("{0} {1}".format(colored.green("tarbell switch"), colored.green(name)))
+    puts("\nor\n")
+    puts("{0}".format(colored.green("cd %s" % path)))
+    puts("{0}".format(colored.green("tarbell serve\n")))
+
+    puts("\nYou got this!\n")
 
 
 def _install_requirements(path):
@@ -527,11 +546,12 @@ def _get_template(settings):
 def _list_templates(settings):
     """List templates from settings."""
     for idx, option in enumerate(settings.config.get("project_templates"), start=1):
-        puts("  {0:5} {1:36}\n      {2}\n".format(
+        puts("  {0:5} {1:36}".format(
             colored.yellow("[{0}]".format(idx)),
-            colored.cyan(option.get("name")),
-            option.get("url")
+            colored.cyan(option.get("name"))
         ))
+        if option.get("url"):
+            puts("      {0}\n".format(option.get("url")))
 
 
 def _create_spreadsheet(name, title, path, settings):
@@ -626,15 +646,15 @@ def _copy_config_template(name, title, template, path, key, settings):
         # @TODO refactor this a bit
         if not key:
             spreadsheet_path = os.path.join(path, '_blueprint/', '_spreadsheet.xlsx')
-            with open(spreadsheet_path, "rb") as f:
-                try:
+            try:
+                with open(spreadsheet_path, "rb") as f:
                     puts("Copying _blueprint/_spreadsheet.xlsx to tarbell_config.py's DEFAULT_CONTEXT") 
                     data = process_xlsx(f.read())
                     if 'values' in data:
                         data = copy_global_values(data)
                     context["default_context"].update(data)
-                except IOError:
-                    show_error("No spreadsheet available")
+            except IOError:
+                pass
 
         s3_buckets = settings.config.get("s3_buckets")
         if s3_buckets:
