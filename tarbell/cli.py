@@ -234,7 +234,7 @@ def tarbell_list(command, args):
             show_error("{0} does not exist".format(projects_path))
             sys.exit()
 
-        puts("\nListing projects in {0}\n".format(
+        puts("Listing projects in {0}\n".format(
             colored.yellow(projects_path)
         ))
 
@@ -245,27 +245,30 @@ def tarbell_list(command, args):
             try:
                 filename, pathname, description = imp.find_module('tarbell_config', [project_path])
                 config = imp.load_module(directory, filename, pathname, description)
-                projects.append((project_path, config))
-                if len(config.TITLE) > longest_title:
-                    longest_title = len(config.TITLE)
+                title = config.DEFAULT_CONTEXT.get("title", directory)
+                projects.append((directory, title))
+                if len(title) > longest_title:
+                    longest_title = len(title)
             except ImportError:
                 pass
 
-        fmt = "{0: <"+str(longest_title+1)+"} {1}"
-        puts(fmt.format(
-            'title',
-            'path'
-        ))
-        for path, config in projects:
-            puts(colored.yellow(fmt.format(
-                config.TITLE,
-                colored.cyan(path)
-            )))
-
-        puts("\nUse {0} to switch to a project\n".format(
-            colored.green("tarbell switch <projectname>")
+        if len(projects):
+            fmt = "{0: <"+str(longest_title+1)+"} {1}"
+            puts(fmt.format(
+                'title',
+                'project name'
             ))
+            for projectname, title in projects:
+                puts(colored.yellow(fmt.format(
+                    title,
+                    colored.cyan(projectname)
+                )))
 
+            puts("\nUse {0} to switch to a project".format(
+                colored.green("tarbell switch <project name>")
+                ))
+        else:
+            puts("No projects found")
 
 def tarbell_list_templates(command, args):
     with ensure_settings(command, args) as settings:
@@ -296,8 +299,9 @@ def tarbell_publish(command, args):
         tempdir = "{0}/".format(tarbell_generate(command,
             args, extra_context=extra_context, skip_args=True, quiet=True))
         try:
+            title = site.project.DEFAULT_CONTEXT.get("title", "")
             puts("\nDeploying {0} to {1} ({2})\n".format(
-                colored.yellow(site.project.TITLE),
+                colored.yellow(title),
                 colored.red(bucket_name),
                 colored.green(bucket_url)
             ))
@@ -333,7 +337,7 @@ def tarbell_publish(command, args):
         except KeyboardInterrupt:
             show_error("ctrl-c pressed, bailing out!")
         except KeyError:
-            show_error("Credentials for bucket {0} not configured -- run {1} or add credentials to {2}".format(colored.red(bucket_url), colored.yellow("tarbell configure s3"), colored.yellow("~/.tarbell/settings.yaml")))
+            show_error("Credentials for bucket {0} not configured\nRun {1} or add credentials to {2}".format(colored.red(bucket_url), colored.yellow("tarbell configure s3"), colored.yellow("~/.tarbell/settings.yaml")))
         finally:
             _delete_dir(tempdir)
 
@@ -656,7 +660,8 @@ def tarbell_serve(command, args):
         address = list_get(args, 0, "").split(":")
         ip = list_get(address, 0, '127.0.0.1')
         port = int(list_get(address, 1, '5000'))
-        puts("Running local server. Press {0} to stop the server".format(colored.red("ctrl-c")))
+        puts("\n * Running local server. Press {0} to stop the server".format(colored.red("ctrl-c")))
+        puts(" * Edit this project's templates at {0}".format(colored.yellow(site.path)))
         try:
             if not is_werkzeug_process():
                 site.call_hook("server_start", site)
@@ -684,8 +689,6 @@ def tarbell_switch(command, args):
         if os.path.isdir(project_path):
             os.chdir(project_path)
             puts("\nSwitching to {0}".format(colored.red(project)))
-            puts("Edit this project's templates at {0}".format(colored.yellow(project_path)))
-            puts("Running preview server...")
             tarbell_serve(command, args)
         else:
             show_error("{0} isn't a tarbell project".format(project_path))
