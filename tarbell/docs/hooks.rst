@@ -31,7 +31,7 @@ for their project on Github after project creation:
       if create and not create.lower() == "y":
           return puts("Not creating Github repo...")
 
-      name = site.project.NAME
+      name = site.project.DEFAULT_CONTEXT.get("name")
       user = raw_input("What is your Github username? ")
       password = getpass.getpass("What is your Github password? ")
       headers = {'Content-type': 'application/json', 'Accept': 'application/json'}

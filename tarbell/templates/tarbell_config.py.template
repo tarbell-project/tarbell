@@ -4,12 +4,6 @@
 Tarbell project configuration
 """
 
-# Short project name
-NAME = "{{ name }}"
-
-# Descriptive title of project
-TITLE = "{{ title|escape }}"
-
 # Google spreadsheet key
 {% if not key %}#{% endif %}SPREADSHEET_KEY = "{{ key }}"
 
