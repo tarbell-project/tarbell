@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
-import yaml
 import os
 import sys
+import yaml
 
 from clint.textui import colored
 from .utils import show_error
+
+EMPTY_BLUEPRINT = {"name": "Empty project (no blueprint)"}
 
 class Settings:
     """Simple object representation of Tarbell settings."""
@@ -18,10 +20,13 @@ class Settings:
         except IOError:
             show_error("No Tarbell configuration found, please run `{0}`."
                        .format(colored.yellow('tarbell configure')))
-            sys.exit(1)
+
+        self.config["project_templates"] = self.config.get("project_templates", [])
+        self.config["project_templates"].append(EMPTY_BLUEPRINT)
 
         self.client_secrets = False
         client_secrets_path = os.path.join(os.path.dirname(self.path), "client_secrets.json")
+
         try:
             with open(client_secrets_path) as f:
                 self.client_secrets = True
@@ -30,4 +35,5 @@ class Settings:
 
     def save(self):
         with open(self.path, "w") as f:
+            self.config["project_templates"].pop()
             yaml.dump(self.config, f, default_flow_style=False)
