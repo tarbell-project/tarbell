@@ -339,8 +339,6 @@ def tarbell_publish(command, args):
             puts(colored.green("http://{0}\n".format(bucket_url)))
         except KeyboardInterrupt:
             show_error("ctrl-c pressed, bailing out!")
-        except KeyError:
-            show_error("Credentials for bucket {0} not configured\nRun {1} or add credentials to {2}".format(colored.red(bucket_url), colored.yellow("tarbell configure s3"), colored.yellow("~/.tarbell/settings.yaml")))
         finally:
             _delete_dir(tempdir)
 
