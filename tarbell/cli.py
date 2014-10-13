@@ -330,7 +330,6 @@ def tarbell_publish(command, args):
                 }
 
 
-            kwargs['excludes'] = site.project.EXCLUDES
             s3 = S3Sync(tempdir, bucket_url, **kwargs)
             s3.deploy_to_s3()
             site.call_hook("publish", site, s3)

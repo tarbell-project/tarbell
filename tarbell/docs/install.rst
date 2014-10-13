@@ -57,7 +57,7 @@ Click the "Credentials" tab (right below "APIs") to create a client ID:
    :width: 700px
 
 
-This is the important screen. Select "web app":
+Select "installed app":
 
 .. image:: create_5_new.png
    :width: 700px
