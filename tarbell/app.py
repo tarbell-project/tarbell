@@ -38,8 +38,6 @@ VALID_CELL_TYPES = range(1, 5)
 # pass template variables to files with these mimetypes
 TEMPLATE_TYPES = [
     "text/html",
-    "text/css",
-    "application/javascript",
 ]
 
 def split_template_path(template):
