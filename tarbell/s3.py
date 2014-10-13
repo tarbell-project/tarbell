@@ -1,10 +1,8 @@
 # -*- coding: utf-8 -*-
-import fnmatch
 import hashlib
 import gzip
 import mimetypes
 import os
-import re
 import shutil
 import sys
 import tempfile
@@ -16,7 +14,6 @@ from clint.textui import puts
 
 from .utils import show_error
 
-EXCLUDES = ['.git', '^\.']
 GZIP_TIMESTAMP = 326073600 # Timestamp of Eads' birthday
 
 class S3Url(str):
@@ -31,11 +28,10 @@ class S3Url(str):
 
 
 class S3Sync:
-    def __init__(self, directory, bucket, access_key_id, secret_access_key, force=False, excludes=[]):
+    def __init__(self, directory, bucket, access_key_id, secret_access_key, force=False):
         connection = S3Connection(access_key_id, secret_access_key)
         self.force = force
         self.bucket = bucket
-        self.excludes = r'|'.join([fnmatch.translate(x) for x in EXCLUDES + excludes]) or r'$.'
         self.directory = directory.rstrip('/')
 
         try:
@@ -94,14 +90,11 @@ class S3Sync:
         """
         paths = []
         for root, dirs, files in os.walk(self.directory, topdown=True):
-            dirs[:] = [os.path.join(root, d) for d in dirs]
-            dirs[:] = [d for d in dirs if not re.match(self.excludes, d)]
             rel_path = os.path.relpath(root, self.directory)
             for f in files:
                 if rel_path == '.':
                     path = (f, os.path.join(root, f))
                 else:
                     path = (os.path.join(rel_path, f), os.path.join(root, f))
-                if not re.match(self.excludes, path[0]):
-                    paths.append(path)
+                paths.append(path)
         return paths

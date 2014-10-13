@@ -1,15 +1,16 @@
 # -*- coding: utf-8 -*-
-import os
-import json
-import imp
-import mimetypes
-import xlrd
 import csv
+import fnmatch
+import imp
+import json
+import mimetypes
+import os
 import re
 import requests
-import time
 import sys
+import time
 import traceback
+import xlrd
 
 from httplib import BadStatusLine
 from flask import Flask, render_template, send_from_directory, Response, g
@@ -22,7 +23,6 @@ from pprint import pformat
 from slughifi import slughifi
 from string import uppercase
 from werkzeug.wsgi import FileWrapper
-from utils import filter_files
 from clint.textui import puts, colored
 
 from .errors import MergedCellError
@@ -39,6 +39,8 @@ VALID_CELL_TYPES = range(1, 5)
 TEMPLATE_TYPES = [
     "text/html",
 ]
+
+EXCLUDES = ['.git/*', '.git', '.gitignore', '.*', '*.pyc', '*.py', '_*']
 
 def split_template_path(template):
     """Split a path into segments and perform a sanity check.  If it detects
@@ -86,7 +88,7 @@ class TarbellFileSystemLoader(BaseLoader):
     def list_templates(self):
         found = set()
         for searchpath in self.searchpath:
-            for dirpath, dirnames, filenames in filter_files(searchpath):
+            for dirpath, dirnames, filenames in self.filter_files(searchpath):
                 for filename in filenames:
                     template = os.path.join(dirpath, filename) \
                         [len(searchpath):].strip(os.path.sep) \
@@ -325,7 +327,7 @@ class TarbellSite:
                 base.EXCLUDES = []
 
             # Merge excludes
-            project.EXCLUDES = base.EXCLUDES + list(set(project.EXCLUDES) - set(base.EXCLUDES))
+            project.EXCLUDES = EXCLUDES + base.EXCLUDES + list(set(project.EXCLUDES) - set(base.EXCLUDES))
 
         try:
             project.DEFAULT_CONTEXT
@@ -359,7 +361,7 @@ class TarbellSite:
         filepath = None
         mimetype = None
 
-        for root, dirs, files in filter_files(self.path):
+        for root, dirs, files in self.filter_files(self.path):
             # Does it exist in Tarbell blueprint?
             if self.base:
                 basepath = os.path.join(root, self.blueprint_name, path)
@@ -554,15 +556,34 @@ class TarbellSite:
     def generate_static_site(self, output_root, extra_context):
         if self.base:
             base_dir = os.path.join(self.path, self.blueprint_name)
-            for root, dirs, files in filter_files(base_dir):
+            for root, dirs, files in self.filter_files(base_dir):
                 for filename in files:
                     self._copy_file(root.replace(self.blueprint_name, ""), filename, output_root, extra_context)
 
-        for root, dirs, files in filter_files(self.path):
+        for root, dirs, files in self.filter_files(self.path):
             #don't copy stuff in the file that we just created
             if root != os.path.abspath(output_root):
                 for filename in files:
                     self._copy_file(root, filename, output_root, extra_context)
+
+    def filter_files(self, path):
+        excludes = r'|'.join([fnmatch.translate(x) for x in self.project.EXCLUDES]) or r'$.'
+        for root, dirs, files in os.walk(path, topdown=True):
+            dirs[:] = [d for d in dirs if not re.match(excludes, d)]
+            dirs[:] = [os.path.join(root, d) for d in dirs]
+            rel_path = os.path.relpath(root, path)
+
+            paths = []
+            for f in files:
+                if rel_path == '.':
+                    file_path = (f, os.path.join(root, f))
+                else:
+                    file_path = (os.path.join(rel_path, f), os.path.join(root, f))
+                if not re.match(excludes, file_path[0]):
+                    paths.append(file_path[0])
+
+            files[:] = paths
+            yield root, dirs, files
 
     def _copy_file(self, root, filename, output_root, extra_context=None):
         # Remove double slashes if they exist
