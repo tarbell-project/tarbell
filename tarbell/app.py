@@ -407,6 +407,9 @@ class TarbellSite:
         # Serve JSON
         if self.project.CREATE_JSON and path == 'data.json':
             context = self.get_context(publish)
+            if extra_context:
+                context.update(extra_context)
+            context["SITE"] = None
             return Response(json.dumps(context), mimetype="application/json")
 
         # Detect files
@@ -418,7 +421,7 @@ class TarbellSite:
             context.update({
                 "PATH": path,
                 "PREVIEW_SERVER": not publish,
-                "TIMESTAMP": time.time(),
+                "TIMESTAMP": int(time.time()),
             })
             if extra_context:
                 context.update(extra_context)
@@ -565,6 +568,9 @@ class TarbellSite:
             if root != os.path.abspath(output_root):
                 for filename in files:
                     self._copy_file(root, filename, output_root, extra_context)
+
+        if self.project.CREATE_JSON:
+            self._copy_file(self.path, 'data.json', output_root, extra_context)
 
     def filter_files(self, path):
         excludes = r'|'.join([fnmatch.translate(x) for x in self.project.EXCLUDES]) or r'$.'
