@@ -510,6 +510,12 @@ class TarbellSite:
                 for filename in files:
                     self._copy_file(root, filename, output_root, extra_context)
 
+        if self.project.CREATE_JSON:
+            puts("\nCREATE_JSON parameter is set")
+            generate_json = raw_input("Would you like to include a copy of your spreadsheet data under 'data.json' for this build? [y/n] ")
+            if generate_json and generate_json.lower() == "y":
+                self._copy_file(self.path, 'data.json', output_root, extra_context)
+
     def _copy_file(self, root, filename, output_root, extra_context=None):
         # Remove double slashes if they exist
         root = root.replace("//", "/")
