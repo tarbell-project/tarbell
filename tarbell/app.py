@@ -416,6 +416,7 @@ class TarbellSite:
             context.update({
                 "PATH": path,
                 "PREVIEW_SERVER": not publish,
+                "TIMESTAMP": time.time(),
             })
             if extra_context:
                 context.update(extra_context)
