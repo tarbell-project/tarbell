@@ -46,6 +46,8 @@ Click the "API Access" tab to create a client ID:
 .. image:: create_3.png
    :width: 700px
 
+Also, click on the consent screen tab and add an email address and product name.  
+
 Add some project details. These don't really matter:
 
 .. image:: create_4.png
@@ -73,7 +75,8 @@ authenticate::
 
   Enter verification code: 
 
-Follow the link:
+Follow the link (You'll need to be on the same machine that you are configuring Tarbell on in order to avoid an OAuth Error. 
+If you are using a remote machine, consider the Lynx terminal browser):
 
 .. image:: create_7.png
    :width: 700px
