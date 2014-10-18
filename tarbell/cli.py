@@ -718,7 +718,8 @@ def tarbell_update(command, args):
     """Update the current tarbell project."""
     with ensure_settings(command, args) as settings, ensure_project(command, args) as site:
         puts("Updating to latest blueprint\n")
-        git = sh.git.bake(_cwd=os.path.join(site.path, '_blueprint'))
+
+        git = sh.git.bake(_cwd=site.base.base_dir)
         git.fetch()
         puts(colored.yellow("Checking out {0}".format(VERSION)))
         puts(git.checkout(VERSION))
