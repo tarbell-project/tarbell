@@ -8,8 +8,8 @@ You'll need to have access to a command prompt (an application on your computer
 that allows you to execute text-based commands). Search for the Terminal application.
 All of the commands we'll show you here will need to be typed into the command prompt.
 
-First you need to `install <install.html>`_ and `configure <install.html#configure-tarbell-with-tarbell-configure>`_
-Tarbell. (Make sure to set up a Google spreadsheet.) Go ahead. We'll wait.
+First you need to `install and configure <install.html>`_
+Tarbell. Make sure to set up a Google spreadsheet. Go ahead. We'll wait.
 
 Set up a new project
 ====================
@@ -130,7 +130,7 @@ This is where our website's content will live. Let's look at the values workshee
 the tabs in the bottom left) first.
 You should see something like this:
 
-.. image:: values_worksheet.png
+.. image:: img/values_worksheet.png
 
 Keys and values are a common idea in programming: each key is shorthand for a corresponding value.
 Each of the values in the *values* column is available to your site when you use
@@ -161,7 +161,7 @@ Reload the server at http://127.0.0.1:5000 in your web browser to see your chang
 
 You can add as many keys and values as you like. We'll add a few.
 
-.. image:: addtl_values.png
+.. image:: img/addtl_values.png
 
 Now we need to reference these variables in the template. Go back to index.html and add
 
@@ -214,7 +214,7 @@ You'll notice that we no longer have columns labeled "key" and "value." Instead,
 the column we want by name. To understand this better, let's add some data about some
 famous ladies who might have been friends of Ida Tarbell had they known one another:
 
-.. image:: addtl_columns.png
+.. image:: img/addtl_columns.png
 
 Now let's edit our index.html again to display this information:
 
@@ -229,7 +229,7 @@ Now let's edit our index.html again to display this information:
 
 Your page should now look like this:
 
-.. image:: tabular_data.png
+.. image:: img/tabular_data.png
 
 Adding CSS
 ==========
@@ -408,7 +408,7 @@ Enter the following data:
 
 It should look like this:
 
-.. image:: leaflet_data.png
+.. image:: img/leaflet_data.png
 
 Make a holder for the map
 ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -488,7 +488,7 @@ your spreadsheet and convert it to JSON in one fell swoop with a very handy Jinj
 
 This will turn the columns from the workbook called ``data`` into something that looks like this::
 
-.. image:: map_data.png
+.. image:: img/map_data.png
 
 We can reference our city data in the rest of our Javascript now. So let's make the map!
 
@@ -526,7 +526,7 @@ max and min zoom levels for the tiles. We'll use Open Street Map's tileset:
 
   For more information about what this code does, see `our docs on creating Leaflet maps <http://docs.beta.tribapps.com/maps.html#how-to-use-leaflet-js>`_
 
-.. image:: map_tiles.png
+.. image:: img/map_tiles.png
 
 So now we have a map, but it would be really helpful to display some information on it. Let's add a marker for
 Chicago, by adding the lat/lon from the spreadsheet and then attaching it to the map::
@@ -534,7 +534,7 @@ Chicago, by adding the lat/lon from the spreadsheet and then attaching it to the
   var chicagoMarker = L.marker([map_data[0].latitude, map_data[0].longitude]);
   chicagoMarker.addTo(map);
 
-.. image:: chicago_marker.png
+.. image:: img/chicago_marker.png
 
 Bingo, there's Chicago! Now, suppose we want to display a little information when you click on the city::
 
@@ -542,7 +542,7 @@ Bingo, there's Chicago! Now, suppose we want to display a little information whe
 
 Now, when you click on Chicago, the popup should show the name of the city.
 
-.. image:: popup.png
+.. image:: img/popup.png
 
 
 Remember that we assigned the contents of your spreadsheet to the variable ``map_data``. Now we can access the first 
@@ -562,7 +562,7 @@ You can see how we could easily create markers for the other two cities::
   minneapolisMarker.addTo(map);
 
 
-.. image:: final_map.png
+.. image:: img/final_map.png
 
 Yay! But wait...what if we have *a lot* of other cities? This is going to take forever. There is a better way!
 Replace all the city marker code with this:
