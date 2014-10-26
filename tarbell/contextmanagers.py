@@ -14,18 +14,16 @@ from clint.textui import colored, puts
 
 from .app import TarbellSite
 from .settings import Settings
-from .utils import show_error, get_config_from_args
-
+from .utils import show_error
 
 class EnsureSettings():
     """Ensure the user has a Tarbell configuration."""
     def __init__(self, command, args):
         self.command = command
         self.args = args
-        self.path = get_config_from_args(args)
 
     def __enter__(self):
-        settings = Settings(self.path)
+        settings = Settings()
         # beta2 and older check
         if settings.config.get('s3_buckets'):
             puts(colored.red("--- Warning! ---\n"))

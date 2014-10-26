@@ -19,7 +19,7 @@ from tarbell import LONG_VERSION
 
 from .settings import Settings
 from .oauth import get_drive_api_from_client_secrets
-from .utils import get_config_from_args, show_error
+from .utils import show_error
 
 
 def tarbell_configure(command, args):
@@ -27,39 +27,41 @@ def tarbell_configure(command, args):
     puts("Configuring Tarbell. Press ctrl-c to bail out!")
 
     # Check if there's settings configured
-    path = get_config_from_args(args)
+    settings = Settings()
+    path = settings.path
+
     prompt = True
     if len(args):
         prompt = False
 
-    settings = _get_or_create_config(path)
+    config = _get_or_create_config(path)
 
     if prompt or "drive" in args:
-        settings.update(_setup_google_spreadsheets(settings, path, prompt))
+        config.update(_setup_google_spreadsheets(config, path, prompt))
     if prompt or "s3" in args:
-        settings.update(_setup_s3(settings, path, prompt))
+        config.update(_setup_s3(config, path, prompt))
     if prompt or "path" in args:
-        settings.update(_setup_tarbell_project_path(settings, path, prompt))
+        config.update(_setup_tarbell_project_path(config, path, prompt))
     if prompt or "templates" in args:
-        if "project_templates" in settings:
-            override_templates = raw_input("\nFound Base Template settings. Would you like to override them? [Default: No, 'none' to skip]")
+        if "project_templates" in config:
+            override_templates = raw_input("\nFound Base Template config. Would you like to override them? [Default: No, 'none' to skip]")
             if override_templates and override_templates != "No" and  override_templates != "no" and override_templates != "N" and override_templates != "n":
-                settings.update(_setup_default_templates(settings, path, prompt))
+                config.update(_setup_default_templates(config, path, prompt))
             else:
-                puts("\nPreserving Base Template settings...")
+                puts("\nPreserving Base Template config...")
         else:
-            settings.update(_setup_default_templates(settings, path, prompt))
+            config.update(_setup_default_templates(config, path, prompt))
 
 
     with open(path, 'w') as f:
         puts("\nWriting {0}".format(colored.green(path)))
-        yaml.dump(settings, f, default_flow_style=False)
+        settings.save()
 
     if all:
         puts("\n- Done configuring Tarbell. Type `{0}` for help.\n"
              .format(colored.green("tarbell")))
 
-    return Settings(path)
+    return settings
 
 
 def _get_or_create_config(path, prompt=True):
@@ -84,17 +86,17 @@ def _get_or_create_config(path, prompt=True):
 
 def _setup_google_spreadsheets(settings, path, prompt=True):
     """Set up a Google spreadsheet"""
+    ret = {}
     if prompt:
         use = raw_input("\nWould you like to use Google spreadsheets [Y/n]? ")
         if use.lower() != "y" and use != "":
             return settings
 
     dirname = os.path.dirname(path)
-
-    secrets = os.path.join(dirname, 'client_secrets.json')
+    path = os.path.join(dirname, "client_secrets.json")
 
     write_secrets = True
-    if os.path.isfile(secrets):
+    if os.path.isfile(path):
         write_secrets_input = raw_input("client_secrets.json already exists. Would you like to overwrite it? [y/N] ")
         if not write_secrets_input.lower().startswith('y'):
             write_secrets = False
@@ -131,9 +133,8 @@ def _setup_google_spreadsheets(settings, path, prompt=True):
     # Now, try and obtain the API for the first time
     get_api = raw_input("Would you like to authenticate your client_secrets.json? [Y/n] ")
     if get_api == '' or get_api.lower().startswith('y'):
-        get_drive_api_from_client_secrets(dirname, reset_creds=True)
+        get_drive_api_from_client_secrets(path, reset_creds=True)
 
-    ret = {}
     default_account = settings.get("google_account", "")
     account = raw_input(("What Google account(s) should have access to new spreadsheets? "
                          "(e.g. somebody@gmail.com, leave blank to specify for each new "
@@ -145,8 +146,8 @@ def _setup_google_spreadsheets(settings, path, prompt=True):
     if account != "":
         ret = { "google_account" : account }
 
-    return ret
     puts("\n- Done configuring Google spreadsheets.")
+    return ret
 
 
 def _setup_s3(settings, path, prompt=True):

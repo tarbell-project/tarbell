@@ -51,11 +51,3 @@ def show_error(msg):
     """Displays error message."""
     sys.stdout.flush()
     sys.stderr.write("\n{0}: {1}".format(colored.red("Error"), msg + '\n'))
-
-
-def get_config_from_args(args):
-    """Get config directory from arguments."""
-    return os.path.expanduser(
-        os.path.join("~", ".{0}".format("tarbell"), "settings.yaml")
-    )
-    return path
