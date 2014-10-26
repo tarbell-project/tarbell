@@ -38,34 +38,34 @@ within your organization, but do not share this file anywhere public.
 
 Log in to the `Google API Developer Console <https://cloud.google.com/console/project>`_ and create a new project:
 
-.. image:: create_1_new.png
+.. image:: img/create_1_new.png
 
-.. image:: create_1-5_new.png
+.. image:: img/create_1-5_new.png
    :width: 700px
 
 
 Now click the "APIs & auth" tab. (Click on the "APIs" tab below that if it 
 doesn't open automatically.) Enable Google Drive API.
 
-.. image:: create_2_new.png
+.. image:: img/create_2_new.png
    :width: 700px
 
 
 Click the "Credentials" tab (right below "APIs") to create a client ID:
 
-.. image:: create_3_new.png
+.. image:: img/create_3_new.png
    :width: 700px
 
 
 Select "installed app":
 
-.. image:: create_5_new.png
+.. image:: img/create_5_new.png
    :width: 700px
 
 
 Whew! Now you can download the ``client_secrets.json`` file:
 
-.. image:: create_6_new.png
+.. image:: img/create_6_new.png
    :width: 700px
 
 
@@ -92,11 +92,11 @@ authenticate
 
 Follow the link:
 
-.. image:: create_7_new.png
+.. image:: img/create_7_new.png
 
 You should receive a confirmation code:
 
-.. image:: create_8.png
+.. image:: img/create_8.png
 
 
 Enter it. If it works, you'll see:
@@ -113,13 +113,13 @@ Generate keys for your Amazon S3 account. Add them during the Amazon S3 section 
 To generate keys, log into your `AWS Console <http://aws.amazon.com/>`_, click your name and select
 "Security Credentials".
 
-.. image:: aws_security_creds.png
+.. image:: img/aws_security_creds.png
    :width: 700px
 
 
 Don't worry about IAM users right now.
 
-.. image:: aws_continue.png
+.. image:: img/aws_continue.png
    :width: 700px
 
 
@@ -129,7 +129,7 @@ Note that if you have existing keys, you can currently retrieve its Access Key I
 and Secret Access Key from the legacy Security Credentials page (linked to in this section), 
 but that Amazon plans to remove the ability to see this information soon.
 
-.. image:: aws_create_new_key.png
+.. image:: img/aws_create_new_key.png
    :width: 700px
 
 
@@ -137,7 +137,7 @@ Woohoo, now you can download your keys! You MUST do this now -- Amazon only lets
 the keys on this screen. If you accidentally close the prompt, you can always delete the 
 keys you just generated and generate a new pair.
 
-.. image:: aws_download_keys.png
+.. image:: img/aws_download_keys.png
    :width: 700px
 
 Now you need to tell Tarbell what your AWS keys are. Run `tarbell configure`. After it checks to see if Google is configured, you'll get this prompt::
@@ -153,17 +153,17 @@ Now you need to tell Tarbell what your AWS keys are. Run `tarbell configure`. Af
 If you don't already have a staging or production bucket, you can create one by 
 going to the S3 management console and clicking "Create bucket."
 
-.. image:: aws_create_bukkits.png
+.. image:: img/aws_create_bukkits.png
    :width: 700px
 
-.. image:: aws_bukkit_settings.png
+.. image:: img/aws_bukkit_settings.png
    :width: 700px
 
 Just remember that when you name a bucket, it must be unique to AWS, not just your account. 
 Like usernames, bucket names are shared across the entire Amazon system. (Which is silly, but 
 that's how it is.)
 
-.. image:: aws_bukkit_settings.png
+.. image:: img/aws_bukkit_settings.png
    :width: 700px
 
 Once you've added production and staging buckets to your configuration, you will get this message::
@@ -179,7 +179,7 @@ Set a default project path
 This is where your Tarbell projects will live. This path will be used by `tarbell list` 
 and `tarbell switch`.
 
-.. image:: project_path.png
+.. image:: img/project_path.png
    :width: 700px
 
 Using Tarbell with virtualenv
