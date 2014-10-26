@@ -32,12 +32,13 @@ if __name__ == "__main__" and __package__ is None:
     __package__ = "tarbell.cli"
 
 from .app import pprint_lines, process_xlsx, copy_global_values
-from .oauth import get_drive_api_from_client_secrets
+from .oauth import get_drive_api
 from .contextmanagers import ensure_settings, ensure_project
 from .configure import tarbell_configure
-from .utils import list_get, split_sentences, show_error, get_config_from_args
-from .utils import puts, is_werkzeug_process
 from .s3 import S3Url, S3Sync
+from .settings import Settings
+from .utils import list_get, split_sentences, show_error
+from .utils import puts, is_werkzeug_process
 
 # Set args
 args = arguments.Args()
@@ -80,26 +81,24 @@ def display_info(args):
     for command in Command.all_commands():
         usage = command.usage or command.name
         help = command.help or ''
-        puts('{0: <37} {1}\n'.format(
-                usage,
-                colored.yellow(split_sentences(help, 37))
+        puts('{0} {1}'.format(
+            colored.yellow('{0: <37}'.format(usage)),
+            split_sentences(help, 37)
         ))
+    puts("")
 
-    config = get_config_from_args(args)
-    if not os.path.isfile(config):
-        puts('\n---\n\n{0}: {1}'.format(
+    settings = Settings()
+    if settings.file_missing:
+        puts('---\n{0}: {1}'.format(
             colored.red("Warning"),
             "No Tarbell configuration found. Run:"
         ))
-        puts('\n    {0}'.format(
+        puts('\n{0}'.format(
             colored.green("tarbell configure")
         ))
-        puts('\n{0}'.format(
+        puts('\n{0}\n---'.format(
             "to configure Tarbell."
         ))
-
-    puts('\nCrafted by the Chicago Tribune News Applications team\n')
-
 
 def display_version():
     """Displays Tarbell version/release."""
@@ -584,7 +583,7 @@ def _create_spreadsheet(name, title, path, settings):
         show_error("_blueprint/_spreadsheet.xlsx doesn't exist!")
         return None
 
-    service = get_drive_api_from_client_secrets(settings.path)
+    service = get_drive_api()
     body = {
         'title': '{0} (Tarbell)'.format(title),
         'description': '{0} ({1})'.format(title, name),

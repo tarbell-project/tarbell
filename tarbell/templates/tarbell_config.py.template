@@ -32,9 +32,9 @@ EXCLUDES = ["*.md", "requirements.txt"]
     # Provide target -> s3 url pairs, such as:
     #     "mytarget": "mys3url.bucket.url/some/path"
     # then use tarbell publish mytarget to publish to it
-    {%- for bucket_name, uri in default_s3_buckets.iteritems() %}
+    {% if default_s3_buckets %}{%- for bucket_name, uri in default_s3_buckets.iteritems() %}
     "{{ bucket_name }}": "{{ uri }}/{{ name }}",
-    {%- endfor %}
+    {%- endfor %}{% endif %}
 {% if not default_s3_buckets %}#{% endif %}}
 
 # Default template variables
