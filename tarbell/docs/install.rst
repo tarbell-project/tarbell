@@ -105,6 +105,12 @@ Enter it. If it works, you'll see:
 
 Now you can access and create Google spreadsheets to use with Tarbell projects.
 
+.. note::
+
+    You need to visit the authentication page from the same machine that you are configuring Tarbell
+    in order to avoid an OAuth Error. If you are using a remote machine, consider using the Lynx terminal 
+    browser. Alternatively, you can `pre-authenticate <remote-configuration.rst>`.
+
 Configure Amazon S3
 -------------------
 
