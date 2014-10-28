@@ -55,6 +55,7 @@ Reference
 =========
 
 .. toctree::
+    remote_configuration
     managingprojects
     hooks
     reference
