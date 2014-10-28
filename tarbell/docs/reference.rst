@@ -90,3 +90,10 @@ Install a Tarbell project from the Git repository url specified.
 **Usage:** ``tarbell install-template <git repository url>``
 
 Install a base template from the given repository url.
+
+``tarbell token``
+-----------------
+
+**Usage:** ``tarbell token``
+
+Print JSON with the current OAuth token.

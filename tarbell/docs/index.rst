@@ -10,7 +10,7 @@ of publishing to the web. Google spreadsheets handle content management, so
 changes to your stories are easy to make without touching a line of code. Step-by-step
 prompts help you set up and configure your project, so that publishing it is a breeze.
 
-New here? Read the `Tarbell tutorial <tutorial.rst>`_ or `install and configure Tarbell <install.rst>`_ to get started.
+New here? Read the `Tarbell tutorial <tutorial.html>`_ or `install and configure Tarbell <install.html>`_ to get started.
 
 Need help? `File a ticket tagged "support" in Github <https://github.com/newsapps/flask-tarbell/issues/new>`_.
 
@@ -55,6 +55,7 @@ Reference
 =========
 
 .. toctree::
+    remote_configuration
     managingprojects
     hooks
     reference
