@@ -42,6 +42,7 @@ settings.update(
         "gnureadline==6.3.3",
         "requests==2.3.0",
         "sh==1.09",
+        "sphinx-rtd-theme==0.1.6",
         "wsgiref==0.1.2",
         "xlrd==0.9.3",
     ],
