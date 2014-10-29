@@ -62,6 +62,9 @@ Select "installed app":
 .. image:: img/create_5_new.png
    :width: 700px
 
+Now, go to the "consent screen" settings and give your project a name:
+
+.. image:: img/consent-screen.png
 
 Whew! Now you can download the ``client_secrets.json`` file:
 
