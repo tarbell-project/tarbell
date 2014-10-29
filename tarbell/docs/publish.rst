@@ -16,16 +16,16 @@ Generate HTML in a specific directory::
 
 .. note::
 
-    ``tarbell generate`` can be used to manually publish sites to hosts other than Amazon. Write a
-    simple deployment script or use Fabric to call tarbell generate and then a command to sync your
-    site with your host.
+  ``tarbell generate`` can be used to manually publish sites to hosts other than Amazon. Write a
+  simple deployment script or use Fabric to call ``tarbell generate <mydirectory>`` and invoke a
+  command to sync ``<mydirectory>`` with your host.
 
 Publish projects with ``tarbell publish <target>``
 ---------------------------------------------------------------------
 
 If Amazon S3 is configured, you can publish with::
 
-  tarbell publish
+  tarbell publish <bucketname>
 
 The default bucket is ``staging``.
 
