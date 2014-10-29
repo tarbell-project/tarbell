@@ -2,7 +2,7 @@
 Publishing
 ==========
 
-Manually publish projects with ``tarbell generate``
+Generate static sites with ``tarbell generate``
 ----------------------------------------------------------------
 
 Generate HTML in a temporary directory::
@@ -13,6 +13,12 @@ Generate HTML in a specific directory::
 
   tarbell generate ~/output/myproject
 
+
+.. note::
+
+    ``tarbell generate`` can be used to manually publish sites to hosts other than Amazon. Write a
+    simple deployment script or use Fabric to call tarbell generate and then a command to sync your
+    site with your host.
 
 Publish projects with ``tarbell publish <target>``
 ---------------------------------------------------------------------
