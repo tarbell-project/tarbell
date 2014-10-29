@@ -2,7 +2,7 @@
 Publishing
 ==========
 
-Manually publish projects with ``tarbell generate``
+Generate static sites with ``tarbell generate``
 ----------------------------------------------------------------
 
 Generate HTML in a temporary directory::
@@ -13,6 +13,12 @@ Generate HTML in a specific directory::
 
   tarbell generate ~/output/myproject
 
+
+.. note::
+
+    ``tarbell generate`` can be used to manually publish sites to hosts other than Amazon. Write a
+    simple deployment script or use Fabric to call tarbell generate and then a command to sync your
+    site with your host.
 
 Publish projects with ``tarbell publish <target>``
 ---------------------------------------------------------------------
@@ -100,9 +106,9 @@ Or add some lines to ``~/.tarbell/settings.yaml``::
 You can now publish to a bucket with non-default access credentials.
 
 Tarbell does not delete files on S3
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------------------
 
 Because altering Amazon S3 buckets has some inherent dangers, Tarbell 1.0 does not include
 a delete feature. You can manually delete files on Amazon through the
 `web interface <https://console.aws.amazon.com/>`_ or with a client like
-`Cyberduck <https://cyberduck.io/?l=en>`_.
+`Cyberduck <https://cyberduck.io/?l=en>`_. 
