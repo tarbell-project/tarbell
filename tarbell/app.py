@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
+import codecs
 import csv
 import fnmatch
 import imp
 import json
+import markdown
 import mimetypes
 import os
 import re
@@ -14,7 +16,7 @@ import xlrd
 
 from httplib import BadStatusLine
 from flask import Flask, render_template, send_from_directory, Response, g
-from jinja2 import Markup, TemplateSyntaxError
+from jinja2 import contextfunction, Markup, TemplateSyntaxError
 from jinja2.loaders import BaseLoader
 from jinja2.utils import open_if_exists
 from jinja2.exceptions import TemplateNotFound
@@ -216,6 +218,33 @@ def make_worksheet_data(headers, worksheet):
     return data
 
 
+def markdown(value):
+    """Run text through markdown process"""
+    return Markup(Markdown.markdown(value))
+
+
+def process_text(text):
+    """Return markup or empty string"""
+    try:
+        return Markup(text)
+    except TypeError:
+        return u''
+
+
+def format_date(value, format='%b. %d, %Y', convert_tz=None):
+    """Format an Excel date."""
+    if isinstance(value, float) or isinstance(value, int):
+        seconds = (value - 25569) * 86400.0
+        parsed = datetime.datetime.utcfromtimestamp(seconds)
+    else:
+        parsed = dateutil.parser.parse(value)
+    if convert_tz:
+        local_zone = dateutil.tz.gettz(convert_tz)
+        parsed = parsed.astimezone(tz=local_zone)
+
+    return parsed.strftime(format)
+
+
 class TarbellSite:
     def __init__(self, path, client_secrets_path=None, quiet=False):
         self.app = Flask(__name__)
@@ -234,12 +263,40 @@ class TarbellSite:
 
         self.app.add_url_rule('/', view_func=self.preview)
         self.app.add_url_rule('/<path:path>', view_func=self.preview)
+        self.app.add_template_filter(format_date, 'format_date')
+        self.app.add_template_filter(markdown, 'markdown')
         self.app.add_template_filter(slughifi, 'slugify')
         self.app.add_template_filter(pprint_lines, 'pprint_lines')
+        self.app.add_template_filter(process_text, 'process_text')
+        self.app.add_template_filter(process_text, 'markup')
+        self.app.jinja_env.globals.update(render_file=self.render_file)
+        self.app.jinja_env.globals.update(read_file=self.read_file)
+
         self.app.before_request(self.add_site_to_context)
+
 
     def add_site_to_context(self):
         g.current_site = self
+
+    def read_file(self, path, absolute=False, encoding='utf-8'):
+        """
+        Read the file at `path`. If `absolute` is True, use absolute path,
+        otherwise path is assumed to be relative to Tarbell template root dir.
+        """
+        if not absolute:
+            path = os.path.join(self.path, path)
+
+        try:
+            return codecs.open(path, 'r', encoding).read()
+        except IOError:
+            return None
+
+    @contextfunction
+    def render_file(self, context, path, absolute=False):
+        """
+        Render a file with the current context
+        """
+        return render_template(path, **context)
 
     def process_hooks(self, hooks):
         try:
