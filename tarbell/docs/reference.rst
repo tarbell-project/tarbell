@@ -37,13 +37,6 @@ Run a preview server. Specify an optional listening address, such as "0.0.0.0" o
 
 Publish a Tarbell project to Amazon S3 using optional target (configured in ``tarbell_config.py``).
 
-``tarbell unpublish``
----------------------
-
-*Requires current directory to be a Tarbell project.*
-
-**Usage:** *Not implemented.*
-
 ``tarbell update``
 ------------------
 
