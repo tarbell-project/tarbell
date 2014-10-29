@@ -27,11 +27,6 @@ You can specify a bucket when publishing (defined in ``tarbell_config.py``)::
 
   tarbell publish production
 
-Remove projects with ``tarbell unpublish <target>``
-----------------------------------------------------------------------
-
-Not implemented.
-
 Configuring S3 buckets for a project
 ------------------------------------
 
@@ -103,3 +98,11 @@ Or add some lines to ``~/.tarbell/settings.yaml``::
       secret_access_key: XXXXXXXXXXXX
 
 You can now publish to a bucket with non-default access credentials.
+
+Tarbell does not delete files on S3
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Because altering Amazon S3 buckets has some inherent dangers, Tarbell 1.0 does not include
+a delete feature. You can manually delete files on Amazon through the
+`web interface <https://console.aws.amazon.com/>`_ or with a client like
+`Cyberduck <https://cyberduck.io/?l=en>`_.
