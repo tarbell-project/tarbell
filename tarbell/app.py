@@ -274,7 +274,6 @@ class TarbellSite:
 
         self.app.before_request(self.add_site_to_context)
 
-
     def add_site_to_context(self):
         g.current_site = self
 
