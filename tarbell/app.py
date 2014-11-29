@@ -273,9 +273,17 @@ class TarbellSite:
         self.app.jinja_env.globals.update(read_file=self.read_file)
 
         self.app.before_request(self.add_site_to_context)
+        self.app.after_request(self.never_cache_preview)
 
     def add_site_to_context(self):
         g.current_site = self
+
+    def never_cache_preview(self, response):
+        response.cache_control.max_age = 0
+        response.cache_control.no_cache = True
+        response.cache_control.must_revalidate = True
+        response.cache_control.no_store = True
+        return response
 
     def read_file(self, path, absolute=False, encoding='utf-8'):
         """
