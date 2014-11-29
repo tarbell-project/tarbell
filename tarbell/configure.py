@@ -284,7 +284,7 @@ def _setup_s3(settings, path, prompt=True):
 def _setup_tarbell_project_path(settings, path, prompt=True):
     """Prompt user to set up project path."""
     default_path = os.path.expanduser(os.path.join("~", "tarbell"))
-    projects_path = raw_input("\nWhat is your Tarbell projects path? [Default: {0}, 'none' to skip] ".format(colored.green(default_path)))
+    projects_path = raw_input("\nWhat is your Tarbell projects path? [Default: {0}, 'none' to skip] ".format(default_path))
     if projects_path == "":
         projects_path = default_path
     if projects_path.lower() == 'none':
