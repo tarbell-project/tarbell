@@ -1,0 +1,9 @@
+{% extends '_error.html' %}
+
+{% block content %}
+<h1>404: Not found</h1>
+<h2>File <code>{{ PATH }}</code> could not be found</h2>
+{% endblock %}
+
+{# 404 errors don't have or need a traceback #}
+{% block traceback %}{% endblock %}

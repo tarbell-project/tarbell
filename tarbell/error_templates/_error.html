@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>{% block title %}{{ title|striptags }}{% endblock title %}</title>
+
+  {% block css %}
+  <link rel="stylesheet" type="text/css" href="/css/errors.css" />
+  {% endblock %}
+
+  {% block meta %}
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  {% endblock meta %}
+</head>
+<body>
+
+{% block body %}
+<div class="content-wrapper">
+  <div class="body content">
+    {% block content %}{% endblock content %}
+  </div>
+
+  {% block traceback %}
+  <div class="traceback">
+    <h3>Traceback</h3>
+    <pre>{{ traceback|join('') }}</pre>
+  </div>
+  {% endblock %}
+
+  {% block footer %}
+  <div class="footer content">
+    <div class="footer-img">
+      <img src="/error-img/ida-tarbell.jpg" class="logo"/>
+    </div>
+    <p>Powered by <a href="http://tarbell.tribapps.com">Tarbell</a></p>
+  </div>
+  {% endblock %}
+</div>
+{% endblock %}
+
+{% block scripts %}{% endblock %}
+
+</body>
+</html>
+
