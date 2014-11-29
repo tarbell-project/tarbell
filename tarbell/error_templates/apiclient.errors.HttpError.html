@@ -1,0 +1,17 @@
+{% extends '_error.html' %}
+
+{% block content %}
+<h1>Google client error</h1>
+{% if e.resp.status == 404 %}
+<p>Google Sheets returned a 404 error. That could mean one of two things:</p>
+
+<ul>
+  <li>The spreadsheet does not exist</li>
+  <li>You don't have permission to access the spreadsheet</li>
+</ul>
+
+<p>Please visit <a href="https://docs.google.com/spreadsheets/d/{{ SPREADSHEET_KEY}}/edit" target="_blank">the Google Sheet</a> to ensure the spreadsheet exists or to request access.</p>
+{% else %}
+<p>Google Sheets returned an unknown error. In most cases, that means Google Drive or Google Sheets is having a problem. Try reloading in a few minutes. If the problem persists, check out the <a href="https://support.google.com/drive/known-issues/2458941?rd=1">known issues page</a> where you can also report an error.</p>
+{% endif %}
+{% endblock %}

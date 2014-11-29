@@ -406,6 +406,8 @@ class TarbellSite:
         template_dirs = [path]
         if base:
             template_dirs.append(base.base_dir)
+        error_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'error_templates')
+        template_dirs.append(error_path)
 
         self.app.jinja_loader = TarbellFileSystemLoader(template_dirs)
 
@@ -417,6 +419,15 @@ class TarbellSite:
         mimetype = None
 
         for root, dirs, files in self.filter_files(self.path):
+            # Does it exist in error path?
+            error_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'error_templates', path)
+            try:
+                with open(error_path):
+                    mimetype, encoding = mimetypes.guess_type(error_path)
+                    filepath = error_path
+            except IOError:
+                pass
+
             # Does it exist in Tarbell blueprint?
             if self.base:
                 basepath = os.path.join(root, self.blueprint_name, path)
@@ -438,61 +449,64 @@ class TarbellSite:
 
         return filepath, mimetype
 
-    def _print_template_error(self, path):
-        """Print a template syntax error"""
-        ex_type, ex, tb = sys.exc_info()
-        stack = traceback.extract_tb(tb)
-        error = stack[-1]
-        puts("\n{0} can't be parsed by Jinja, serving static".format(colored.red(path)))
-        puts("\nLine {0}:".format(colored.green(str(error[1]))))
-        puts("  {0}".format(colored.yellow(error[3])))
-        puts("\nFull traceback:")
-        traceback.print_tb(tb)
-        puts("")
-        del tb
-
-
-    def preview(self, path=None, extra_context=None, publish=False, allow_failure=False):
+    def preview(self, path=None, extra_context=None, publish=False):
         """ Preview a project path """
-        self.call_hook("preview", self)
+        try:
+            self.call_hook("preview", self)
 
-        if path is None:
-            path = 'index.html'
+            if path is None:
+                path = 'index.html'
 
-        # Serve JSON
-        if self.project.CREATE_JSON and path == 'data.json':
-            context = self.get_context(publish)
-            if extra_context:
-                context.update(extra_context)
-            context["SITE"] = None
-            return Response(json.dumps(context), mimetype="application/json")
+            # Serve JSON
+            if self.project.CREATE_JSON and path == 'data.json':
+                context = self.get_context(publish)
+                if extra_context:
+                    context.update(extra_context)
+                context["SITE"] = None
+                return Response(json.dumps(context), mimetype="application/json")
 
-        # Detect files
-        filepath, mimetype = self._resolve_path(path)
+            # Detect files
+            filepath, mimetype = self._resolve_path(path)
 
-        # Serve dynamic
-        if filepath and mimetype and mimetype in TEMPLATE_TYPES:
-            context = self.get_context(publish)
-            context.update({
-                "PATH": path,
-                "PREVIEW_SERVER": not publish,
-                "TIMESTAMP": int(time.time()),
-            })
-            if extra_context:
-                context.update(extra_context)
+            # Serve dynamic
+            if filepath and mimetype and mimetype in TEMPLATE_TYPES:
+                context = self.get_context(publish)
+                context.update({
+                    "PATH": path,
+                    "PREVIEW_SERVER": not publish,
+                    "TIMESTAMP": int(time.time()),
+                })
+                if extra_context:
+                    context.update(extra_context)
 
-            try:
                 rendered = render_template(path, **context)
                 return Response(rendered, mimetype=mimetype)
-            except TemplateSyntaxError:
-                self._print_template_error(filepath)
-                if allow_failure:
-                    sys.exit(1)
 
-        # Serve static
-        if filepath:
-            dir, filename = os.path.split(filepath)
-            return send_from_directory(dir, filename)
+            # Serve static
+            if filepath:
+                dir, filename = os.path.split(filepath)
+                return send_from_directory(dir, filename)
+
+        except Exception as e:
+            try:
+                # Find template with name of error
+                cls = e.__class__
+                error_path = '{0}.{1}.html'.format(cls.__module__, cls.__name__)
+                ex_type, ex, tb = sys.exc_info()
+
+                context = self.project.DEFAULT_CONTEXT
+                context.update({
+                    'PATH': path,
+                    'traceback': traceback.format_exception(ex_type, ex, tb),
+                    'e': e,
+                })
+                if extra_context:
+                    context.update(extra_context)
+                rendered = render_template(error_path, **context)
+                return Response(rendered, mimetype="text/html")
+            except TemplateNotFound:
+                # Otherwise raise old error
+                raise e
 
         # Last ditch effort -- see if path has "index.html" underneath it
         if not path.endswith("index.html"):
@@ -501,7 +515,11 @@ class TarbellSite:
             path = "{0}{1}".format(path, "index.html")
             return self.preview(path)
 
-        return Response(status=404)
+        # It's a 404
+        if path.endswith('/index.html'):
+            path = path[:-11]
+        rendered = render_template("404.html", PATH=path)
+        return Response(rendered, status=404)
 
     def get_context(self, publish=False):
         """
@@ -658,7 +676,7 @@ class TarbellSite:
         if not self.quiet:
             puts("Writing {0}".format(output_path))
         with self.app.test_request_context():
-            preview = self.preview(rel_path, extra_context=extra_context, publish=True, allow_failure=True)
+            preview = self.preview(rel_path, extra_context=extra_context, publish=True)
             if not os.path.exists(output_dir):
                 os.makedirs(output_dir)
             with open(output_path, "wb") as f:
