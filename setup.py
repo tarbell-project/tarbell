@@ -36,6 +36,7 @@ settings.update(
         "PyYAML==3.11",
         "boto==2.32.1",
         "clint==0.3.7",
+        "gnureadline==6.3.3",
         "google-api-python-client==1.2",
         "keyring==4.0",
         "python-dateutil>=2.2",
