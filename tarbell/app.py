@@ -4,7 +4,7 @@ import csv
 import fnmatch
 import imp
 import json
-import markdown
+import markdown as md
 import mimetypes
 import os
 import re
@@ -220,7 +220,7 @@ def make_worksheet_data(headers, worksheet):
 
 def markdown(value):
     """Run text through markdown process"""
-    return Markup(Markdown.markdown(value))
+    return Markup(md.markdown(value))
 
 
 def process_text(text):
