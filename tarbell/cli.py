@@ -314,8 +314,8 @@ def tarbell_publish(command, args):
                 kwargs = settings.config['s3_credentials'].get(bucket_url.root)
                 if not kwargs:
                     kwargs = {
-                        'access_key_id': settings.config['default_s3_access_key_id'],
-                        'secret_access_key': settings.config['default_s3_secret_access_key'],
+                        'access_key_id': settings.config.get('default_s3_access_key_id'),
+                        'secret_access_key': settings.config.get('default_s3_secret_access_key'),
                     }
                     puts("Using default bucket credentials")
                 else:
@@ -328,6 +328,10 @@ def tarbell_publish(command, args):
                     'secret_access_key': os.environ["AWS_SECRET_ACCESS_KEY"],
                 }
 
+            if not kwargs.get('access_key_id') and not kwargs.get('secret_access_key'):
+                show_error('S3 access is not configured. Set up S3 with {0} to publish.'
+                            .format(colored.green('tarbell configure')))
+                sys.exit()
 
             s3 = S3Sync(tempdir, bucket_url, **kwargs)
             s3.deploy_to_s3()
