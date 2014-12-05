@@ -452,7 +452,7 @@ class TarbellSite:
 
         return filepath, mimetype
 
-    def data_json(self):
+    def data_json(self, extra_context=None, publish=False):
         """
         Serve site context as JSON. Useful for debugging.
         """
@@ -461,7 +461,7 @@ class TarbellSite:
 
         if not self.data:
             # this sets site.data by spreadsheet or gdoc
-            self.get_context()
+            self.get_context(publish)
 
         return jsonify(self.data)
 
@@ -685,11 +685,15 @@ class TarbellSite:
             puts("Writing {0}".format(output_path))
 
         with self.app.test_request_context():
+
             # call any pre-request hooks
             self.app.preprocess_request()
 
             # render
-            preview = self.preview(rel_path, extra_context=extra_context, publish=True)
+            if filename == 'data.json':
+                preview = self.data_json(extra_context, publish=True)
+            else:
+                preview = self.preview(rel_path, extra_context=extra_context, publish=True)
             
             if not os.path.exists(output_dir):
                 os.makedirs(output_dir)
