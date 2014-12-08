@@ -44,5 +44,5 @@ class Settings:
 
     def save(self):
         with open(self.path, "w") as f:
-            self.config["project_templates"].pop()
+            self.config["project_templates"] = filter(lambda template: template.get("url"), self.config["project_templates"])
             yaml.dump(self.config, f, default_flow_style=False)

@@ -33,13 +33,13 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'Tarbell'
-copyright = u'2013, Chicago Tribune News Applications Team and David Eads'
+copyright = u'2013-2014, MIT-licensed, created by the Chicago Tribune New Applications Team'
 
 # The short X.Y version.
 version = '0.9'
 
 # The full version, including alpha/beta/rc tags.
-release = '0.9-beta5'
+release = '0.9-beta7'
 
 exclude_patterns = ['_build']
 
