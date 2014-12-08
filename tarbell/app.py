@@ -15,7 +15,7 @@ import traceback
 import xlrd
 
 from httplib import BadStatusLine
-from flask import Flask, render_template, send_from_directory, Response, g
+from flask import Flask, render_template, send_from_directory, Response, g, jsonify
 from jinja2 import contextfunction, Markup, TemplateSyntaxError
 from jinja2.loaders import BaseLoader
 from jinja2.utils import open_if_exists
@@ -261,8 +261,11 @@ class TarbellSite:
         self.hooks = self.process_hooks(hooks)
         self.expires = 0
 
+        # add routes
         self.app.add_url_rule('/', view_func=self.preview)
         self.app.add_url_rule('/<path:path>', view_func=self.preview)
+        self.app.add_url_rule('/data.json', view_func=self.data_json)
+
         self.app.add_template_filter(format_date, 'format_date')
         self.app.add_template_filter(markdown, 'markdown')
         self.app.add_template_filter(slughifi, 'slugify')
@@ -449,6 +452,19 @@ class TarbellSite:
 
         return filepath, mimetype
 
+    def data_json(self, extra_context=None, publish=False):
+        """
+        Serve site context as JSON. Useful for debugging.
+        """
+        if not self.project.CREATE_JSON:
+            return ""
+
+        if not self.data:
+            # this sets site.data by spreadsheet or gdoc
+            self.get_context(publish)
+
+        return jsonify(self.data)
+
     def preview(self, path=None, extra_context=None, publish=False):
         """ Preview a project path """
         try:
@@ -456,14 +472,6 @@ class TarbellSite:
 
             if path is None:
                 path = 'index.html'
-
-            # Serve JSON
-            if self.project.CREATE_JSON and path == 'data.json':
-                context = self.get_context(publish)
-                if extra_context:
-                    context.update(extra_context)
-                context["SITE"] = None
-                return Response(json.dumps(context), mimetype="application/json")
 
             # Detect files
             filepath, mimetype = self._resolve_path(path)
@@ -675,10 +683,17 @@ class TarbellSite:
 
         if not self.quiet:
             puts("Writing {0}".format(output_path))
+
         with self.app.test_request_context():
-            preview = self.preview(rel_path, extra_context=extra_context, publish=True)
+            # data.json is special
+            if filename == 'data.json':
+                preview = self.data_json(extra_context, publish=True)
+            else:
+                preview = self.preview(rel_path, extra_context=extra_context, publish=True)
+            
             if not os.path.exists(output_dir):
                 os.makedirs(output_dir)
+
             with open(output_path, "wb") as f:
                 if isinstance(preview.response, FileWrapper):
                     f.write(preview.response.file.read())
