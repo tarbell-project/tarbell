@@ -278,6 +278,7 @@ def tarbell_list(command, args):
                 'project name'
             ))
             for projectname, title in projects:
+                title = codecs.encode(title, 'utf8')
                 puts(colored.yellow(fmt.format(
                     title,
                     colored.cyan(projectname)
