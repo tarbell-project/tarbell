@@ -659,11 +659,11 @@ class TarbellSite:
             paths = []
             for f in files:
                 if rel_path == '.':
-                    file_path = (f, os.path.join(root, f))
+                    file_path = f
                 else:
-                    file_path = (os.path.join(rel_path, f), os.path.join(root, f))
-                if not re.match(excludes, file_path[0]):
-                    paths.append(file_path[0])
+                    file_path = os.path.join(rel_path, f)
+                if not re.match(excludes, file_path):
+                    paths.append(f)
 
             files[:] = paths
             yield root, dirs, files

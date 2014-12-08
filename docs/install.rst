@@ -7,7 +7,7 @@ Install Tarbell with `pip install tarbell`
 
 .. code-block:: bash
 
-    pip install -e git+https://github.com/newsapps/flask-tarbell@0.9-beta7#egg=tarbell
+    pip install tarbell
 
 .. note::
 

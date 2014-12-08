@@ -62,4 +62,5 @@ def _get_drive_api(credentials):
     http = httplib2.Http()
     http = credentials.authorize(http)
     service = discovery.build('drive', 'v2', http=http)
+    service.credentials = credentials  # duck punch service obj. with credentials
     return service

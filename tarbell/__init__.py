@@ -1,2 +1,2 @@
-__VERSION__ = '0.9b7'
+__VERSION__ = '1.0'
 LONG_VERSION = __VERSION__.replace('b', '-beta')

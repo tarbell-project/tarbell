@@ -100,6 +100,7 @@ def display_info(args):
             "to configure Tarbell."
         ))
 
+
 def display_version():
     """Displays Tarbell version/release."""
     puts('You are using Tarbell v{0}'.format(
@@ -277,6 +278,7 @@ def tarbell_list(command, args):
                 'project name'
             ))
             for projectname, title in projects:
+                title = codecs.encode(title, 'utf8')
                 puts(colored.yellow(fmt.format(
                     title,
                     colored.cyan(projectname)
@@ -361,17 +363,6 @@ def tarbell_publish(command, args):
             _delete_dir(tempdir)
 
 
-def _delete_dir(dir):
-    """Delete tempdir"""
-    try:
-        shutil.rmtree(dir)  # delete directory
-    except OSError as exc:
-        if exc.errno != 2:  # code 2 - no such file or directory
-            raise  # re-raise exception
-    except UnboundLocalError:
-        pass
-
-
 def tarbell_newproject(command, args):
     """Create new Tarbell project."""
     with ensure_settings(command, args) as settings:
@@ -390,6 +381,75 @@ def tarbell_newproject(command, args):
             _delete_dir(path)
             show_error("Unexpected error: {0}".format(sys.exc_info()[0]))
             raise
+
+
+def tarbell_serve(command, args):
+    """Serve the current Tarbell project."""
+    with ensure_project(command, args) as site:
+        address = list_get(args, 0, "").split(":")
+        ip = list_get(address, 0, '127.0.0.1')
+        port = int(list_get(address, 1, '5000'))
+        puts("\n * Running local server. Press {0} to stop the server".format(colored.red("ctrl-c")))
+        puts(" * Edit this project's templates at {0}".format(colored.yellow(site.path)))
+        try:
+            if not is_werkzeug_process():
+                site.call_hook("server_start", site)
+
+            site.app.run(ip, port=port)
+
+            if not is_werkzeug_process():
+                site.call_hook("server_stop", site)
+
+        except socket.error:
+            show_error("Address {0} is already in use, please try another port or address."
+                 .format(colored.yellow("{0}:{1}".format(ip, port))))
+
+
+def tarbell_switch(command, args):
+    """Switch to a project"""
+    with ensure_settings(command, args) as settings:
+        projects_path = settings.config.get("projects_path")
+        if not projects_path:
+            show_error("{0} does not exist".format(projects_path))
+            sys.exit()
+        project = args.get(0)
+        args.remove(project)
+        project_path = os.path.join(projects_path, project)
+        if os.path.isdir(project_path):
+            os.chdir(project_path)
+            puts("\nSwitching to {0}".format(colored.red(project)))
+            tarbell_serve(command, args)
+        else:
+            show_error("{0} isn't a tarbell project".format(project_path))
+
+
+def tarbell_credentials(command, args):
+    """Print current OAuth access token"""
+    api = get_drive_api()
+    puts(api.credentials.to_json())
+
+
+def tarbell_update(command, args):
+    """Update the current tarbell project."""
+    with ensure_settings(command, args) as settings, ensure_project(command, args) as site:
+        puts("Updating to latest blueprint\n")
+
+        git = sh.git.bake(_cwd=site.base.base_dir)
+        git.fetch()
+        puts(colored.yellow("Checking out {0}".format(VERSION)))
+        puts(git.checkout(VERSION))
+        puts(colored.yellow("Stashing local changes"))
+        puts(git.stash())
+        puts(colored.yellow("Pull latest changes"))
+        puts(git.pull('origin', VERSION))
+
+
+
+def tarbell_unpublish(command, args):
+    with ensure_settings(command, args) as settings, ensure_project(command, args) as site:
+        """Delete a project."""
+        show_error("Not implemented!")
+
 
 
 def _newproject(command, path, name, settings):
@@ -693,66 +753,15 @@ def _copy_config_template(name, title, template, path, key, settings):
         puts("\n- Done copying configuration file")
 
 
-def tarbell_serve(command, args):
-    """Serve the current Tarbell project."""
-    with ensure_project(command, args) as site:
-        address = list_get(args, 0, "").split(":")
-        ip = list_get(address, 0, '127.0.0.1')
-        port = int(list_get(address, 1, '5000'))
-        puts("\n * Running local server. Press {0} to stop the server".format(colored.red("ctrl-c")))
-        puts(" * Edit this project's templates at {0}".format(colored.yellow(site.path)))
-        try:
-            if not is_werkzeug_process():
-                site.call_hook("server_start", site)
-
-            site.app.run(ip, port=port)
-
-            if not is_werkzeug_process():
-                site.call_hook("server_stop", site)
-
-        except socket.error:
-            show_error("Address {0} is already in use, please try another port or address."
-                 .format(colored.yellow("{0}:{1}".format(ip, port))))
-
-
-def tarbell_switch(command, args):
-    """Switch to a project"""
-    with ensure_settings(command, args) as settings:
-        projects_path = settings.config.get("projects_path")
-        if not projects_path:
-            show_error("{0} does not exist".format(projects_path))
-            sys.exit()
-        project = args.get(0)
-        args.remove(project)
-        project_path = os.path.join(projects_path, project)
-        if os.path.isdir(project_path):
-            os.chdir(project_path)
-            puts("\nSwitching to {0}".format(colored.red(project)))
-            tarbell_serve(command, args)
-        else:
-            show_error("{0} isn't a tarbell project".format(project_path))
-
-
-def tarbell_update(command, args):
-    """Update the current tarbell project."""
-    with ensure_settings(command, args) as settings, ensure_project(command, args) as site:
-        puts("Updating to latest blueprint\n")
-
-        git = sh.git.bake(_cwd=site.base.base_dir)
-        git.fetch()
-        puts(colored.yellow("Checking out {0}".format(VERSION)))
-        puts(git.checkout(VERSION))
-        puts(colored.yellow("Stashing local changes"))
-        puts(git.stash())
-        puts(colored.yellow("Pull latest changes"))
-        puts(git.pull('origin', VERSION))
-
-
-
-def tarbell_unpublish(command, args):
-    with ensure_settings(command, args) as settings, ensure_project(command, args) as site:
-        """Delete a project."""
-        show_error("Not implemented!")
+def _delete_dir(dir):
+    """Delete tempdir"""
+    try:
+        shutil.rmtree(dir)  # delete directory
+    except OSError as exc:
+        if exc.errno != 2:  # code 2 - no such file or directory
+            raise  # re-raise exception
+    except UnboundLocalError:
+        pass
 
 
 class Command(object):
@@ -878,6 +887,13 @@ def_cmd(
     help=('Switch to the project named <project> and start a preview server. '
           'Supply an optional address for the preview server such as '
           '\'192.168.56.1:8080\''))
+
+
+def_cmd(
+    name='credentials',
+    fn=tarbell_credentials,
+    usage='credentials',
+    help=('Display Google OAuth credentials'))
 
 
 def_cmd(

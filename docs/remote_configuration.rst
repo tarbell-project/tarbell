@@ -10,7 +10,7 @@ your Tarbell configuration directory to the server.
 
 Assuming you have Tarbell properly configured, create a credentials file::
 
-    tarbell token > ~/.tarbell/credentials.json
+    tarbell credentials > ~/.tarbell/credentials.json
 
 Now copy the ``~/.tarbell`` directory to your server. You could use ``scp``, ``rsync``. A preferred 
 way of doing it is to use a private git repository::

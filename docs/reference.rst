@@ -77,16 +77,16 @@ List projects from your default Tarbell project directory.
 
 Install a Tarbell project from the Git repository url specified.
 
-``tarbell install-template``
+``tarbell install-blueprint``
 ----------------------------
 
-**Usage:** ``tarbell install-template <git repository url>``
+**Usage:** ``tarbell install-blueprint <git repository url>``
 
-Install a base template from the given repository url.
+Install a Tarbell blueprint from the given repository url.
 
-``tarbell token``
+``tarbell credentials``
 -----------------
 
-**Usage:** ``tarbell token``
+**Usage:** ``tarbell credentials``
 
-Print JSON with the current OAuth token.
+Print JSON with the current OAuth credentials.
