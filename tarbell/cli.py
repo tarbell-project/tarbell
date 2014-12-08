@@ -821,10 +821,17 @@ def_cmd(
 
 
 def_cmd(
+    name='install-blueprint',
+    fn=tarbell_install_blueprint,
+    usage='install-blueprint <url to blueprint>',
+    help='Install a Tarbell blueprint')
+
+
+def_cmd(
     name='install-template',
-    fn=tarbell_install_template,
-    usage='install-template <url to template>',
-    help='Install a project template')
+    fn=tarbell_install_blueprint,
+    usage='install-template <url to blueprint>',
+    help='Install a Tarbell blueprint (deprecated, use \'tarbell install-blueprint\')')
 
 
 def_cmd(
