@@ -52,6 +52,7 @@ def tarbell_configure(command, args):
         else:
             config.update(_setup_default_templates(config, path, prompt))
 
+    settings.config = config
 
     with open(path, 'w') as f:
         puts("\nWriting {0}".format(colored.green(path)))
