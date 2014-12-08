@@ -7,7 +7,7 @@ from setuptools import setup, find_packages
 
 
 APP_NAME = 'tarbell'
-VERSION = '0.9b7'
+VERSION = '1.0'
 
 settings = dict()
 
@@ -50,7 +50,7 @@ settings.update(
             'tarbell = tarbell.cli:main',
         ],
     },
-    keywords=['Development Status :: 4 - beta',
+    keywords=['Development Status :: 5 - Production/Stable',
           'License :: OSI Approved :: MIT License',
           'Operating System :: OS Independent',
           'Programming Language :: Python',

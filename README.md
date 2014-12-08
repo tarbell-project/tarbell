@@ -6,10 +6,10 @@ Tarbell is a Chicago Tribune News Applications Team project.
 
 To install Tarbell run:
 
-    pip install -e git+https://github.com/newsapps/flask-tarbell@0.9-beta7#egg=tarbell    
+    pip install tarbell
 
-Check out the [tutorial](http://tarbell.readthedocs.org/en/0.9-beta7/tutorial.html) to get started.
+Check out the [tutorial](http://tarbell.readthedocs.org/en/1.0/tutorial.html) to get started.
 
 --
 
-[![Stories in Ready](https://badge.waffle.io/newsapps/flask-tarbell.png?label=ready&title=Ready)](http://waffle.io/newsapps/flask-tarbell)
+[![Stories in Ready](https://badge.waffle.io/tarbell-project/tarbell.png?label=ready&title=Ready)](http://waffle.io/tarbell-project/tarbell)
