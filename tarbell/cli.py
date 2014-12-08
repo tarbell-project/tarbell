@@ -66,7 +66,7 @@ def main():
         sys.exit()
 
     else:
-        show_error(colored.red('Error! Unknown command `{0}`.\n'
+        show_error(colored.red('Error! Unknown command \'{0}\'.\n'
                                .format(args.get(0))))
         display_info(args)
         sys.exit(1)
@@ -840,11 +840,13 @@ def_cmd(
     usage='list',
     help='List all projects.')
 
+
 def_cmd(
     name='list-templates',
     fn=tarbell_list_templates,
     usage='list-templates',
     help='List installed project templates')
+
 
 def_cmd(
     name='publish',
@@ -864,9 +866,9 @@ def_cmd(
     name='serve',
     fn=tarbell_serve,
     usage='serve <address (optional)>',
-    help=('Run a preview server (typically handled by `switch`). '
+    help=('Run a preview server (typically handled by \'switch\'). '
           'Supply an optional address for the preview server such as '
-          '`192.168.56.1:8080`'))
+          '\'192.168.56.1:8080\''))
 
 
 def_cmd(
@@ -875,7 +877,7 @@ def_cmd(
     usage='switch <project> <address (optional)>',
     help=('Switch to the project named <project> and start a preview server. '
           'Supply an optional address for the preview server such as '
-          '`192.168.56.1:8080`'))
+          '\'192.168.56.1:8080\''))
 
 
 def_cmd(
@@ -890,4 +892,3 @@ def_cmd(
     fn=tarbell_unpublish,
     usage='unpublish <target (default: staging)>',
     help='Remove the current project from <target>.')
-
