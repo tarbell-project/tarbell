@@ -422,6 +422,12 @@ def tarbell_switch(command, args):
             show_error("{0} isn't a tarbell project".format(project_path))
 
 
+def tarbell_credentials(command, args):
+    """Print current OAuth access token"""
+    api = get_drive_api()
+    puts(api.credentials.to_json())
+
+
 def tarbell_update(command, args):
     """Update the current tarbell project."""
     with ensure_settings(command, args) as settings, ensure_project(command, args) as site:
@@ -880,6 +886,13 @@ def_cmd(
     help=('Switch to the project named <project> and start a preview server. '
           'Supply an optional address for the preview server such as '
           '\'192.168.56.1:8080\''))
+
+
+def_cmd(
+    name='credentials',
+    fn=tarbell_credentials,
+    usage='credentials',
+    help=('Display Google OAuth credentials'))
 
 
 def_cmd(

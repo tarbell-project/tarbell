@@ -84,9 +84,9 @@ Install a Tarbell project from the Git repository url specified.
 
 Install a Tarbell blueprint from the given repository url.
 
-``tarbell token``
+``tarbell credentials``
 -----------------
 
-**Usage:** ``tarbell token``
+**Usage:** ``tarbell credentials``
 
-Print JSON with the current OAuth token.
+Print JSON with the current OAuth credentials.
