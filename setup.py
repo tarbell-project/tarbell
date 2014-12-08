@@ -19,12 +19,16 @@ if sys.argv[-1] == 'publish':
 settings.update(
     name=APP_NAME,
     version=VERSION,
-    author=u'Chicago Tribune News Applications Team',
-    author_email='newsapps@tribune.com',
-    url='http://github.com/newsapps/flask-tarbell',
+    author=u'Tarbell Project',
+    author_email='davideads@gmail.com',
+    url='http://github.com/tarbell-project/tarbell',
     license='MIT',
     description='A very simple content management system',
-    long_description='',
+    long_description="""Read the docs at http://tarbell.readthedocs.org
+
+Tarbell makes it simple to put your work on the web, whether you’re a team of one or a dozen. With Tarbell, you can collaboratively build beautiful websites and publish them with ease.
+
+Tarbell makes use of familiar, flexible tools to take the magic (and frustration) out of publishing to the web. Google spreadsheets handle content management, so changes to your stories are easy to make without touching a line of code. Step-by-step prompts help you set up and configure your project, so that publishing it is a breeze.""",
     zip_safe=False,
     packages=find_packages(),
     include_package_data=True,
