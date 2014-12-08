@@ -155,77 +155,93 @@ def tarbell_install(command, args):
         project_url = args.get(0)
         puts("\n- Getting project information for {0}".format(project_url))
         project_name = project_url.split("/").pop()
-        message = None
         error = None
 
         # Create a tempdir and clone
         tempdir = tempfile.mkdtemp()
         try:
-            testgit = sh.git.bake(_cwd=tempdir, _tty_out=False)
-            puts(testgit.clone(project_url, '.', *['--depth=1', '--bare']))
+            testgit = sh.git.bake(_cwd=tempdir, _tty_in=True, _tty_out=False) # _err_to_out=True)
+            testclone = testgit.clone(project_url, '.', '--depth=1', '--bare')
+            puts(testclone)
             config = testgit.show("HEAD:tarbell_config.py")
             puts("\n- Found tarbell_config.py")
             path = _get_path(_clean_suffix(project_name, ".git"), settings)
             _mkdir(path)
             git = sh.git.bake(_cwd=path)
-            puts(git.clone(project_url, '.'))
-            puts(git.submodule.update(*['--init', '--recursive']))
+            clone = git.clone(project_url, '.', _tty_in=True, _tty_out=False, _err_to_out=True)
+            puts(clone)
+            puts(git.submodule.update('--init', '--recursive', _tty_in=True, _tty_out=False, _err_to_out=True))
             _install_requirements(path)
 
             # Get site, run hook
             with ensure_project(command, args, path) as site:
                 site.call_hook("install", site, git)
 
-            message = "\n- Done installing project in {0}".format(colored.yellow(path))
-
-        except sh.ErrorReturnCode_128:
-            error = "Not a Tarbell project!"
+        except sh.ErrorReturnCode_128, e:
+            if e.message.endswith('Device not configured\n'):
+                error = 'Git tried to prompt for a username or password.\n\nTarbell doesn\'t support interactive sessions. Please configure ssh key access to your Git repository. (See https://help.github.com/articles/generating-ssh-keys/)'
+            else:
+                error = 'Not a valid repository or Tarbell project'
         finally:
             _delete_dir(tempdir)
-            if message:
-                puts(message)
             if error:
                 show_error(error)
+            else:
+                puts("\n- Done installing project in {0}".format(colored.yellow(path)))
 
-def tarbell_install_template(command, args):
+
+def tarbell_install_blueprint(command, args):
     """Install a project template."""
     with ensure_settings(command, args) as settings:
+        name = None
+        error = None
         template_url = args.get(0)
+        matches = [template for template in settings.config["project_templates"] if template.get("url") == template_url]
+        tempdir = tempfile.mkdtemp()
 
-        matches = [template for template in settings.config["project_templates"] if template["url"] == template_url]
         if matches:
             puts("\n{0} already exists. Nothing more to do.\n".format(
                 colored.yellow(template_url)
             ))
             sys.exit()
 
-        puts("\nInstalling {0}".format(colored.cyan(template_url))) 
-        tempdir = tempfile.mkdtemp()
-        puts("\n- Cloning repo to {0}".format(colored.green(tempdir))) 
-        tempdir = tempfile.mkdtemp()
-        git = sh.git.bake(_cwd=tempdir)
-        puts(git.clone(template_url, '.'))
-        puts(git.fetch())
-        puts(git.checkout(VERSION))
-
-        _install_requirements(tempdir)
-
-        filename, pathname, description = imp.find_module('blueprint', [tempdir])
-        blueprint = imp.load_module('blueprint', filename, pathname, description)
-        puts("\n- Found _blueprint/blueprint.py")
         try:
+            puts("\nInstalling {0}".format(colored.cyan(template_url)))
+            puts("\n- Cloning repo")
+            git = sh.git.bake(_cwd=tempdir, _tty_in=True, _tty_out=False, _err_to_out=True)
+            puts(git.clone(template_url, '.'))
+            puts(git.fetch())
+            puts(git.checkout(VERSION))
+
+            _install_requirements(tempdir)
+
+            filename, pathname, description = imp.find_module('blueprint', [tempdir])
+            blueprint = imp.load_module('blueprint', filename, pathname, description)
+            puts("\n- Found _blueprint/blueprint.py")
             name = blueprint.NAME
             puts("\n- Name specified in blueprint.py: {0}".format(colored.yellow(name)))
+            settings.config["project_templates"].append({"name": name, "url": template_url})
+            print settings.config
+            settings.save()
+
         except AttributeError:
             name = template_url.split("/")[-1]
-            puts("\n- No name specified in blueprint.py, using '{0}'".format(colored.yellow(name)))
+            error = "\n- No name specified in blueprint.py, using '{0}'".format(colored.yellow(name))
 
-        settings.config["project_templates"].append({"name": name, "url": template_url})
-        settings.save()
+        except ImportError:
+            error = 'No blueprint.py found'
 
-        _delete_dir(tempdir)
-
-        puts("\n+ Added new project template: {0}".format(colored.yellow(name)))
+        except sh.ErrorReturnCode_128, e:
+            if e.stdout.strip('\n').endswith('Device not configured'):
+                error = 'Git tried to prompt for a username or password.\n\nTarbell doesn\'t support interactive sessions. Please configure ssh key access to your Git repository. (See https://help.github.com/articles/generating-ssh-keys/)'
+            else:
+                error = 'Not a valid repository or Tarbell project'
+        finally:
+            _delete_dir(tempdir)
+            if error:
+                show_error(error)
+            else:
+                puts("\n+ Added new project template: {0}".format(colored.yellow(name)))
 
 
 def tarbell_list(command, args):
