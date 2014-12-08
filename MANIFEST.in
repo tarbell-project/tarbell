@@ -1,2 +1,2 @@
 include tarbell/templates/*
-include tarbell/docs/*
+include tarbell/error_templates/*
