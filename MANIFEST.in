@@ -1,2 +1,4 @@
 include tarbell/templates/*
 include tarbell/error_templates/*
+include tarbell/error_templates/error-img/*
+include tarbell/error_templates/css/*
