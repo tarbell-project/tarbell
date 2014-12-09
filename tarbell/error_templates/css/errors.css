@@ -43,25 +43,9 @@ h3 {
   margin-bottom: 1vmax;
 }
 
-.footer {
-  text-align: center;
-  margin-top: 70px;
-}
-
 p, ul {
   margin-top: 0;
   font-size: 1.6vmax;
-}
-
-.footer-img {
-  border-top: 1px solid #ccc;
-}
-.logo {
-  width: 36px;
-  margin-top: -30px;
-  padding-right: 10px;
-  padding-left: 10px;
-  background-color: #fff;
 }
 
 .traceback {
@@ -74,4 +58,28 @@ pre {
   background-color: #eee;
   border: 1px solid #ccc;
   white-space:pre-wrap;
+}
+
+a {
+  color: #B84E39;
+  text-decoration: none;
+}
+a:hover {
+  color: #F75D3E;
+  text-decoration: underline;
+}
+
+footer {
+  text-align: center;
+  margin-top: 70px;
+}
+footer .footer-img {
+  border-top: 1px solid #ccc;
+}
+footer .footer-img img {
+  width: 36px;
+  margin-top: -30px;
+  padding-right: 10px;
+  padding-left: 10px;
+  background-color: #fff;
 }
