@@ -1,8 +1,6 @@
 # Tarbell is a very simple content management system
 
-Visit [tarbell.tribapps.com](http://tarbell.tribapps.com) for more information.
-
-Tarbell is a Chicago Tribune News Applications Team project.
+Visit [tarbell.io](http://tarbell.io) for more information.
 
 To install Tarbell run:
 
