@@ -675,10 +675,17 @@ class TarbellSite:
 
         if not self.quiet:
             puts("Writing {0}".format(output_path))
+
         with self.app.test_request_context():
+            # call any pre-request hooks
+            self.app.preprocess_request()
+
+            # render
             preview = self.preview(rel_path, extra_context=extra_context, publish=True)
+            
             if not os.path.exists(output_dir):
                 os.makedirs(output_dir)
+            
             with open(output_path, "wb") as f:
                 if isinstance(preview.response, FileWrapper):
                     f.write(preview.response.file.read())
