@@ -16,6 +16,7 @@ import xlrd
 
 from httplib import BadStatusLine
 from flask import Flask, render_template, send_from_directory, Response, g
+from flask_frozen import Freezer, walk_directory
 from jinja2 import contextfunction, Markup, TemplateSyntaxError
 from jinja2.loaders import BaseLoader
 from jinja2.utils import open_if_exists
@@ -248,6 +249,7 @@ def format_date(value, format='%b. %d, %Y', convert_tz=None):
 class TarbellSite:
     def __init__(self, path, client_secrets_path=None, quiet=False):
         self.app = Flask(__name__)
+        self.freezer = Freezer(self.app) # centralized freezer
 
         self.quiet = quiet
 
@@ -274,6 +276,13 @@ class TarbellSite:
 
         self.app.before_request(self.add_site_to_context)
         self.app.after_request(self.never_cache_preview)
+
+        self.freezer.register_generator(self.find_files)
+        self.app.config.setdefault('FREEZER_RELATIVE_URLS', True)
+        self.app.config.setdefault('FREEZER_DESTINATION', 
+            os.path.join(os.path.realpath(self.path), '_site'))
+        #self.app.config.setdefault('FREEZER_IGNORE_MIMETYPE_WARNINGS', True)
+
 
     def add_site_to_context(self):
         g.current_site = self
@@ -625,21 +634,27 @@ class TarbellSite:
         resp, content = self.client._http.request(downloadurl)
         return content
 
-    def generate_static_site(self, output_root, extra_context):
-        if self.base:
-            base_dir = os.path.join(self.path, self.blueprint_name)
-            for root, dirs, files in self.filter_files(base_dir):
-                for filename in files:
-                    self._copy_file(root.replace(self.blueprint_name, ""), filename, output_root, extra_context)
+    #def generate_static_site(self, output_root, extra_context):
+    #    if self.base:
+    #        base_dir = os.path.join(self.path, self.blueprint_name)
+    #        for root, dirs, files in self.filter_files(base_dir):
+    #            for filename in files:
+    #                self._copy_file(root.replace(self.blueprint_name, ""), filename, output_root, extra_context)
+    #
+    #    for root, dirs, files in self.filter_files(self.path):
+    #        #don't copy stuff in the file that we just created
+    #        if root != os.path.abspath(output_root):
+    #            for filename in files:
+    #                self._copy_file(root, filename, output_root, extra_context)
+    #
+    #    if self.project.CREATE_JSON:
+    #        self._copy_file(self.path, 'data.json', output_root, extra_context)
 
-        for root, dirs, files in self.filter_files(self.path):
-            #don't copy stuff in the file that we just created
-            if root != os.path.abspath(output_root):
-                for filename in files:
-                    self._copy_file(root, filename, output_root, extra_context)
-
-        if self.project.CREATE_JSON:
-            self._copy_file(self.path, 'data.json', output_root, extra_context)
+    def generate_static_site(self, output_root=None, extra_context=None):
+        if output_root is not None:
+            # realpath or this gets generated relative to the tarbell package
+            self.app.config['FREEZER_DESTINATION'] = os.path.realpath(output_root)
+        self.freezer.freeze()
 
     def filter_files(self, path):
         excludes = r'|'.join([fnmatch.translate(x) for x in self.project.EXCLUDES]) or r'$.'
@@ -659,6 +674,13 @@ class TarbellSite:
 
             files[:] = paths
             yield root, dirs, files
+
+    def find_files(self):
+        """
+        Find all files for publishing, yield (urlname, kwargs)
+        """
+        for path in walk_directory(self.path, ignore=self.project.EXCLUDES):
+            yield 'preview', {'path': path}
 
     def _copy_file(self, root, filename, output_root, extra_context=None):
         # Remove double slashes if they exist

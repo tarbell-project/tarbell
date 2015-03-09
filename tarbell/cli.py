@@ -114,8 +114,8 @@ def tarbell_generate(command, args, skip_args=False, extra_context=None, quiet=F
     output_root = None
     with ensure_settings(command, args) as settings, ensure_project(command, args) as site:
         if not skip_args:
-            output_root = list_get(args, 0, False)
-            is_folder = os.path.exists(output_root)
+            output_root = list_get(args, 0, None)
+            is_folder = output_root is not None and os.path.exists(output_root)
         if quiet:
             site.quiet = True
         if not output_root:
