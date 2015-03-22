@@ -466,7 +466,8 @@ class TarbellSite:
         Serve site context as JSON. Useful for debugging.
         """
         if not self.project.CREATE_JSON:
-            return ""
+            # nothing to see here, but the right mimetype
+            return jsonify()
 
         if not self.data:
             # this sets site.data by spreadsheet or gdoc
