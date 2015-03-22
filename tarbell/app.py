@@ -634,22 +634,6 @@ class TarbellSite:
         resp, content = self.client._http.request(downloadurl)
         return content
 
-    #def generate_static_site(self, output_root, extra_context):
-    #    if self.base:
-    #        base_dir = os.path.join(self.path, self.blueprint_name)
-    #        for root, dirs, files in self.filter_files(base_dir):
-    #            for filename in files:
-    #                self._copy_file(root.replace(self.blueprint_name, ""), filename, output_root, extra_context)
-    #
-    #    for root, dirs, files in self.filter_files(self.path):
-    #        #don't copy stuff in the file that we just created
-    #        if root != os.path.abspath(output_root):
-    #            for filename in files:
-    #                self._copy_file(root, filename, output_root, extra_context)
-    #
-    #    if self.project.CREATE_JSON:
-    #        self._copy_file(self.path, 'data.json', output_root, extra_context)
-
     def generate_static_site(self, output_root=None, extra_context=None):
         if output_root is not None:
             # realpath or this gets generated relative to the tarbell package
