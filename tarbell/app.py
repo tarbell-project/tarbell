@@ -674,38 +674,3 @@ class TarbellSite:
         for path in walk_directory(self.path, ignore=self.project.EXCLUDES):
             yield 'preview', {'path': path}
 
-    def _copy_file(self, root, filename, output_root, extra_context=None):
-        # Remove double slashes if they exist
-        root = root.replace("//", "/")
-
-        # Strip out full filesystem paths
-        rel_path = os.path.join(root.replace(self.path, ""), filename)
-
-        if rel_path.startswith("/"):
-            rel_path = rel_path[1:]
-
-        output_path = os.path.join(output_root, rel_path)
-        output_dir = os.path.dirname(output_path)
-
-        if not self.quiet:
-            puts("Writing {0}".format(output_path))
-
-        with self.app.test_request_context():
-
-            # call any pre-request hooks
-            self.app.preprocess_request()
-
-            # render
-            if filename == 'data.json':
-                preview = self.data_json(extra_context, publish=True)
-            else:
-                preview = self.preview(rel_path, extra_context=extra_context, publish=True)
-            
-            if not os.path.exists(output_dir):
-                os.makedirs(output_dir)
-            
-            with open(output_path, "wb") as f:
-                if isinstance(preview.response, FileWrapper):
-                    f.write(preview.response.file.read())
-                else:
-                    f.write(preview.data)
