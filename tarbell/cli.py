@@ -146,7 +146,6 @@ def tarbell_generate(command, args, skip_args=False, extra_context=None, quiet=F
         if not quiet:
             puts("\nCreated site in {0}".format(colored.cyan(output_root)))
 
-        site.call_hook("generate", site, output_root, quiet)
         return output_root
 
 
