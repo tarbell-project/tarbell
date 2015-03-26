@@ -1,14 +1,20 @@
 body {
-    padding-top: 20px;
+    padding-top: 10px;
+    padding-bottom: 20px;
 }
 
 .tab-pane {
     padding-top: 20px;
+    padding-bottom: 20px;
 }
 
-h3 {
-    margin-top: 40px;
+.tab-content h4 {
+    margin-top: 20px;
 }
+.tab-content h4:first-child {
+    margin-top: 10px;
+}
+
 
 .nowrap {
     white-space: nowrap;
@@ -97,6 +103,16 @@ a[data-toggle="collapse"][aria-expanded="true"]:before  {
 
 /*  misc
 */
+
+.bucket-disable, .bucket-enable, .bucket-add, .bucket-remove {
+    padding-left: 6px;
+    padding-right: 6px;
+}
+
+#settings_save {
+    padding-left: 30px;
+    padding-right: 30px;
+}
 
 #site_link {
     position: absolute;

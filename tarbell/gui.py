@@ -24,6 +24,7 @@ class TarbellAdminSite:
        
         # Add routes
         self.app.add_url_rule('/', view_func=self.main)   
+        self.app.add_url_rule('/settings/save/', view_func=self.settings_save)
         self.app.add_url_rule('/project/run/', view_func=self.project_run)
         self.app.add_url_rule('/project/stop/', view_func=self.project_stop)
  
@@ -61,13 +62,26 @@ class TarbellAdminSite:
         print VERSION
         print self.settings
         print self.settings.config
-                
+        
+        defaults = {
+            'projects_path': os.path.expanduser(os.path.join("~", "tarbell"))
+        }
+        
         return render_template('admin.html', 
             version=VERSION,
+            defaults=defaults,
             config=self.settings.config,
             projects=list_projects(self.settings.config.get('projects_path'))
         ) 
 
+    def settings_save(self):
+        """Save settings"""
+        try:
+            raise Exception('not implemented yet')
+        except Exception, e:
+            traceback.print_exc()
+            return jsonify({'error': str(e)})
+            
     def project_run(self):
         """Run preview server for project"""
         try:

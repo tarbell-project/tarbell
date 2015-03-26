@@ -32,6 +32,104 @@
 
 <div class="tab-pane active" id="settings_tab">   
 
+<p>Enter the path to your projects directory, where your projects will be saved.</p>
+<form>
+    <input type="text" class="form-control" id="projects_path" value="{{ config.projects_path }}" 
+        placeholder="{{ defaults.projects_path }}">
+</form>
+
+<h4>Google Settings</h4>
+<p> TODO </p>
+
+
+<h4>S3 Defaults</h4>
+<form class="form-horizontal">
+    <div class="form-group">
+        <label for="default_s3_access_key_id" class="col-xs-offset-1 col-xs-3 control-label">Access Key</label>
+        <div class="col-xs-7">
+            <input type="text" class="form-control" id="default_s3_access_key_id" value="{{ config.default_s3_access_key_id }}">
+        </div>    
+    </div>
+    <div class="form-group">
+        <label for="default_s3_secret_access_key" class="col-xs-offset-1 col-xs-3 control-label">Secret Access Key</label>
+        <div class="col-xs-7">
+            <input type="text" class="form-control" id="default_s3_secret_access_key" value="{{ config.default_s3_secret_access_key }}">
+        </div>    
+    </div>
+    <div class="form-group">
+        <label for="default_s3_buckets_staging" class="col-xs-offset-1 col-xs-3 control-label">staging bucket</label>
+        <div class="col-xs-7">
+            <input type="text" class="form-control" id="default_s3_buckets_staging" value="{{ config.default_s3_buckets.staging }}">
+        </div>    
+    </div>
+    <div class="form-group">
+        <label for="default_s3_buckets_production" class="col-xs-offset-1 col-xs-3 control-label">production bucket</label>
+        <div class="col-xs-7">
+            <input type="text" class="form-control" id="default_s3_buckets_production" value="{{ config.default_s3_buckets.production }}">
+        </div>    
+    </div>
+</form>
+
+<h4>S3 Buckets</h4>
+
+<p>Specify any additional S3 buckets.  Be sure to enter an Access Key and Secret Access Key if they differ from the defaults.</p>
+
+<form class="form-horizontal">
+<!--
+{% for url, d in config.s3_credentials.iteritems() %}
+    <div class="form-group">
+        <div class="col-xs-4">
+            <input type="text" class="form-control bucket-url" value="{{ url }}">
+        </div>    
+        <div class="col-xs-3">
+            <input type="text" class="form-control bucket-key" value="{{ d.access_key_id }}">
+        </div>    
+        <div class="col-xs-4">
+            <input type="text" class="form-control bucket-secret" value="{{ d.secret_access_key }}">
+        </div>   
+        <div class="col-xs-1">
+            <a class="btn text-danger bucket-disable" href="#" onclick="bucket_disable(this)">
+                <i class="fa fa-lg fa-remove"></i></a>
+            <a class="btn text-success bucket-enable" href="#" onclick="bucket_enable(this)" style="display: none;">
+                <i class="fa fa-lg fa-plus"></i></a>
+        </div> 
+    </div>
+{% endfor %}
+-->
+    <div class="form-group">
+        <div class="col-xs-4">
+            <input type="text" class="form-control bucket-url" value="" placeholder="additional.bucket.myorg.com">
+        </div>    
+        <div class="col-xs-3">
+            <input type="text" class="form-control bucket-key" value="" placeholder="access key">
+        </div>    
+        <div class="col-xs-4">
+            <input type="text" class="form-control bucket-secret" value="" placeholder="secret access key">
+        </div>   
+        <div class="col-xs-1">
+            <a class="btn text-danger bucket-remove" href="#" onclick="bucket_remove(this)">
+                <i class="fa fa-lg fa-remove"></i></a>
+        </div> 
+    </div>
+    <div class="form-group">
+        <div class="col-xs-11" style="text-align: right;">
+            <p class="form-control-static text-muted"><em>Add a row &gt;</em></p>
+        </div>
+       
+        <div class="col-xs-1">
+            <a class="btn text-success bucket-add" href="#" onclick="bucket_add(this)">
+                <i class="fa fa-lg fa-plus"></i></a>           
+        </div>
+    </div>
+</form>
+
+<div class="col-xs-12">
+    <button type="button" class="btn btn-success center-block" id="settings_save" disabled>Save Settings</button>
+</div>
+
+
+
+
 </div> <!-- // settings_tab-->
 
 
@@ -143,6 +241,33 @@
         </div>
     </div>
 </div>
+
+<!-- UNDERSCORE TEMPLATES -->
+
+<script type="text/template" id="error_alert_template">
+    <div class="alert alert-danger alert-dismissible" role="alert">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <%= message %>
+    </div>
+</script>
+
+<script type="text/template" id="settings_bucket_template">
+    <div class="form-group">
+        <div class="col-xs-4">
+            <input type="text" class="form-control bucket-url" value="" placeholder="additional.bucket.myorg.com">
+        </div>    
+        <div class="col-xs-3">
+            <input type="text" class="form-control bucket-key" value="" placeholder="access key">
+        </div>    
+        <div class="col-xs-4">
+            <input type="text" class="form-control bucket-secret" value="" placeholder="secret access key">
+        </div>   
+        <div class="col-xs-1">
+            <a class="btn text-danger bucket-remove" href="#" onclick="bucket_remove(this)">
+                <i class="fa fa-lg fa-remove"></i></a>
+        </div> 
+    </div>
+</script>
 
 <script type="text/javascript" src="/static/js/admin.js"></script>
 

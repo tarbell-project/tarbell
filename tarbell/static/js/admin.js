@@ -24,10 +24,13 @@ $.fn.extend({
 // templates
 //
 
-/*var _config_s3_bucket_template = _.template($('#config_s3_bucket_template').html());
+var _error_alert_template = _.template($('#error_alert_template').html());
+
+var _settings_bucket_template = _.template($('#settings_bucket_template').html());
+
+/*
 var _select_bucket_template = _.template($('#select_bucket_template').html());
 var _select_blueprint_template = _.template($('#select_blueprint_template').html());
-var _error_alert_template = _.template($('#error_alert_template').html());
 var _success_alert_template = _.template($('#success_alert_template').html());
 var _blueprint_template = _.template($('#blueprint_template').html());
 var _project_template = _.template($('#project_template').html());
@@ -198,30 +201,35 @@ function ajax_post(url, data, on_error, on_success, on_complete) {
 }
 
 //
-// config
+// settings
 //
 
-function config_dirty() {
-    $('#config_save').enable();
+function settings_dirty() {
+    $('#settings_save').enable();
 }
 
-function disable_bucket(target) {
+function bucket_disable(target) {
     var $group = $(target).closest('.form-group');
     $group.find('input').disable();
-    $group.find('.remove-bucket').hide();
-    $group.find('.add-bucket').show();
+    $group.find('.bucket-disable').hide();
+    $group.find('.bucket-enable').show();
     config_dirty();
 }
 
-function enable_bucket(target) {
+function bucket_enable(target) {
     var $group = $(target).closest('.form-group');
     $group.find('input').enable();
-    $group.find('.add-bucket').hide();
-    $group.find('.remove-bucket').show();
+    $group.find('.bucket-enable').hide();
+    $group.find('.bucket-disable').show();
 }
 
-function remove_bucket(target) {
+function bucket_remove(target) {
     $(target).closest('.form-group').remove();
+}
+
+function bucket_add(target) {
+    var $group = $(target).closest('.form-group');    
+    $(_settings_bucket_template()).insertBefore($group);
 }
 
 
@@ -240,23 +248,14 @@ $(function() {
 // settings tab
 // ------------------------------------------------------------
      
-    $('#configuration_tab input').change(config_dirty);
-        
-    $('#config_add_bucket').click(function(event) {
-        var $group = $(this).closest('.form-group');
-        $(_config_s3_bucket_template())
-            .insertAfter($group)
-            .find('input')
-                .change(config_dirty);
-    });
-             
-      
+    $('#settings_tab input').change(settings_dirty);
+              
     $('#settings_save').click(function(event) {
-         progress_show('Saving configuration');
+         progress_show('Saving settings');
          
-         ajax_get('/configuration/save/', {},// TODO: add data
+         ajax_get('/settings/save/', {},// TODO: add data
             function(error) {
-                error_alert(error);
+                error_alert('Error saving settings ('+error+')');
             },
             function(data) {
                 // TODO: update cached config
