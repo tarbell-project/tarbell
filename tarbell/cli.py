@@ -39,6 +39,7 @@ from .s3 import S3Url, S3Sync
 from .settings import Settings
 from .utils import list_get, split_sentences, show_error
 from .utils import puts, is_werkzeug_process
+from .gui import TarbellAdminSite
 
 # Set args
 args = arguments.Args()
@@ -449,6 +450,18 @@ def tarbell_unpublish(command, args):
     with ensure_settings(command, args) as settings, ensure_project(command, args) as site:
         """Delete a project."""
         show_error("Not implemented!")
+
+
+
+def tarbell_admin(command, args):
+    """Run the admin site"""
+    address = list_get(args, 0, "").split(":")
+    ip = list_get(address, 0, '127.0.0.1')
+    port = int(list_get(address, 1, '5001'))
+    
+    settings = Settings() 
+    admin_site = TarbellAdminSite(settings)
+    admin_site.app.run(ip, port=port)
 
 
 
@@ -908,3 +921,11 @@ def_cmd(
     fn=tarbell_unpublish,
     usage='unpublish <target (default: staging)>',
     help='Remove the current project from <target>.')
+
+
+def_cmd(
+    name='admin',
+    fn=tarbell_admin,
+    usage='admin <address (optional)>',
+    help='Run the admin GUI.'
+         'Supply an optional address such as \'127.0.0.1:8000\'')

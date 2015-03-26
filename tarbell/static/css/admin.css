@@ -1,0 +1,117 @@
+body {
+    padding-top: 20px;
+}
+
+.tab-pane {
+    padding-top: 20px;
+}
+
+h3 {
+    margin-top: 40px;
+}
+
+.nowrap {
+    white-space: nowrap;
+    text-align: right;
+}
+
+textarea {
+    resize: none;
+}
+
+.borderless tbody tr td, .borderless tbody tr th, .borderless thead tr th {
+    border: none;
+}
+
+.borderless tbody tr td:first-child {
+    font-weight: bold;
+}
+
+/*  modal error panel
+*/
+
+.modal-msg {
+    display: inline-block; 
+    margin: 4px 6px;
+}
+
+/*  modal confirm panel 
+*/
+.modal-confirm {
+    position:absolute;
+    top: 0;
+    left:0;
+    bottom: 0;
+    right: 0;
+    -webkit-border-radius: 6px;
+    -moz-border-radius: 6px;
+    border-radius: 6px;
+    background-color: #fff;
+    opacity: 0.85;
+    z-index: 1001;
+}
+.modal-confirm > div {display: table;width: 100%;height: 100%;}
+.modal-confirm > div > div {display: table-cell;text-align: center;vertical-align: middle;}
+.modal-confirm button {margin-left: 8px;margin-right: 8px;}
+
+
+/*  modal progress panel 
+*/
+.modal-progress {
+    position:absolute;
+    top: 0;
+    left:0;
+    bottom: 0;
+    right: 0;
+    min-height: 100px;
+    -webkit-border-radius: 6px;
+    -moz-border-radius: 6px;
+    border-radius: 6px;
+    background-color: #fff;
+    opacity: 0.85;
+    z-index: 1000;
+}
+.modal-progress > div {display: table;width: 100%;height: 100%;}
+.modal-progress > div > div {display: table-cell;text-align: center;vertical-align: middle;}
+.modal-progress i {margin-top: 10px;margin-bottom: 10px;}
+
+
+/*  collapse
+*/
+
+a[data-toggle="collapse"] {
+    text-decoration: none;
+}
+
+a[data-toggle="collapse"][aria-expanded="false"]:before {
+    font-family: FontAwesome;
+    content: "\f105";
+    padding-right: 6px;
+}
+
+a[data-toggle="collapse"][aria-expanded="true"]:before  {
+    font-family: FontAwesome;
+    content: "\f107";
+    padding-right: 6px;
+}
+
+/*  misc
+*/
+
+#site_link {
+    position: absolute;
+    top: 11px;
+    right: 16px;
+}
+
+#blueprints_tab table {
+    border-bottom: 2px solid #ddd;
+}
+
+#projects_tab table {
+    border-bottom: 2px solid #ddd;
+}
+
+.project-title, .project-title:hover {
+    cursor: pointer;
+}

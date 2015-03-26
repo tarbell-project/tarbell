@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Tarbell Administration</title>
+<meta charset="utf-8">
+<meta name="description" content="Tarbell Administration">
+<link rel="stylesheet" href="/static/bootstrap-3.3.2-dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="/static/font-awesome-4.3.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="/static/css/admin.css">
+<script type="text/javascript" src="/static/js/jquery-1.10.2.min.js"></script>
+<script type="text/javascript" src="/static/js/underscore-1.8.2.min.js"></script>
+<script type="text/javascript" src="/static/bootstrap-3.3.2-dist/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="/static/js/json2.js"></script>
+</head>
+<body>
+
+<div class="container-fluid">
+<div class="row">
+<div class="col-xs-12">
+
+<div id="site_link">
+    <a href="http://www.tarbell.io/" target="_blank">tarbell.io</a>&nbsp;&nbsp;{{ version }}
+</div>
+
+<ul class="nav nav-tabs" role="tablist">
+    <li class="active"><a href="#settings_tab" role="tab" data-toggle="tab">Settings</a></li>
+    <li><a href="#blueprints_tab" role="tab" data-toggle="tab">Blueprints</a></li>
+    <li><a href="#projects_tab" role="tab" data-toggle="tab">Projects</a></li>
+</ul>
+
+<div class="tab-content">
+
+<div class="tab-pane active" id="settings_tab">   
+
+</div> <!-- // settings_tab-->
+
+
+<div class="tab-pane" id="blueprints_tab">   
+
+    <table class="table" id="blueprints_table">
+        <thead>
+            <th>Name</th>
+            <th>URL</th>
+        </thead>
+        <tbody>
+{% for item in config.project_templates %}
+            <tr>
+                <td>{{ item.name }}</td>
+{% if item.url %}
+                <td><a href="{{ item.url }}" target="_blank">{{ item.url }}</a></td>
+{% else %}
+                <td><span class="text-muted">N/A</span></td>
+{% endif %}
+            </tr>
+{% endfor %}            
+        </tbody>        
+    </table>  
+</div> <!-- // blueprints_tab-->
+
+<div class="tab-pane" id="projects_tab">   
+
+    <table class="table" id="projects_table">
+        <thead>
+            <th class="col-xs-3">Directory</th>
+            <th class="col-xs-6">Title</th>
+<!--
+            <th class="col-xs-3">&nbsp;</th>
+-->
+        </thead>
+        <tbody>
+{% for p in projects %}
+            <tr data-project="{{ p.directory }}">
+                <td>{{ p.directory }}</td>
+                <td><a role="button" class="project-title" title="Run this project" data-toggle="modal" data-target="#run_modal">
+                    {{ p.title }}</a>
+                </td>
+                <td class="actions nowrap">
+<!--
+                    <button class="btn btn-default project-detail" title="View project details"
+                        data-toggle="modal" data-target="#detail_modal">
+                        <i class="fa fa-lg fa-cog"></i>
+                    </button>
+                    <button class="btn btn-default project-update" title="Update the blueprint in this project">
+                        <i class="fa fa-lg fa-refresh"></i>
+                    </button>
+                    <button class="btn btn-default project-generate" title="Generate static files for this project"
+                         data-toggle="modal" data-target="#generate_modal">
+                        <i class="fa fa-lg fa-magic"></i>
+                    </button>
+                    <button class="btn btn-default project-publish" title="Publish this project to a target"
+                        data-toggle="modal" data-target="#publish_modal">
+                        <i class="fa fa-lg fa-cloud-upload text-success"></i>
+                    </button>
+-->
+                </td>
+            </tr>
+{% endfor %}            
+        </tbody>        
+    </table>  
+    
+</div> <!-- // projects_tab-->
+
+
+</div> <!-- // tab-content -->
+
+</div> <!-- // col-xs-12 -->
+</div> <!-- // row -->
+</div> <!-- // container-fluid -->
+
+<!-- MODAL: run project -->
+<div id="run_modal" class="modal fade" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Run Project</h4>
+            </div>
+            <div class="modal-body">
+                <p class="modal-error bg-danger">
+                    <span class="modal-msg text-danger"></span>
+                </p>
+                <form class='form-horizontal'>
+                    <div class="form-group">
+                        <label for="run_address" class="col-xs-2 control-label">Address</label>
+                        <div class="col-xs-10">
+                            <input type="text" class="form-control" id="run_address" value="127.0.0.1:5000" placeholder="127.0.0.1:5000">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" id="run_done_button" data-dismiss="modal">Done</button>
+                <button type="button" class="btn btn-success" id="run_button">Run</button>
+                <button type="button" class="btn btn-danger" id="run_stop_button">Stop</button>
+            </div>
+            <div class="modal-progress" style="display: none;">
+                <div>
+                    <div>
+                        <i class="fa fa-3x fa-spinner fa-spin"></i>
+                        <p><span class="modal-msg"></span>...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript" src="/static/js/admin.js"></script>
+
+</body>
+</html>
