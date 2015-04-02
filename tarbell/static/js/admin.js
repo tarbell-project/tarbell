@@ -573,11 +573,14 @@ $(function() {
 
     var $run_modal = modal_init($('#run_modal'))
         .on('show.bs.modal', function(event) {
+            $run_modal.trigger('all_hide');
+            
             $(this).data('data-project', 
                 $(event.relatedTarget).closest('tr').attr('data-project'));  
             
-            $run_modal.trigger('all_hide');
-            $('#run_address').val('127.0.0.1:5000');
+            $('#run_address').val('127.0.0.1:5000').enable();
+            $('#run_done_button, #run_button').show();              
+            $('#run_stop_button').hide();
         })
         .on('click', '#run_button', function(event) {   
             $run_modal.trigger('all_hide');
