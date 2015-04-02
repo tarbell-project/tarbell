@@ -7,6 +7,10 @@
 
 var _error_alert_template = _.template($('#error_alert_template').html());
 var _success_alert_template = _.template($('#success_alert_template').html());
+
+var _project_template = _.template($('#project_template').html());
+var _blueprint_template = _.template($('#blueprint_template').html());
+
 var _google_msg_template = _.template($('#google_msg_template').html());
 var _bucket_template = _.template($('#bucket_template').html());
 
@@ -63,7 +67,7 @@ function input_hide() {
 //
 
 function alert_hide() {
-    $('div.tab-pane').find('div[role="alert"]').remove(); 
+    $('div.tab-pane').find('div[role="alert"].alert-danger, div[role="alert"].alert-success').remove(); 
 }
 
 function error_hide() {
@@ -255,6 +259,48 @@ function show_settings() {
     $('#projects_path').val(_config.projects_path);
 }
 
+function show_projects() {
+    ajax_get('/projects/list/', {},
+        function(error) {
+            $('#projects_alert').hide();
+            $('#projects_table').hide();
+            error_alert('Error listing projects ('+error+')');
+        },
+        function(data) {    
+            var projects = data.projects;    
+            var html = '';
+    
+            for(var i = 0; i < projects.length; i++) {
+                html += _project_template({d: projects[i]});
+            }    
+            if(projects.length) {
+                $('#projects_alert').hide();
+                $('#projects_table tbody').html(html);
+                $('#projects_table').show();
+            } else {
+                $('#projects_alert').show();
+                $('#projects_table').hide();        
+            }
+        });
+}
+
+function show_blueprints() {
+    var blueprints = _settings.config.project_templates;
+    var html = '';
+
+    for(var i = 0; i < blueprints.length; i++) {
+        html += _blueprint_template({d: blueprints[i]});
+    }  
+    if(blueprints.length) {
+        $('#blueprints_alert').hide();
+        $('#blueprints_table tbody').html(html);
+        $('#blueprints_table').show();
+    } else {
+        $('#blueprints_alert').show();
+        $('#blueprints_table').hide();        
+    }
+}
+
 // Verify authorization code
 function handle_google_auth_code($context, code) {
     $context.trigger('progress_show', 'Verifying code');
@@ -301,6 +347,7 @@ function handle_google_auth_secrets($context, file) {
         reader.readAsDataURL(file);  
     }
 }
+
 
 $(function() {
         
@@ -378,9 +425,13 @@ $(function() {
             function(error) {
                 error_alert('Error saving settings ('+error+')');
             },
-            function(data) {
+            function(unused) {
                 _settings.config = data;
                 _config = _settings.config;
+                
+                show_projects();
+                show_blueprints();
+                
                 $('#settings_save').disable()
                 success_alert('Settings saved!');
             },
@@ -524,6 +575,8 @@ $(function() {
                             $config_modal.trigger('error_show', 'Error saving settings ('+error+')');
                         },
                         function(data) {
+                            show_projects();
+                            show_blueprints();
                             show_settings();
                             $('#tab_content').show();
                             success_alert('Your settings have been saved and your Tarbell installation has been configured!');
@@ -639,6 +692,8 @@ $(function() {
     if(_settings.file_missing || window.location.search == '?configure') {
         $('#config_modal').modal('show');
     } else {
+        show_projects();
+        show_blueprints();
         show_settings();
         $('#tab_content').show();
     }

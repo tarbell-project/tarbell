@@ -2,6 +2,7 @@
 """
 This module provides a web-based GUI admin for tarbell.
 """
+import copy
 import os
 import re
 import multiprocessing
@@ -13,7 +14,8 @@ from flask import Flask, request, render_template, jsonify
 
 from tarbell import __VERSION__ as VERSION
 
-from .admin import safe_write, get_or_create_config, list_projects, props, \
+from .admin import DEFAULT_BLUEPRINTS, props, safe_write, \
+    get_or_create_config, list_projects, \
     client_secrets_authorize_url, client_secrets_authorize
 from .contextmanagers import ensure_project
 from .settings import Settings
@@ -30,30 +32,18 @@ class TarbellAdminSite:
             'default_s3_secret_access_key': '',
             'default_s3_buckets': {},
             'google_account': '',
-            'project_templates': [
-                {
-                    'name': 'Empty project (no blueprint)'
-                },
-                {
-                    'name': 'Basic Bootstrap 3 template',
-                    'url': 'https://github.com/newsapps/tarbell-template'
-                }, 
-                {
-                    'name': 'Searchable map template',
-                    'url': 'https://github.com/eads/tarbell-map-template'
-                }, 
-                {
-                    'name': 'Tarbell template walkthrough',
-                    'url': 'https://github.com/hbillings/tarbell-tutorial-template'
-                }
-            ],
-            'projects_path': os.path.expanduser(os.path.join("~", "tarbell")),
+            'project_templates': copy.deepcopy(DEFAULT_BLUEPRINTS),
+            'projects_path': os.path.expanduser(
+                os.path.join("~", "tarbell")),
             's3_credentials': {}
         }
-               
+
         # Add routes
         self.app.add_url_rule('/', view_func=self.main)   
-               
+        
+        self.app.add_url_rule('/projects/list/',
+             view_func=self.projects_list)
+             
         self.app.add_url_rule('/google/auth/secrets/',
             view_func=self.google_auth_secrets, methods=['POST'])
         self.app.add_url_rule('/google/auth/url/',
@@ -102,12 +92,12 @@ class TarbellAdminSite:
     def _client_secrets_path(self):
         """Get path for client_secrets"""
         return os.path.join(
-            os.path.dirname(self.settings.path), "client_secrets.json"
-        )     
+            os.path.dirname(self.settings.path), "client_secrets.json")     
           
     def _project_path(self, name):
         """Get path for project"""
-        return os.path.join(self.settings.config.get('projects_path'), name)
+        return os.path.join(
+            self.settings.config.get('projects_path'), name)
       
     def _project_run(self, project_path, ip, port):
         with ensure_project('serve', [], path=project_path) as site:
@@ -128,9 +118,10 @@ class TarbellAdminSite:
             get_or_create_config(self.settings.path)
             
             for key, value in self.defaults.iteritems():
-                self.settings.config[key] = value            
+                self.settings.config[key] = copy.deepcopy(value)            
         else:
-            projects = list_projects(self.settings.config.get('projects_path'))   
+            projects = list_projects(
+                self.settings.config.get('projects_path'))   
         
         return render_template('admin.html', 
             version=VERSION,
@@ -139,6 +130,16 @@ class TarbellAdminSite:
             projects=projects
         ) 
     
+    def projects_list(self):
+        """Get a list of projects"""
+        try:
+            projects = list_projects(
+                self.settings.config.get('projects_path'))   
+            return jsonify({'projects': projects})
+        except Exception, e:
+            traceback.print_exc()
+            return jsonify({'error': str(e)})
+            
     def google_auth_secrets(self):
         """Copy client_secrets to settings directory"""
         try:
@@ -156,7 +157,7 @@ class TarbellAdminSite:
             print 'Writing %s' % client_secrets_path    # DEBUG
             safe_write(content, client_secrets_path)
 
-            self.settings = Settings()                  # reload settings
+            self.settings = Settings()  # reload settings
             
             return jsonify({'settings': props(self.settings)})
         except Exception, e:
@@ -166,7 +167,8 @@ class TarbellAdminSite:
     def google_auth_url(self):
         """Get google authorization url"""
         try:
-            url = client_secrets_authorize_url(self.settings.client_secrets_path)
+            url = client_secrets_authorize_url(
+                self.settings.client_secrets_path)
             
             return(jsonify({'url': url}))
         except Exception, e:
@@ -177,7 +179,8 @@ class TarbellAdminSite:
         """Verify google confirmation code"""
         try:
             code = self._request_get_required('code')                       
-            client_secrets_authorize(self.settings.client_secrets_path, code)            
+            client_secrets_authorize(
+                self.settings.client_secrets_path, code)            
             
             return jsonify({})
         except Exception, e:
@@ -201,12 +204,12 @@ class TarbellAdminSite:
         except Exception, e:
             traceback.print_exc()
             return jsonify({'error': str(e)})
-        
-                        
+                                
     def project_run(self):
         """Run preview server for project"""
         try:
-            project, address = self._request_get_required('project', 'address')
+            project, address = self._request_get_required(
+                'project', 'address')
 
             m = re.match(r'([\w.]+):(\d+)', address)   
             if not m:
@@ -214,8 +217,8 @@ class TarbellAdminSite:
 
             path = self._project_path(project)
             if not os.path.exists(path):
-                raise Exception('The project directory "%s" does not exist' \
-                    % path)
+                raise Exception(
+                    'The project directory "%s" does not exist' % path)
                 
             ip = m.group(1)
             port = m.group(2)
@@ -236,11 +239,13 @@ class TarbellAdminSite:
                     if r.status_code == requests.codes.ok:
                         return jsonify({})       
                 except requests.exceptions.ConnectionError, e:
-                    # If the server isn't running at all, we will end up here
+                    # If the server isn't running at all...
                     print 'ERROR', e    
             
             if r is not None:
-                return jsonify({'warning':  'Started preview server with error (%d)' % r.status_code}) 
+                return jsonify({'warning': \
+                    'Started preview server with error (%d)' \
+                        % r.status_code}) 
             
             raise Exception('Could not start preview server')
         except Exception, e:

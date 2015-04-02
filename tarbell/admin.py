@@ -24,6 +24,34 @@ from .oauth import OAUTH_SCOPE
 from .utils import puts
 
 
+DEFAULT_BLUEPRINTS = [
+    {
+        "name": "Basic Bootstrap 3 template",
+        "url": "https://github.com/newsapps/tarbell-template",
+    }, 
+    {
+        "name": "Searchable map template",
+        "url": "https://github.com/eads/tarbell-map-template",
+    },
+    {
+        "name": "Tarbell template walkthrough",
+        "url": "https://github.com/hbillings/tarbell-tutorial-template",
+    },
+    {
+        "name": "Empty project (no blueprint)"
+    }
+]  
+
+
+def props(obj):
+    """
+    Return object as dictionary
+    Only gets attributes set on the instance, not on the class!
+    """
+    return dict((key, value) \
+        for key, value in obj.__dict__.iteritems() \
+        if not callable(value) and not key.startswith('__'))
+
 def backup(path, filename):
     """Backup a file"""
     target = os.path.join(path, filename)
@@ -69,24 +97,6 @@ def get_or_create_config(path):
             return yaml.load(f)
     except IOError:
         return {}
-
-def setup_default_templates():
-    """Add some (hardcoded) default templates."""
-    project_templates = [{
-        "name": "Basic Bootstrap 3 template",
-        "url": "https://github.com/newsapps/tarbell-template",
-    }, {
-        "name": "Searchable map template",
-        "url": "https://github.com/eads/tarbell-map-template",
-    }, {
-        "name": "Tarbell template walkthrough",
-        "url": "https://github.com/hbillings/tarbell-tutorial-template",
-    }]
-    for project in project_templates:
-        puts("+ Adding {0} ({1})".format(project["name"], project["url"]))
-
-    puts("\n- Done configuring project templates.")
-    return {"project_templates": project_templates}
     
 def load_module_dict(module_name, module_path):
     """
@@ -101,15 +111,6 @@ def load_module_dict(module_name, module_path):
 
     del sys.modules[m.__name__]
     return d
-
-def props(obj):
-    """
-    Return object as dictionary
-    Only gets attributes set on the instance, not on the class!
-    """
-    return dict((key, value) \
-        for key, value in obj.__dict__.iteritems() \
-        if not callable(value) and not key.startswith('__'))
 
 def list_projects(projects_dir):
     """Get a list of projects"""
