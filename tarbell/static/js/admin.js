@@ -331,7 +331,7 @@ function handle_google_auth_secrets($context, file) {
         
             ajax_post('/google/auth/secrets/', {content: reader.result},
                 function(error) {
-                    $context.trigger('Error copying file ('+error+')');
+                    $context.trigger('error_show', 'Error copying file ('+error+')');
                 },
                 function(data) {
                     _settings = data.settings;

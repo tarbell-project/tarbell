@@ -153,7 +153,7 @@ class TarbellAdminSite:
             content = m.group(2).decode('base64')
             print content                               # DEBUG
             
-            client_secrets_path = self._get_client_secrets_path()
+            client_secrets_path = self._client_secrets_path()
             print 'Writing %s' % client_secrets_path    # DEBUG
             safe_write(content, client_secrets_path)
 
