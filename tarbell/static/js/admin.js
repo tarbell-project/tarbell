@@ -605,6 +605,9 @@ $(function() {
                     $run_modal.trigger('error_show', error);
                 },
                 function(data) {
+                    if(data.warning) {
+                        $run_modal.trigger('error_show', data.warning);
+                    }
                     window.open('http://'+address);
             
                     $('#run_address').disable();

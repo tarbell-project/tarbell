@@ -224,19 +224,24 @@ class TarbellAdminSite:
                 args=(path, ip, port))
             self.p.start()
             
-            # Wait for server to come up          
+            # Wait for server to come up  
+            r = None        
             for i in [1, 2, 3]:
                 time.sleep(2)
                 
                 try:
-                    print 'Waiting for server...', 'http://'+address
+                    print 'Waiting for server @ http://%s' % address
                     r = requests.get('http://'+address, timeout=3)
                 
                     if r.status_code == requests.codes.ok:
-                        return jsonify({})                       
+                        return jsonify({})       
                 except requests.exceptions.ConnectionError, e:
-                    print 'ERROR', e
-                            
+                    # If the server isn't running at all, we will end up here
+                    print 'ERROR', e    
+            
+            if r is not None:
+                return jsonify({'warning':  'Started preview server with error (%d)' % r.status_code}) 
+            
             raise Exception('Could not start preview server')
         except Exception, e:
             traceback.print_exc()
