@@ -459,8 +459,7 @@ def tarbell_admin(command, args):
     ip = list_get(address, 0, '127.0.0.1')
     port = int(list_get(address, 1, '5001'))
     
-    settings = Settings() 
-    admin_site = TarbellAdminSite(settings)
+    admin_site = TarbellAdminSite()
     admin_site.app.run(ip, port=port)
 
 
@@ -927,5 +926,5 @@ def_cmd(
     name='admin',
     fn=tarbell_admin,
     usage='admin <address (optional)>',
-    help='Run the admin GUI.'
-         'Supply an optional address such as \'127.0.0.1:8000\'')
+    help=('Run the admin GUI on 127.0.0.1:5001.  '
+         'Supply an optional address such as \'127.0.0.1:8000\''))

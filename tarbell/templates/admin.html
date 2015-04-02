@@ -23,125 +23,40 @@
 </div>
 
 <ul class="nav nav-tabs" role="tablist">
-    <li class="active"><a href="#settings_tab" role="tab" data-toggle="tab">Settings</a></li>
-    <li><a href="#blueprints_tab" role="tab" data-toggle="tab">Blueprints</a></li>
     <li><a href="#projects_tab" role="tab" data-toggle="tab">Projects</a></li>
+    <li><a href="#blueprints_tab" role="tab" data-toggle="tab">Blueprints</a></li>
+    <li class="active"><a href="#settings_tab" role="tab" data-toggle="tab">Settings</a></li>
 </ul>
 
-<div class="tab-content">
+<div id="tab_content" class="tab-content" style="display: none;">
 
-<div class="tab-pane active" id="settings_tab">   
-
-<p>Enter the path to your projects directory, where your projects will be saved.</p>
-<form>
-    <input type="text" class="form-control" id="projects_path" value="{{ config.projects_path }}" 
-        placeholder="{{ defaults.projects_path }}">
-</form>
-
-<h4>Google Settings</h4>
-<p> TODO </p>
-
-
-<h4>S3 Defaults</h4>
-<form class="form-horizontal">
-    <div class="form-group">
-        <label for="default_s3_access_key_id" class="col-xs-offset-1 col-xs-3 control-label">Access Key</label>
-        <div class="col-xs-7">
-            <input type="text" class="form-control" id="default_s3_access_key_id" value="{{ config.default_s3_access_key_id }}">
-        </div>    
-    </div>
-    <div class="form-group">
-        <label for="default_s3_secret_access_key" class="col-xs-offset-1 col-xs-3 control-label">Secret Access Key</label>
-        <div class="col-xs-7">
-            <input type="text" class="form-control" id="default_s3_secret_access_key" value="{{ config.default_s3_secret_access_key }}">
-        </div>    
-    </div>
-    <div class="form-group">
-        <label for="default_s3_buckets_staging" class="col-xs-offset-1 col-xs-3 control-label">staging bucket</label>
-        <div class="col-xs-7">
-            <input type="text" class="form-control" id="default_s3_buckets_staging" value="{{ config.default_s3_buckets.staging }}">
-        </div>    
-    </div>
-    <div class="form-group">
-        <label for="default_s3_buckets_production" class="col-xs-offset-1 col-xs-3 control-label">production bucket</label>
-        <div class="col-xs-7">
-            <input type="text" class="form-control" id="default_s3_buckets_production" value="{{ config.default_s3_buckets.production }}">
-        </div>    
-    </div>
-</form>
-
-<h4>S3 Buckets</h4>
-
-<p>Specify any additional S3 buckets.  Be sure to enter an Access Key and Secret Access Key if they differ from the defaults.</p>
-
-<form class="form-horizontal">
-<!--
-{% for url, d in config.s3_credentials.iteritems() %}
-    <div class="form-group">
-        <div class="col-xs-4">
-            <input type="text" class="form-control bucket-url" value="{{ url }}">
-        </div>    
-        <div class="col-xs-3">
-            <input type="text" class="form-control bucket-key" value="{{ d.access_key_id }}">
-        </div>    
-        <div class="col-xs-4">
-            <input type="text" class="form-control bucket-secret" value="{{ d.secret_access_key }}">
-        </div>   
-        <div class="col-xs-1">
-            <a class="btn text-danger bucket-disable" href="#" onclick="bucket_disable(this)">
-                <i class="fa fa-lg fa-remove"></i></a>
-            <a class="btn text-success bucket-enable" href="#" onclick="bucket_enable(this)" style="display: none;">
-                <i class="fa fa-lg fa-plus"></i></a>
-        </div> 
-    </div>
-{% endfor %}
--->
-    <div class="form-group">
-        <div class="col-xs-4">
-            <input type="text" class="form-control bucket-url" value="" placeholder="additional.bucket.myorg.com">
-        </div>    
-        <div class="col-xs-3">
-            <input type="text" class="form-control bucket-key" value="" placeholder="access key">
-        </div>    
-        <div class="col-xs-4">
-            <input type="text" class="form-control bucket-secret" value="" placeholder="secret access key">
-        </div>   
-        <div class="col-xs-1">
-            <a class="btn text-danger bucket-remove" href="#" onclick="bucket_remove(this)">
-                <i class="fa fa-lg fa-remove"></i></a>
-        </div> 
-    </div>
-    <div class="form-group">
-        <div class="col-xs-11" style="text-align: right;">
-            <p class="form-control-static text-muted"><em>Add a row &gt;</em></p>
-        </div>
-       
-        <div class="col-xs-1">
-            <a class="btn text-success bucket-add" href="#" onclick="bucket_add(this)">
-                <i class="fa fa-lg fa-plus"></i></a>           
-        </div>
-    </div>
-</form>
-
-<div class="col-xs-12">
-    <button type="button" class="btn btn-success center-block" id="settings_save" disabled>Save Settings</button>
-</div>
-
-
-
-
-</div> <!-- // settings_tab-->
-
-
-<div class="tab-pane" id="blueprints_tab">   
-
-    <table class="table" id="blueprints_table">
+<div class="tab-pane" id="projects_tab">   
+    <table class="table" id="projects_table">
         <thead>
-            <th>Name</th>
-            <th>URL</th>
+            <th class="col-xs-4">Directory</th>
+            <th class="col-xs-8">Title</th>
         </thead>
         <tbody>
-{% for item in config.project_templates %}
+{% for p in projects %}
+            <tr data-project="{{ p.directory }}">
+                <td>{{ p.directory }}</td>
+                <td><a role="button" class="project-title" title="Run this project" data-toggle="modal" data-target="#run_modal">
+                    {{ p.title }}</a>
+                </td>
+            </tr>
+{% endfor %}            
+        </tbody>        
+    </table>     
+</div> <!-- // projects_tab-->
+
+<div class="tab-pane" id="blueprints_tab">   
+    <table class="table" id="blueprints_table">
+        <thead>
+            <th class="col-xs-5">Name</th>
+            <th class="col-xs-7">URL</th>
+        </thead>
+        <tbody>
+{% for item in settings.config.project_templates %}
             <tr>
                 <td>{{ item.name }}</td>
 {% if item.url %}
@@ -155,55 +70,394 @@
     </table>  
 </div> <!-- // blueprints_tab-->
 
-<div class="tab-pane" id="projects_tab">   
+<div class="tab-pane active" id="settings_tab">   
+<p class="section">
+    <div class="checkbox">
+        <label data-toggle="collapse" data-target="#google">
+            <input type="checkbox" id="use_google"> Use Google spreadsheets 
+        </label>
+        <a class="help" href="http://tarbell.readthedocs.org/en/{{ version }}/install.html#configure-google-spreadsheet-access-optional" target="_blank">
+            <i class="fa fa-question-circle"></i>
+        </a>
+    </div>
+    <div id="google" class="collapse">
+        <form>
+            <div class="form-group">
+                <label>Google credentials</label>
+                <div>
+                    <p class="form-control-static text-danger google-secrets-exists">A client_secrets.json file exists.</p>
+                    <span>                
+                        <span class="btn btn-default btn-file">
+                            Select New Secrets File <input type="file" class="google-secrets-file" accept="application/json">
+                        </span>
+                    </span>
+                    <a class="btn btn-default google-authenticate" disabled>Authenticate Secrets File</a>
+                </div>
+            </div>
+            <div class="form-group">           
+                <label>Google account(s) with access to new spreadsheets</label>
+                <textarea class="form-control google-emails" rows="3" placeholder="somebody@gmail.com" aria-describedby="google_emails_help"></textarea>
+                <span class="help-block" id="google_emails_help">
+                    Leave blank to specify for each new project; separate multiple addresses with commas
+                </span>
+            </div>
+        </form>
+    </div>
+</p>
+<p class="section">
+    <div class="checkbox">
+        <label data-toggle="collapse" data-target="#s3">
+            <input type="checkbox" id="use_s3"> Use S3
+        </label>
+        <a class="help" href="http://tarbell.readthedocs.org/en/{{ version }}/install.html#configure-amazon-s3" target="_blank">
+            <i class="fa fa-question-circle"></i>
+        </a>
+    </div>
+    <div id="s3" class="collapse">
+        <form class="form-horizontal">
+            <div class="form-group">
+                <label for="default_s3_access_key_id" class="col-xs-4 control-label">Default Access Key</label>
+                <div class="col-xs-8">
+                    <input type="text" class="form-control default-s3-access-key-id" value="">
+                </div>    
+            </div>
+            <div class="form-group">
+                <label for="default_s3_secret_access_key" class="col-xs-4 control-label">Default Secret Access Key</label>
+                <div class="col-xs-8">
+                    <input type="text" class="form-control default-s3-secret-access-key" value="">
+                </div>    
+            </div>
+            <div class="form-group">
+                <label for="default_s3_buckets_staging" class="col-xs-4 control-label">Default staging bucket</label>
+                <div class="col-xs-8">
+                    <input type="text" class="form-control default-staging" value="">
+                </div>    
+            </div>
+            <div class="form-group">
+                <label for="default_s3_buckets_production" class="col-xs-4 control-label">Default production bucket</label>
+                <div class="col-xs-8">
+                    <input type="text" class="form-control default-production" value="">
+                </div>    
+            </div>
+        </form>
+        <form class="form-horizontal" id="s3_credentials">
+            <div class="form-group">
+                <div class="col-xs-12">
+                    <p>Specify any additional S3 buckets.  Be sure to enter an access key and secret access key if they differ from the defaults.</p>
+                </div>
+            </div>
+            <!-- #bucket_template insertion -->
+            <div class="form-group">
+                <div class="col-xs-11 bucket-control-text">
+                    <p class="form-control-static text-muted"><em>Add a row &gt;</em></p>
+                </div>
+       
+                <div class="col-xs-1">
+                    <a class="btn text-success bucket-add" href="#" onclick="bucket_add(this)">
+                        <i class="fa fa-lg fa-plus"></i></a>           
+                </div>
+            </div>
+        </form>
+    </div>
+</p>
+<p class="section">
+    <form>
+        <div class="form-group">   
+            <label>Projects Path</label>
+            <input type="text" class="form-control" id="projects_path" value="" 
+                placeholder="{{ defaults.projects_path }}" aria-describedby="projects_path_help">
+            <span class="help-block" id="projects_path_help">
+                The directory where your projects will be saved, or leave empty to use the default
+            </span>
+        </div>
+    </form>
+</p>
 
-    <table class="table" id="projects_table">
-        <thead>
-            <th class="col-xs-3">Directory</th>
-            <th class="col-xs-6">Title</th>
-<!--
-            <th class="col-xs-3">&nbsp;</th>
--->
-        </thead>
-        <tbody>
-{% for p in projects %}
-            <tr data-project="{{ p.directory }}">
-                <td>{{ p.directory }}</td>
-                <td><a role="button" class="project-title" title="Run this project" data-toggle="modal" data-target="#run_modal">
-                    {{ p.title }}</a>
-                </td>
-                <td class="actions nowrap">
-<!--
-                    <button class="btn btn-default project-detail" title="View project details"
-                        data-toggle="modal" data-target="#detail_modal">
-                        <i class="fa fa-lg fa-cog"></i>
-                    </button>
-                    <button class="btn btn-default project-update" title="Update the blueprint in this project">
-                        <i class="fa fa-lg fa-refresh"></i>
-                    </button>
-                    <button class="btn btn-default project-generate" title="Generate static files for this project"
-                         data-toggle="modal" data-target="#generate_modal">
-                        <i class="fa fa-lg fa-magic"></i>
-                    </button>
-                    <button class="btn btn-default project-publish" title="Publish this project to a target"
-                        data-toggle="modal" data-target="#publish_modal">
-                        <i class="fa fa-lg fa-cloud-upload text-success"></i>
-                    </button>
--->
-                </td>
-            </tr>
-{% endfor %}            
-        </tbody>        
-    </table>  
-    
-</div> <!-- // projects_tab-->
+<div class="col-xs-12">
+    <div class="center-block">
+        <button type="button" class="btn btn-success" id="settings_save" disabled>Save Settings</button>
+    </div>
+</div>
 
+</div> <!-- // settings_tab-->
 
 </div> <!-- // tab-content -->
 
 </div> <!-- // col-xs-12 -->
 </div> <!-- // row -->
 </div> <!-- // container-fluid -->
+
+<!-- MODAL: progress -->
+<div id="progress_modal" class="modal fade" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-body">
+            <div class="modal-progress">
+                <div>
+                    <div>
+                        <i class="fa fa-3x fa-spinner fa-spin"></i>
+                        <p><span class="modal-msg"></span>...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: input -->
+<div id="input_modal" class="modal fade" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Authenticate Secrets</h4>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group">
+                        <p class="form-control-static modal-msg"></p>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" class="form-control" val="" placeholder="enter your confirmation code">
+                    </div>               
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default">Cancel</button>
+                <button type="button" class="btn btn-primary">Submit Code</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: configuration -->
+<div id="config_modal" class="modal fade" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Configure Tarbell</h4>
+            </div>
+            <div class="modal-body">
+                <p class="modal-error bg-danger">
+                    <span class="modal-msg text-danger"></span>
+                </p>
+                <p class="modal-success bg-success">
+                    <span class="modal-msg text-success"></span>
+                </p>
+                <!-- welcome -->
+                <div class="config-panel" id="config_welcome_panel">                   
+                    <div class="row">
+                        <div class="col-xs-3">
+                            <img src="/static/img/ida-tarbell.jpg" width="100">
+                        </div>
+                        <div class="col-xs-9">
+                            <h3>Welcome to Tarbell</h3>
+                            <p>The following step-by-step prompts will help you configure your Tarbell installation.
+                            </p>
+                            <p>Click the "Next" button below to get started. 
+                            </p>
+                        </div>
+                    </div>
+                </div>  <!-- // welcome_panel -->
+                <!-- google spreadsheets -->
+                <div class="config-panel" id="config_google_panel">
+                    <form class="form-inline">
+                        <div class="form-group">
+                            <label class="radio-inline">
+                                <strong>Would you like to use Google spreadsheets?</strong>
+                            </label>
+                            <label class="radio-inline">
+                                <input type="radio" name="config_google" value="1"> Yes
+                            </label>
+                            <label class="radio-inline">
+                                <input type="radio" name="config_google" value=""> No
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <p class="form-control-static">
+                            See the <a href="http://tarbell.readthedocs.org/en/{{ version }}/install.html#configure-google-spreadsheet-access-optional" target="_blank">
+                            Configure Google spreadsheet access</a> section in the documentation for more information.
+                            </p>
+                        </div>
+                    </form> 
+                    <div class="config-collapse">
+                        <form>
+                            <div class="form-group">
+                               <label>Google Credentials</label>
+                                <p class="form-control-static text-danger google-secrets-exists">
+                                    A client_secrets.json file already exists.
+                                </p>  
+                                <p class="form-control-static">
+                                Login to Google and go to <a href="https://console.developers.google.com/project" target="_blank">
+                                https://console.developers.google.com/project</a> to create an app and generate a client_secrets
+                                authentication file.  You should create credentials for an "installed app".
+                                </p>  
+                                <span>                
+                                    <span class="btn btn-default btn-file">
+                                        Select Secrets File <input type="file" class="google-secrets-file" accept="application/json">
+                                    </span>
+                                </span>
+                                <a class="btn btn-default google-authenticate" disabled>Authenticate Secrets File</a>
+                            </div>
+                            <div class="form-group">
+                                <label>Google Spreadsheet Access</label>
+                                <p class="form-control-static">
+                                Enter the Google account(s) that should have access to new spreadsheets, separating multiple addresses with commas.
+                                Leave this field blank to specify accounts for each new project.
+                                </p>
+                                <textarea class="form-control google-emails" rows="3" placeholder="somebody@gmail.com"></textarea>
+                            </div>
+                        </form>
+                    </div>
+                </div>  <!-- // config_google_panel -->
+                <!-- s3 defaults -->
+                <div class="config-panel" id="config_s3_panel">
+                    <form class="form-inline">
+                        <div class="form-group">
+                            <label class="radio-inline">
+                                <strong>Would you like to set up Amazon S3?</strong>
+                            </label>
+                            <label class="radio-inline">
+                                <input type="radio" name="config_s3" value="1"> Yes
+                            </label>
+                            <label class="radio-inline">
+                                <input type="radio" name="config_s3" value=""> No
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <p class="form-control-static">
+                            See the <a href="http://tarbell.readthedocs.org/en/{{ version }}/install.html#configure-amazon-s3" target="_blank">
+                            Configure Amazon S3</a> section in the documentation for more information.
+                            </p>
+                        </div>
+                    </form>                   
+                    <div class="config-collapse">
+                        <form class="form-horizontal">
+                            <div class="form-group">
+                                <label class="col-xs-5 control-label">Default Access Key</label>
+                                <div class="col-xs-7">
+                                    <input type="text" class="form-control default-s3-access-key-id" value="">
+                                </div>    
+                            </div>
+                            <div class="form-group">
+                                <label class="col-xs-5 control-label">Default Secret Access Key</label>
+                                <div class="col-xs-7">
+                                    <input type="text" class="form-control default-s3-secret-access-key" value="">
+                                </div>    
+                            </div>
+                            <div class="form-group">
+                                <label class="col-xs-5 control-label">Default staging bucket</label>
+                                <div class="col-xs-7">
+                                    <input type="text" class="form-control default-staging" value="" placeholder="staging.myorg.com">
+                                </div>    
+                            </div>
+                            <div class="form-group">
+                                <label class="col-xs-5 control-label">Default production bucket</label>
+                                <div class="col-xs-7">
+                                    <input type="text" class="form-control default-production" value="" placeholder="production.myorg.com">
+                                </div>    
+                            </div>
+                        </form>
+                    </div>
+                </div>  <!-- // config_s3_panel -->      
+                <!-- s3 buckets -->
+                <div class="config-panel"  id="config_buckets_panel">
+                    <form class="form-inline">
+                        <div class="form-group">
+                            <label class="radio-inline">
+                                <strong>Would you like to add additional S3 buckets and credentials?</strong>
+                            </label>
+                            <label class="radio-inline">
+                                <input type="radio" name="config_buckets" value="1"> Yes
+                            </label>
+                            <label class="radio-inline">
+                                <input type="radio" name="config_buckets" value=""> No
+                            </label>
+                        </div>
+                    </form>                   
+                    <div class="config-collapse">
+                        <form class="form-horizontal">
+                            <div class="form-group bucket-group">
+                                <div class="col-xs-4">
+                                    <input type="text" class="form-control bucket-url" value="" placeholder="bucket.myorg.com">
+                                </div>
+                                <div class="col-xs-3">
+                                    <input type="text" class="form-control bucket-key" value="">
+                                </div>
+                                <div class="col-xs-4">
+                                    <input type="text" class="form-control bucket-secret" value="">
+                                </div>
+                                <div class="col-xs-1">
+                                    <a class="btn text-danger bucket-remove" href="#" onclick="bucket_remove(this)">
+                                        <i class="fa fa-lg fa-remove"></i></a>                         
+                                </div>
+                            </div>                            
+                            <div class="form-group">
+                                <div class="col-xs-11 bucket-control-text">
+                                    <p class="form-control-static text-muted"><em>Add a row &gt;</em></p>
+                                </div>
+                                <div class="col-xs-1">
+                                    <a class="btn text-success bucket-add" href="#" onclick="bucket_add(this)">
+                                        <i class="fa fa-lg fa-plus"></i></a>                         
+                                </div>
+                            </div>                            
+                         </form>
+                    </div>
+                </div>  <!-- // config_buckets_panel -->
+                <!-- projects path -->
+                <div class="config-panel" id="config_path_panel">
+                    <form>
+                        <div class="form-group">
+                            <label for="projects_path">What is your Tarbell projects path?</label> 
+                            <p>This is where your Tarbell projects will live.  This path will be used by <code>tarbell list</code> and <code>tarbell switch</code>.
+                            </p>
+                            <input type="text" class="form-control" id="config_projects_path" value="{{ defaults.projects_path }}" placeholder="{{ defaults.projects_path }}">                                
+                        </div>
+                    </form>
+                </div>  <!-- // config_path_panel -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="config_next">Next</button>
+                <button type="button" class="btn btn-primary" id="config_save">Save Settings</button>
+            </div>
+            <div class="modal-progress" style="display: none;">
+                <div>
+                    <div>
+                        <i class="fa fa-3x fa-spinner fa-spin"></i>
+                        <p><span class="modal-msg"></span>...</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-confirm" style="display: none;">
+                <div>
+                    <div>
+                        <p><span class="modal-msg"></span></p>
+                        <div>
+                            <button type="button" class="btn btn-default">No</button>
+                            <button type="button" class="btn btn-primary">Yes</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-input" style="display: none;">
+                <div>
+                    <div>
+                        <form>  
+                            <div class="form-group col-xs-offset-1 col-xs-10">
+                                <p class="form-control-static modal-msg"></p>
+                            </div>
+                            <div class="form-group col-xs-offset-1 col-xs-10">
+                                <input type="text" class="form-control" val="" placeholder="enter your confirmation code">
+                            </div>
+                        </form>
+                        <div class="modal-input-buttons">
+                            <button type="button" class="btn btn-default">Cancel</button>
+                            <button type="button" class="btn btn-primary">Submit Code</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 <!-- MODAL: run project -->
 <div id="run_modal" class="modal fade" data-backdrop="static" data-keyboard="false">
@@ -251,25 +505,51 @@
     </div>
 </script>
 
-<script type="text/template" id="settings_bucket_template">
-    <div class="form-group">
-        <div class="col-xs-4">
-            <input type="text" class="form-control bucket-url" value="" placeholder="additional.bucket.myorg.com">
-        </div>    
-        <div class="col-xs-3">
-            <input type="text" class="form-control bucket-key" value="" placeholder="access key">
-        </div>    
-        <div class="col-xs-4">
-            <input type="text" class="form-control bucket-secret" value="" placeholder="secret access key">
-        </div>   
-        <div class="col-xs-1">
-            <a class="btn text-danger bucket-remove" href="#" onclick="bucket_remove(this)">
-                <i class="fa fa-lg fa-remove"></i></a>
-        </div> 
+<script type="text/template" id="success_alert_template">
+    <div class="alert alert-success alert-dismissible" role="alert">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <%= message %>
     </div>
 </script>
 
+<script type="text/template" id="google_msg_template">
+    <a href="<%= url %>" target="_blank">Click here</a> to authorize this
+    application to create and access Google spreadsheets to use with Tarbell
+    projects. After authenticating, you will receive a confirmation code.
+    Enter it below.
+</script>
+                       
+<script type="text/template" id="bucket_template">
+    <div class="form-group bucket-group">
+        <div class="col-xs-4">
+            <input type="text" class="form-control bucket-url" value="<%= name %>" placeholder="bucket.myorg.com">
+        </div>
+        <div class="col-xs-3">
+            <input type="text" class="form-control bucket-key" value="<%= access_key_id %>" placeholder="access key">            
+        </div>
+        <div class="col-xs-4">
+            <input type="text" class="form-control bucket-secret" value="<%= secret_access_key %>" placeholder="secret access key">
+        </div>
+        <div class="col-xs-1">
+            <a class="btn text-danger bucket-remove" href="#" onclick="bucket_remove(this)">
+                <i class="fa fa-lg fa-remove"></i></a>                         
+        </div>
+    </div>                            
+</script>
+
+<script type="text/javascript" src="/static/js/admin-util.js"></script>
+<script type="text/javascript" src="/static/js/admin-modal.js"></script>
 <script type="text/javascript" src="/static/js/admin.js"></script>
+
+<script type="text/javascript">
+
+var _defaults = {{ defaults|tojson }};
+
+var _settings = {{ settings|tojson }};
+
+var _config = _settings.config;
+
+</script>
 
 </body>
 </html>

@@ -1,3 +1,4 @@
+
 body {
     padding-top: 10px;
     padding-bottom: 20px;
@@ -8,40 +9,25 @@ body {
     padding-bottom: 20px;
 }
 
-.tab-content h4 {
-    margin-top: 20px;
-}
-.tab-content h4:first-child {
-    margin-top: 10px;
-}
-
-
-.nowrap {
-    white-space: nowrap;
-    text-align: right;
-}
-
 textarea {
     resize: none;
 }
 
-.borderless tbody tr td, .borderless tbody tr th, .borderless thead tr th {
-    border: none;
+p.section {
+    margin-top: 20px;
+}
+p.section:first-child {
+    margin-top: 0;
 }
 
-.borderless tbody tr td:first-child {
-    font-weight: bold;
-}
+.help {color: black;margin-left: 8px;}
 
-/*  modal error panel
+
+/*  in-modal message
 */
+.modal-msg {display: inline-block;margin: 4px 6px;}
 
-.modal-msg {
-    display: inline-block; 
-    margin: 4px 6px;
-}
-
-/*  modal confirm panel 
+/*  in-modal confirm panel 
 */
 .modal-confirm {
     position:absolute;
@@ -60,8 +46,7 @@ textarea {
 .modal-confirm > div > div {display: table-cell;text-align: center;vertical-align: middle;}
 .modal-confirm button {margin-left: 8px;margin-right: 8px;}
 
-
-/*  modal progress panel 
+/*  in-modal progress panel 
 */
 .modal-progress {
     position:absolute;
@@ -81,24 +66,48 @@ textarea {
 .modal-progress > div > div {display: table-cell;text-align: center;vertical-align: middle;}
 .modal-progress i {margin-top: 10px;margin-bottom: 10px;}
 
+/*  in-modal (user) input panel 
+*/
+.modal-input {
+    position:absolute;
+    top: 0;
+    left:0;
+    bottom: 0;
+    right: 0;
+    min-height: 100px;
+    -webkit-border-radius: 6px;
+    -moz-border-radius: 6px;
+    border-radius: 6px;
+    background-color: #fff;
+    opacity: 0.98;
+    z-index: 1000;
+}
+.modal-input > div {display: table;width: 100%;height: 100%;}
+.modal-input > div > div {display: table-cell;vertical-align: middle;}
+.modal-input .modal-input-buttons {text-align: center;}
 
-/*  collapse
+
+/* file selection
 */
 
-a[data-toggle="collapse"] {
-    text-decoration: none;
+.btn-file {
+    position: relative;
+    overflow: hidden;
 }
-
-a[data-toggle="collapse"][aria-expanded="false"]:before {
-    font-family: FontAwesome;
-    content: "\f105";
-    padding-right: 6px;
-}
-
-a[data-toggle="collapse"][aria-expanded="true"]:before  {
-    font-family: FontAwesome;
-    content: "\f107";
-    padding-right: 6px;
+.btn-file input[type=file] {
+    position: absolute;
+    top: 0;
+    right: 0;
+    min-width: 100%;
+    min-height: 100%;
+    font-size: 100px;
+    text-align: right;
+    filter: alpha(opacity=0);
+    opacity: 0;
+    outline: none;
+    background: white;
+    cursor: inherit;
+    display: block;
 }
 
 /*  misc
@@ -109,10 +118,7 @@ a[data-toggle="collapse"][aria-expanded="true"]:before  {
     padding-right: 6px;
 }
 
-#settings_save {
-    padding-left: 30px;
-    padding-right: 30px;
-}
+.bucket-control-text {text-align: right;}
 
 #site_link {
     position: absolute;
@@ -120,14 +126,38 @@ a[data-toggle="collapse"][aria-expanded="true"]:before  {
     right: 16px;
 }
 
-#blueprints_tab table {
-    border-bottom: 2px solid #ddd;
+/* inset collapse-ables on settings tab */
+#settings_tab div.collapse, 
+#settings_tab div.collapsing,
+#settings_tab div.collapsed {
+    padding-left: 20px; 
 }
 
+#settings_tab #s3 .form-horizontal label {text-align: left;}
+
+#settings_save {
+    padding-left: 30px;
+    padding-right: 30px;
+}
+
+#blueprints_tab table, 
 #projects_tab table {
     border-bottom: 2px solid #ddd;
 }
 
-.project-title, .project-title:hover {
+#projects_tab .project-title, 
+#projects_tab .project-title:hover {
     cursor: pointer;
+}
+
+
+/* config_modal
+*/
+
+.form-group label.radio-inline:first-child {
+    padding-left: 0;
+}
+
+.config-collapse {
+    margin-top: 12px;
 }

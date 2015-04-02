@@ -1,119 +1,61 @@
+// admin.js, admin GUI functions
 // required jquery, json2
-
-//
-// extend jquery
-//
-
-(function($) {
-
-$.fn.extend({
-    // enable UI element
-    enable: function() {
-        return this.removeAttr('disabled');
-    },
-    // disable UI element
-    disable: function() {
-        return this.attr('disabled', 'disabled'); 
-    }
-});
-
-})(jQuery);
-
 
 //
 // templates
 //
 
 var _error_alert_template = _.template($('#error_alert_template').html());
-
-var _settings_bucket_template = _.template($('#settings_bucket_template').html());
-
-/*
-var _select_bucket_template = _.template($('#select_bucket_template').html());
-var _select_blueprint_template = _.template($('#select_blueprint_template').html());
 var _success_alert_template = _.template($('#success_alert_template').html());
-var _blueprint_template = _.template($('#blueprint_template').html());
-var _project_template = _.template($('#project_template').html());
-var _detail_s3_bucket_template = _.template($('#detail_s3_bucket_template').html());
-*/
+var _google_msg_template = _.template($('#google_msg_template').html());
+var _bucket_template = _.template($('#bucket_template').html());
+
 //
-// generic modal event handlers
+// progress modal
 //
 
-modal_error_show = function(event, msg) {
-    $(this).find('.modal-error .modal-msg').html(msg);
-    $(this).find('.modal-error').show();    
-};
-modal_error_hide = function(event, msg) {
-    $(this).find('.modal-error .modal-msg').html('');
-    $(this).find('.modal-error').hide();         
-};
-
-modal_success_show = function(event, msg) {
-    if(msg) {
-        $(this).find('.modal-success .modal-msg').html(msg);
-    }
-    $(this).find('.modal-success').show();    
-};
-
-modal_success_hide = function(event) {
-    $(this).find('.modal-success').hide();         
-};
-
-modal_progress_show = function(event, msg) {
-    $(this).find('.modal-progress .modal-msg').html(msg);
-    $(this).find('.modal-progress').show();    
-};
-
-modal_progress_hide = function(event) {
-    $(this).find('.modal-progress').hide(); 
-};
-
-modal_confirm_show = function(event, msg, callback) { 
-    console.log('modal_confirm_show');
-       
-    var $panel = $(this).find('.modal-confirm');
-    console.log(callback);
-    
-    $panel.find('.modal-msg').html(msg);
-    
-    $panel.find('.btn').bind('click.confirm', function(event) {
-        $(this).unbind('click.confirm'); 
-        $panel.hide();         
-        callback($(this).hasClass('btn-primary'));
-    });
-    
-    $panel.show();    
-};
-
-modal_confirm_hide = function(event) {
-    $(this).find('.modal-confirm').hide(); 
-};
-
-function modal_init($modal) {
-    return $modal
-        .on('error_show', modal_error_show)
-        .on('error_hide', modal_error_hide)
-        .on('success_show', modal_success_show)
-        .on('success_hide', modal_success_hide)
-        .on('progress_show', modal_progress_show)
-        .on('progress_hide', modal_progress_hide)
-        .on('confirm_show', modal_confirm_show)
-        .on('confirm_hide', modal_confirm_hide);
+function progress_show(msg) {
+    $('#progress_modal .modal-msg').html(msg);
+    $('#progress_modal').modal('show');
 }
 
+function progress_hide() {
+    $('#progress_modal').modal('hide');
+}
 
 //
-// debug
+// input modal
 //
 
-function debug() {
-    if(console && console.log) {
-        // converts arguments to real array
-        var args = Array.prototype.slice.call(arguments);
-        args.unshift('**');
-        console.log.apply(console, args); // call the function
-    }
+function input_show(msg, callback) {
+    var $input = $('#input_modal').find('input[type="text"]');
+    
+    var $input_modal = $('#input_modal')
+        .on('show.bs.modal', function(event) {
+            $input_modal.find('.modal-msg').html(msg);   
+            $input.val('');       
+        })
+        .on('click', '.btn-default', function(event) {
+            $input_modal.modal('hide');
+            callback(false);
+        })
+        .on('click', '.btn-primary', function(event) {
+            var value = $input.trimmed();
+            if(!value) {
+                $input.focus()
+                    .closest('.form-group').addClass('has-error');
+                return;
+            }
+ 
+            $input_modal.modal('hide');
+            callback(true, value);       
+        });
+        
+    $input_modal.modal('show');
+}
+
+function input_hide() {
+    $('#input_modal').modal('hide');
 }
 
 //
@@ -121,7 +63,7 @@ function debug() {
 //
 
 function alert_hide() {
-    $('div.tab-pane').find('div[role="alert"]').remove(); // all
+    $('div.tab-pane').find('div[role="alert"]').remove(); 
 }
 
 function error_hide() {
@@ -143,64 +85,6 @@ function success_alert(message) {
 }
 
 //
-// progress
-//
-
-function progress_show(msg) {
-    $('#progress_modal .modal-msg').html(msg);
-    $('#progress_modal').modal('show');
-}
-
-function progress_hide() {
-    $('#progress_modal').modal('hide');
-}
-
-//
-// ajax
-//
-
-function _ajax(url, type, data, on_error, on_success, on_complete) {
-    var _error = '';
-    
-    debug('ajax params', data);
-    
-    $.ajax({
-        url: url,
-        type: type,
-        data: data,
-        dataType: 'json',
-        timeout: 45000, // ms
-        error: function(xhr, status, err) { 
-            _error = err || status;
-            debug('ajax error', _error);           
-            on_error(_error);
-        },
-        success: function(data) {
-            debug('ajax data', data);
-            if(data.error) {
-                _error = data.error;
-                on_error(_error);
-            } else if (on_success) {
-                on_success(data);
-            }
-        },
-        complete: function() {
-            if(on_complete) {
-                on_complete(_error);
-            }
-        }
-    });
-}
-
-function ajax_get(url, data, on_error, on_success, on_complete) {
-    _ajax(url, 'GET', data, on_error, on_success, on_complete);
-}
-
-function ajax_post(url, data, on_error, on_success, on_complete) {
-    _ajax(url, 'POST', data, on_error, on_success, on_complete);
-}
-
-//
 // settings
 //
 
@@ -208,14 +92,16 @@ function settings_dirty() {
     $('#settings_save').enable();
 }
 
+// Disable row of S3 bucket controls
 function bucket_disable(target) {
     var $group = $(target).closest('.form-group');
     $group.find('input').disable();
     $group.find('.bucket-disable').hide();
     $group.find('.bucket-enable').show();
-    config_dirty();
+    settings_dirty();
 }
 
+// Enable row of S3 bucket controls
 function bucket_enable(target) {
     var $group = $(target).closest('.form-group');
     $group.find('input').enable();
@@ -223,42 +109,280 @@ function bucket_enable(target) {
     $group.find('.bucket-disable').show();
 }
 
+// Remove set of S3 bucket controls
 function bucket_remove(target) {
     $(target).closest('.form-group').remove();
 }
 
-function bucket_add(target) {
+// Add row of S3 bucket controls
+function bucket_add(target, data) {
+    var d = $.extend(
+        {name: '', access_key_id: '', secret_access_key: ''},
+        data || {}
+    );
     var $group = $(target).closest('.form-group');    
-    $(_settings_bucket_template()).insertBefore($group);
+    $(_bucket_template(d)).insertBefore($group);
 }
 
+// Show google settings in controls in $scope
+function show_google($scope, cfg) {
+    if(_settings.client_secrets) {
+        $scope.find('.google-secrets-exists').show();
+        $scope.find('.google-authenticate').enable();
+        $scope.find('.google-emails').enable().val(cfg.google_account || '');
+        $scope.addClass('in');
+    } else {
+        $scope.find('.google-secrets-exists').hide();
+        $scope.find('.google-authenticate').disable();
+        $scope.find('.google-emails').disable().val(cfg.google_account || '');   
+        $scope.removeClass('in');
+    }
+}
+
+// Get and validate google settings from controls in $scope
+function get_google($scope, cfg) {
+    cfg.google_account = $scope.find('.google-emails').trimmed();
+}
+
+// Show S3 defaults in controls in $scope
+function show_s3_defaults($scope, cfg) {
+    $scope.find('.default-s3-access-key-id').val(cfg.default_s3_access_key_id || '');
+    $scope.find('.default-s3-secret-access-key').val(cfg.default_s3_secret_access_key || '');
+    $scope.find('.default-staging').val(cfg.default_s3_buckets.staging || '');
+    $scope.find('.default-production').val(cfg.default_s3_buckets.production || '');
+}
+
+// Get and validate S3 defaults from controls in $scope
+function get_s3_defaults($scope, cfg) {
+    var key = $scope.find('.default-s3-access-key-id').trimmed();
+    var secret = $scope.find('.default-s3-secret-access-key').trimmed();
+    var staging = $scope.find('.default-staging').trimmed();
+    var production = $scope.find('.default-production').trimmed();
+    
+    if(!(key && secret) && (staging || production)) {
+        return 'You must enter keys to specify default staging and production buckets';
+    }
+    
+    $.extend(cfg, {
+        default_s3_access_key_id: key,
+        default_s3_secret_access_key: secret,
+        default_s3_buckets: {
+            staging: staging,
+            production: production
+        }
+    });
+}
+
+// Show S3 credentials in controls in $scope
+function show_s3_credentials($scope, cfg) {
+    $scope.find('.bucket-group').remove();
+
+    var $el = $scope.find('.bucket-add');
+    
+    for(var name in cfg.s3_credentials) {
+        bucket_add($el, $.extend({name: name}, cfg.s3_credentials[name]));
+    } 
+    if(!Object.keys(cfg.s3_credentials).length) {
+        $el.click();
+    }
+}
+
+// Get and validate S3 credentials from controls in $scope
+function get_s3_credentials($scope, cfg) {
+    var error = '';
+    var data = {};
+    var has_defaults = cfg.default_s3_access_key_id && cfg.default_s3_secret_access_key;
+
+    $scope.find('.bucket-group').each(function(i, el) {
+        var $el = $(el);
+        var url = $el.find('.bucket-url').trimmed();
+        var key = $el.find('.bucket-key').trimmed(); 
+        var secret = $el.find('.bucket-secret').trimmed(); 
+        
+        if(url) {
+            if(key && secret) {         // entered both
+                data[url] = {
+                    access_key_id: key,
+                    secret_access_key: secret
+                };             
+            } else if(key || secret) {  // entered only one
+                if(has_defaults) {
+                    error = 'You must enter an access key and a secret access key for each bucket (or leave both blank to use defaults)';
+                } else {
+                    error = 'You must enter an access key and a secret access key for each bucket';                
+                }
+            } else {                    // entered neither
+                if(has_defaults) {  
+                    data[url] = {
+                        access_key_id: settings.default_s3_access_key_id,
+                        secret_access_key: settings.default_s3_secret_access_key
+                    };              
+                } else {
+                    error = 'You must enter an access key and a secret access key for each bucket';
+                }
+            }
+        } else if(key || secret) {
+            error = 'You must enter a name for each S3 bucket';
+        }
+        if(error) {
+            return false;
+        }
+    });     
+    
+    if(error) {
+        return error;
+    }
+    
+    $.extend(cfg.s3_credentials, data);
+}
+
+// Initialize controls in settings tab
+function show_settings() {        
+    $('#use_google').prop('checked', _settings.client_secrets);
+    show_google($('#google'), _config);
+       
+    if(_config.default_s3_access_key_id || _config.default_s3_secret_access_key) {
+        $('#use_s3').prop('checked', true);
+        $('#s3').addClass('in');    
+    } else {
+        $('#use_s3').prop('checked', false);
+        $('#s3').removeClass('in');
+    } 
+        
+    show_s3_defaults($('#s3'), _config);    
+    show_s3_credentials($('#s3_credentials'), _config);    
+
+    $('#projects_path').val(_config.projects_path);
+}
+
+// Verify authorization code
+function handle_google_auth_code($context, code) {
+    $context.trigger('progress_show', 'Verifying code');
+      
+    ajax_get('/google/auth/code/', {code: code},
+        function(error) {
+            $context.trigger('error_show', error);
+        },
+        function(data) {
+            $context.trigger('success_show', 'Authentication successful');               
+        },
+        function() {
+            $context.trigger('progress_hide');
+        });  
+}
+
+// Handle new client_secrets file selection
+function handle_google_auth_secrets($context, file) {
+     if(file) {
+        var reader = new FileReader();
+        
+        reader.onerror = function() {
+            $context.trigger('error_show', 'Error loading file');
+        };
+       
+        reader.onload = function() {
+            $context.trigger('progress_show', 'Copying file');
+        
+            ajax_post('/google/auth/secrets/', {content: reader.result},
+                function(error) {
+                    $context.trigger('Error copying file ('+error+')');
+                },
+                function(data) {
+                    _settings = data.settings;
+                    _config = _settings.config;
+                    $('.google-authenticate, .google-emails').enable();
+                },
+                function() {
+                    $context.trigger('progress_hide');
+                });                
+        };
+
+        $context.trigger('progress_show', 'Loading file');
+        reader.readAsDataURL(file);  
+    }
+}
 
 $(function() {
-
-    //
+        
     // Clear alerts/states when switching from tab to tab
-    //
     $('a[data-toggle="tab"]').on('hide.bs.tab', function(event) {      
         alert_hide();
         $('.form-group, .input-group').removeClass('has-error');        
-        $('#blueprint_url, #project_url').val('');
     });
-     
+   
 // ------------------------------------------------------------
 // settings tab
 // ------------------------------------------------------------
      
-    $('#settings_tab input').change(settings_dirty);
-              
-    $('#settings_save').click(function(event) {
-         progress_show('Saving settings');
+    var $settings_tab = $('#settings_tab')
+        // mimic modal functions so we can re-use core routines
+        .on('error_hide', error_hide)
+        .on('error_show', function(event, msg) { 
+            error_alert(msg); 
+        })
+        .on('progress_hide', progress_hide)
+        .on('progress_show', function(event, msg) {
+            progress_show(msg);
+        })  
+        .on('success_show', function(event, msg) {
+            success_alert(msg);
+        })
+        .on('change', 'input[type="text"]', settings_dirty)
+        .on('click', 'input[type="checkbox"]', settings_dirty)
+        .on('change', '.google-secrets-file', function(event) {
+            handle_google_auth_secrets($settings_tab, event.target.files[0]);
+        })
+        .on('click', '.google-authenticate', function(event) {
+             ajax_get('/google/auth/url/', {},
+                function(error) {
+                    error_alert(error);
+                },
+                function(data) {
+                    input_show(_google_msg_template(data), function(yes, code) {
+                        if(yes) {
+                            handle_google_auth_code($settings_tab, code);
+                        }
+                    });
+                });                    
+        });
+
+    // Save settings
+    $('#settings_save').click(function(event) {  
+        var error = null;   
+        var data = $.extend(true, {}, _defaults);
+
+        if($('#use_google').is(':checked')) {
+            error = get_google($('#google'), data);    
+            if(error) {
+                error_alert(error);
+                return;
+            }
+        }
+        
+        if($('#use_s3').is(':checked')) {        
+            error = get_s3_defaults($('#s3'), data)
+                 || get_s3_credentials($('#s3'), data);               
+            if(error) {
+                error_alert(error);
+                return;
+            }
+        }
+        
+        data.projects_path = $('#projects_path').val();
+                                     
+        progress_show('Saving configuration');
          
-         ajax_get('/settings/save/', {},// TODO: add data
+        ajax_post('/config/save/', {
+                config: JSON.stringify(data)
+            },
             function(error) {
                 error_alert('Error saving settings ('+error+')');
             },
             function(data) {
-                // TODO: update cached config
+                _settings.config = data;
+                _config = _settings.config;
+                $('#settings_save').disable()
+                success_alert('Settings saved!');
             },
             function() {
                 progress_hide();
@@ -266,117 +390,251 @@ $(function() {
     });
  
 // ------------------------------------------------------------
-// blueprints
+// config modal
 // ------------------------------------------------------------
+            
+    var $config_modal = modal_init($('#config_modal'))
+        .on('show.bs.modal', function(event) { 
+            $config_modal.find('.config-panel').hide();                              
+            $('#config_save').hide();
+            $('#config_next').show();          
+            $config_modal.trigger('show_welcome');
+        })
+        .on('show_panel', function(event, id) {
+            $config_modal.trigger('all_hide')
+                .find('.config-panel:visible').hide();
+            $('#'+id).show();              
+        })
+        .on('show_welcome', function(event) {
+            $('#config_next')
+                .off('click.next')
+                .on('click.next', function(event) {
+                    $config_modal.trigger('show_google');
+                });      
+            
+            $(this).trigger('show_panel', 'config_welcome_panel');
+        })
+        .on('show_google', function(event) {
+            if(_settings.client_secrets) {
+                $('input[name="config_google"][value="1"]').click();
+            } else {
+                $('input[name="config_google"][value=""]').click(); 
+            }
+            
+            show_google($('#config_google_panel .config-collapse'), _config);
+                                           
+            $('#config_next')
+                .off('click.next')
+                .on('click.next', function(event) {
+                    var error = null;
+                    
+                    error = get_google($('#config_google_panel'), _config);
+                    if(error) {
+                        $config_modal.trigger('error_show', error);
+                    } else {           
+                        $config_modal.trigger('show_s3');
+                    }
+                });      
+            
+            $(this).trigger('show_panel', 'config_google_panel');
+        })
+        .on('show_s3', function(event) {      
+            var $scope = $('#config_s3_panel');
+                 
+            if(_config.default_s3_access_key_id
+            || _config.default_s3_secret_access_key) {
+                $scope.find('input[name="config_s3"][value="1"]').click(); 
+            } else {
+                $scope.find('input[name="config_s3"][value=""]').click(); 
+            }
+            
+            show_s3_defaults($scope, _config);
+
+            $('#config_next')
+                .off('click.next')
+                .on('click.next', function(event) {
+                    var error = null;
+                    
+                    if($scope.find('input[name="config_s3"]:checked').val()) {
+                        error = get_s3_defaults($scope, _config);
+                        
+                        if(error) {
+                            $config_modal.trigger('error_show', error);
+                        } else {                   
+                            $config_modal.trigger('show_buckets');
+                        }
+                    } else {
+                        $.extend(_config, {
+                            default_s3_access_key_id: '',
+                            default_s3_secret_access_key: '',
+                            default_s3_buckets: {
+                                staging: '',
+                                production: ''
+                            }
+                        });
+                    
+                        $config_modal.trigger('show_path');
+                    }
+                });
+                                        
+            $(this).trigger('show_panel', 'config_s3_panel');
+        })
+        .on('show_buckets', function(event) {
+            var $scope = $('#config_buckets_panel');
+            
+            show_s3_credentials($scope, _config);
+
+            if(Object.keys(_config.s3_credentials).length) {
+                $scope.find('input[name="config_buckets"][value="1"]').click(); 
+            } else {
+                $scope.find('input[name="config_buckets"][value=""]').click(); 
+            }     
+
+            $('#config_next')
+                .off('click.next')
+                .on('click.next', function(event) {
+                    error = get_s3_credentials($('#config_buckets_panel'), _config);
+ 
+                     if(error) {
+                        $config_modal.trigger('error_show', error);
+                        return;
+                    }
+                           
+                    $config_modal.trigger('show_path');
+                });
   
-    $('#blueprint_install').click(function(event) {
-        alert_hide();
-        
-        var url = $('#blueprint_url').val().trim();
-        if(!url) {
-            $(this).closest('.input-group').addClass('has-error');
-            return;
-        }
-        
-        $(this).closest('.input-group').removeClass('has-error');           
-        progress_show('Installing blueprint'); 
-             
-        ajax_get('/blueprint/install/', {url: url},
-            function(error) {
-                error_alert(error);
-            },
-            function(data) {
-                // Add to cached config!
-                _config['project_templates'].push(data);
-                
-                $('#blueprints_table tbody').append(_blueprint_template(data));
-                $('#blueprint_url').val('');
-                success_alert('Successfully installed blueprint <strong>'+data.name+'</strong>');                               
-            },
-            function() {
-                progress_hide();
-            });
-    });
-    
-// ------------------------------------------------------------
-// projects tab
-// ------------------------------------------------------------ 
-   
+            $config_modal.trigger('show_panel', 'config_buckets_panel');      
+       })
+        .on('show_path', function(event) {        
+            $('#config_projects_path').val(_config.projects_path);
 
-// ------------------------------------------------------------
-// common modal
-// ------------------------------------------------------------
+            $('#config_next')
+                .off('click.next')
+                .hide();
+            
+            $('#config_save')
+                .off('click.save')
+                .on('click.save', function(event) {         
+                    _config.projects_path = $('#config_projects_path').trimmed();
+                                
+                    ajax_post('/config/save/', {
+                            config: JSON.stringify(_config)
+                        },
+                        function(error) {
+                            $config_modal.trigger('error_show', 'Error saving settings ('+error+')');
+                        },
+                        function(data) {
+                            show_settings();
+                            $('#tab_content').show();
+                            success_alert('Your settings have been saved and your Tarbell installation has been configured!');
+                            $config_modal.modal('hide');
+                        },
+                        function() {
+                            $config_modal.trigger('progress_hide');
+                        });
+                })
+                .show();
+          
+            $(this).trigger('show_panel', 'config_path_panel'); 
+        })
+        // collapsables
+        .on('click', 'input[name="config_google"], input[name="config_s3"], input[name="config_buckets"]', function(event) {
+            var $el = $(this).closest('.config-panel').find('.config-collapse');
+            if($(this).val()) {
+                $el.show();
+            } else {
+                $el.hide();        
+            }
+        })
+        // client_secrets
+        .on('change', '.google-secrets-file', function(event) {
+            handle_google_auth_secrets($config_modal, event.target.files[0]);
+        })
+        .on('click', '.google-authenticate', function(event) {
+            ajax_get('/google/auth/url/', {},
+                function(error) {
+                    $config_modal.trigger('error_show', error);
+                },
+                function(data) {                    
+                    $config_modal.trigger('input_show', [
+                        _google_msg_template(data), 
+                        function(yes, code) {
+                            if(yes) {
+                                handle_google_auth_code($config_modal, code);
+                            }
+                        }
+                    ]);          
+                });
+        });        
     
-    $('#run_modal')
-        .on('show.bs.modal', function(event) {
-            var directory = $(event.relatedTarget)
-                .closest('tr').attr('data-project');
-            $(this).data('data-project', directory);      
-            $('.project-name').html(directory);
-        });
-
 // ------------------------------------------------------------
 // run modal
 // ------------------------------------------------------------
 
-    modal_init($('#run_modal'))
-        .on('reset', function(event) {
-            $('#run_address').enable()
-                .closest('.form-group').removeClass('has-error');              
-            $('#run_stop_button').hide();
-            $('#run_done_button, #run_button').show();   
-        })
+    var $run_modal = modal_init($('#run_modal'))
         .on('show.bs.modal', function(event) {
-            $(this)
-                .trigger('error_hide')
-                .trigger('progress_hide')
-                .trigger('reset');
+            $(this).data('data-project', 
+                $(event.relatedTarget).closest('tr').attr('data-project'));  
+            
+            $run_modal.trigger('all_hide');
             $('#run_address').val('127.0.0.1:5000');
-         });      
-        
-    $('#run_button').click(function(event) {
-        var $modal = $(this).closest('.modal').trigger('error_hide');
-        var project = $modal.data('data-project');
-               
-        var $address = $('#run_address');
-        var address = $address.val().trim();
-        if(!address) {
-            $address.focus().closest('.form-group').addClass('has-error');
-            return;
-        }
-               
-        $address.closest('.form-group').removeClass('has-error');
-        $modal.trigger('progress_show', 'Starting preview server');
-        
-        ajax_get('/project/run/', {
-                project: project,
-                address: address
-            }, 
-            function(error) {
-                $modal.trigger('error_show', error);
-            },
-            function(data) {
-                window.open('http://'+address);
-                
-                $('#run_address').disable();
-                $('#run_done_button, #run_button').hide();   
-                $('#run_stop_button').show();
-            },
-            function() {
-                $modal.trigger('progress_hide');
+        })
+        .on('click', '#run_button', function(event) {   
+            $run_modal.trigger('all_hide');
+            
+            var project = $run_modal.data('data-project');
+           
+            var $address = $('#run_address');
+            var address = $address.val().trim();
+            if(!address) {
+                $address.focus().closest('.form-group').addClass('has-error');
+                return;
             }
-        );
-    });
+            $address.closest('.form-group').removeClass('has-error');
+            
+            $run_modal.trigger('progress_show', 'Starting preview server');
     
-    $('#run_stop_button').click(function(event) {
-        ajax_get('/project/stop/', {}, 
-            function(error) {
-                $modal.trigger('error_show', error);
-            },
-            function(data) {
-                $('#run_modal').trigger('reset');
-            }
-        );
-    });  
-     
+            ajax_get('/project/run/', {
+                    project: project,
+                    address: address
+                }, 
+                function(error) {
+                    $run_modal.trigger('error_show', error);
+                },
+                function(data) {
+                    window.open('http://'+address);
+            
+                    $('#run_address').disable();
+                    $('#run_done_button, #run_button').hide();   
+                    $('#run_stop_button').show();
+                },
+                function() {
+                    $run_modal.trigger('progress_hide');
+                }
+            );
+        })
+        .on('click', '#run_stop_button', function(event) {
+            ajax_get('/project/stop/', {}, 
+                function(error) {
+                    $run_modal.trigger('error_show', error);
+                },
+                function(data) {
+                    $('#run_address').enable();              
+                    $('#run_stop_button').hide();
+                    $('#run_done_button, #run_button').show();   
+                }
+            );
+        });  
+
+// ------------------------------------------------------------
+// main
+// ------------------------------------------------------------
+
+    if(_settings.file_missing || window.location.search == '?configure') {
+        $('#config_modal').modal('show');
+    } else {
+        show_settings();
+        $('#tab_content').show();
+    }
+ 
 });
