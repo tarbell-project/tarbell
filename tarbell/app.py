@@ -673,8 +673,13 @@ class TarbellSite:
 
     def find_files(self):
         """
-        Find all files for publishing, yield (urlname, kwargs)
+        Find all file paths for publishing, yield (urlname, kwargs)
         """
+        # yield blueprint paths first
+        for path in walk_directory(os.path.join(self.path, self.blueprint_name), ignore=self.project.EXCLUDES):
+            yield 'preview', {'path': path}
+
+        # then yield project paths
         for path in walk_directory(self.path, ignore=self.project.EXCLUDES):
             yield 'preview', {'path': path}
 
