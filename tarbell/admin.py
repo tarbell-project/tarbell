@@ -116,8 +116,9 @@ def list_projects(projects_dir):
     """Get a list of projects"""
     projects_list = []
 
-    for directory in os.listdir(projects_dir):
-        project_path = os.path.join(projects_dir, directory)
+    path_prefix = os.path.expanduser(projects_dir)
+    for directory in os.listdir(path_prefix):
+        project_path = os.path.join(path_prefix, directory)
         try:
             config = load_module_dict('tarbell_config', project_path)
             title = config.get('DEFAULT_CONTEXT').get("title", directory)
