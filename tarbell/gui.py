@@ -157,8 +157,12 @@ class TarbellAdminSite:
             print 'Writing %s' % client_secrets_path    # DEBUG
             safe_write(content, client_secrets_path)
 
-            self.settings = Settings()  # reload settings
+            # Reload settings, restore current config object
+            config = self.settings.config
             
+            self.settings = Settings()
+            self.settings.config = config
+                        
             return jsonify({'settings': props(self.settings)})
         except Exception, e:
             traceback.print_exc()
