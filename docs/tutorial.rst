@@ -569,7 +569,7 @@ Replace all the city marker code with this:
 
 .. code-block:: javascript
 
-  for (i=0; i <= map_data.length; i++){
+  for (i=0; i < map_data.length; i++){
       var marker = L.marker([map_data[i].latitude, map_data[i].longitude]);
       marker.bindPopup('<h3>This is the city of ' + map_data[i].city + '</h3>');
       marker.addTo(map);
