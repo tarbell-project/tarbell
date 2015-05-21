@@ -112,22 +112,6 @@ def load_module_dict(module_name, module_path):
     del sys.modules[m.__name__]
     return d
 
-def list_projects(projects_dir):
-    """Get a list of projects"""
-    projects_list = []
-
-    path_prefix = os.path.expanduser(projects_dir)
-    for directory in os.listdir(path_prefix):
-        project_path = os.path.join(path_prefix, directory)
-        try:
-            config = load_module_dict('tarbell_config', project_path)
-            title = config.get('DEFAULT_CONTEXT').get("title", directory)
-            projects_list.append({'directory': directory, 'title': title})
-        except ImportError:
-            pass
-    
-    return projects_list
-
 def client_secrets_authorize_url(client_secrets_path):  
     """Get the client_secrets authorization url"""
     flow = client.flow_from_clientsecrets(client_secrets_path, \
