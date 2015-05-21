@@ -208,9 +208,9 @@ function get_s3_credentials($scope, cfg) {
                 };             
             } else if(key || secret) {  // entered only one
                 if(has_defaults) {
-                    error = 'You must enter an access key and a secret access key for each bucket (or leave both blank to use defaults)';
+                    error = 'You must enter an access key ID and a secret access key for each bucket (or leave both blank to use defaults)';
                 } else {
-                    error = 'You must enter an access key and a secret access key for each bucket';                
+                    error = 'You must enter an access key ID and a secret access key for each bucket';                
                 }
             } else {                    // entered neither
                 if(has_defaults) {  
@@ -219,7 +219,7 @@ function get_s3_credentials($scope, cfg) {
                         secret_access_key: settings.default_s3_secret_access_key
                     };              
                 } else {
-                    error = 'You must enter an access key and a secret access key for each bucket';
+                    error = 'You must enter an access key ID and a secret access key for each bucket';
                 }
             }
         } else if(key || secret) {
