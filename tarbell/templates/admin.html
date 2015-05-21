@@ -23,42 +23,10 @@
 </div>
 
 <ul class="nav nav-tabs" role="tablist">
-    <li><a href="#projects_tab" role="tab" data-toggle="tab">Projects</a></li>
-    <li><a href="#blueprints_tab" role="tab" data-toggle="tab">Blueprints</a></li>
     <li class="active"><a href="#settings_tab" role="tab" data-toggle="tab">Settings</a></li>
 </ul>
 
 <div id="tab_content" class="tab-content" style="display: none;">
-
-<div class="tab-pane" id="projects_tab">   
-    <div id="projects_alert" class="alert alert-info" role="alert">
-        <strong>No Tarbell projects found!</strong>
-        <p>Run <code>tarbell newproject &lt;project&gt;</code> from the command line to create a new project.</p>
-    </div>
-    <table class="table" id="projects_table">
-        <thead>
-            <th class="col-xs-4">Directory</th>
-            <th class="col-xs-8">Title</th>
-        </thead>
-        <tbody>
-        </tbody>        
-    </table>     
-</div> <!-- // projects_tab-->
-
-<div class="tab-pane" id="blueprints_tab">   
-    <div id="blueprints_alert" class="alert alert-info" role="alert">
-        <strong>There are no Tarbell blueprints installed!</strong>
-        <p>Run <code>tarbell install-blueprint &lt;url to blueprint&gt;</code> from the command line to install Tarbell blueprints.</p>
-    </div>
-    <table class="table" id="blueprints_table">
-        <thead>
-            <th class="col-xs-5">Name</th>
-            <th class="col-xs-7">URL</th>
-        </thead>
-        <tbody>
-        </tbody>        
-    </table>  
-</div> <!-- // blueprints_tab-->
 
 <div class="tab-pane active" id="settings_tab">   
 <p class="section">
@@ -449,43 +417,6 @@
     </div>
 </div>
 
-<!-- MODAL: run project -->
-<div id="run_modal" class="modal fade" data-backdrop="static" data-keyboard="false">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title">Run Project</h4>
-            </div>
-            <div class="modal-body">
-                <p class="modal-error bg-danger">
-                    <span class="modal-msg text-danger"></span>
-                </p>
-                <form class='form-horizontal'>
-                    <div class="form-group">
-                        <label for="run_address" class="col-xs-2 control-label">Address</label>
-                        <div class="col-xs-10">
-                            <input type="text" class="form-control" id="run_address" value="127.0.0.1:5000" placeholder="127.0.0.1:5000">
-                        </div>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-default" id="run_done_button" data-dismiss="modal">Done</button>
-                <button type="button" class="btn btn-success" id="run_button">Run</button>
-                <button type="button" class="btn btn-danger" id="run_stop_button">Stop</button>
-            </div>
-            <div class="modal-progress" style="display: none;">
-                <div>
-                    <div>
-                        <i class="fa fa-3x fa-spinner fa-spin"></i>
-                        <p><span class="modal-msg"></span>...</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
 <!-- UNDERSCORE TEMPLATES -->
 
 <script type="text/template" id="error_alert_template">
@@ -500,26 +431,6 @@
         <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
         <%= message %>
     </div>
-</script>
-
-<script type="text/template" id="project_template">
-    <tr data-project="<%= d.directory %>">
-        <td><%= d.directory %></td>
-        <td><a role="button" class="project-title" title="Run this project" data-toggle="modal" data-target="#run_modal">
-            <%= d.title %></a>
-        </td>
-    </tr>
-</script>
-
-<script type="text/template" id="blueprint_template">
-    <tr>
-        <td><%= d.name %></td>
-<% if(d.url) { %>
-        <td><a href="<%= d.url %>" target="_blank"><%= d.url %></a></td>
-<% } else { %>
-        <td><span class="text-muted">N/A</span></td>
-<% } %>
-    </tr>
 </script>
 
 <script type="text/template" id="google_msg_template">

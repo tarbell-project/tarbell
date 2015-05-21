@@ -40,10 +40,7 @@ class TarbellAdminSite:
 
         # Add routes
         self.app.add_url_rule('/', view_func=self.main)   
-        
-        self.app.add_url_rule('/projects/list/',
-             view_func=self.projects_list)
-             
+                     
         self.app.add_url_rule('/google/auth/secrets/',
             view_func=self.google_auth_secrets, methods=['POST'])
         self.app.add_url_rule('/google/auth/url/',
@@ -53,12 +50,7 @@ class TarbellAdminSite:
                                         
         self.app.add_url_rule('/config/save/',
             view_func=self.config_save, methods=['POST'])
-            
-        self.app.add_url_rule('/project/run/', 
-            view_func=self.project_run)
-        self.app.add_url_rule('/project/stop/', 
-            view_func=self.project_stop)
- 
+             
     def _request_get(self, *keys):
         """Get request data"""
         if request.method == 'POST':
@@ -94,20 +86,6 @@ class TarbellAdminSite:
         return os.path.join(
             os.path.dirname(self.settings.path), "client_secrets.json")     
           
-    def _project_path(self, name):
-        """Get path for project"""
-        return os.path.join(
-            self.settings.config.get('projects_path'), name)
-      
-    def _project_run(self, project_path, ip, port):
-        with ensure_project('serve', [], path=project_path) as site:
-            site.app.run(ip, port=port, use_reloader=False)
- 
-    def _project_stop(self):
-        if self.p:
-            self.p.terminate()
-            self.p = None
-
     def main(self):
         """Main view"""
         self.settings = Settings()
@@ -119,27 +97,13 @@ class TarbellAdminSite:
             
             for key, value in self.defaults.iteritems():
                 self.settings.config[key] = copy.deepcopy(value)            
-        else:
-            projects = list_projects(
-                self.settings.config.get('projects_path'))   
         
         return render_template('admin.html', 
             version=VERSION,
             defaults=self.defaults,
-            settings=props(self.settings),
-            projects=projects
+            settings=props(self.settings)
         ) 
-    
-    def projects_list(self):
-        """Get a list of projects"""
-        try:
-            projects = list_projects(
-                self.settings.config.get('projects_path'))   
-            return jsonify({'projects': projects})
-        except Exception, e:
-            traceback.print_exc()
-            return jsonify({'error': str(e)})
-            
+                
     def google_auth_secrets(self):
         """Copy client_secrets to settings directory"""
         try:
@@ -208,60 +172,4 @@ class TarbellAdminSite:
         except Exception, e:
             traceback.print_exc()
             return jsonify({'error': str(e)})
-                                
-    def project_run(self):
-        """Run preview server for project"""
-        try:
-            project, address = self._request_get_required(
-                'project', 'address')
-
-            m = re.match(r'([\w.]+):(\d+)', address)   
-            if not m:
-                raise Exception('Invalid "address" parameter')
-
-            path = self._project_path(project)
-            if not os.path.exists(path):
-                raise Exception(
-                    'The project directory "%s" does not exist' % path)
-                
-            ip = m.group(1)
-            port = m.group(2)
-                       
-            self.p = multiprocessing.Process(target=self._project_run, 
-                args=(path, ip, port))
-            self.p.start()
-            
-            # Wait for server to come up  
-            r = None        
-            for i in [1, 2, 3]:
-                time.sleep(2)
-                
-                try:
-                    print 'Waiting for server @ http://%s' % address
-                    r = requests.get('http://'+address, timeout=3)
-                
-                    if r.status_code == requests.codes.ok:
-                        return jsonify({})       
-                except requests.exceptions.ConnectionError, e:
-                    # If the server isn't running at all...
-                    print 'ERROR', e    
-            
-            if r is not None:
-                return jsonify({'warning': \
-                    'Started preview server with error (%d)' \
-                        % r.status_code}) 
-            
-            raise Exception('Could not start preview server')
-        except Exception, e:
-            traceback.print_exc()
-            return jsonify({'error': str(e)})
-            
-    def project_stop(self):
-        """Stop preview server"""
-        try:
-            self._project_stop()
-            return jsonify({})
-        except Exception, e:
-            traceback.print_exc()
-            return jsonify({'error': str(e)})
- 
+         

@@ -8,9 +8,6 @@
 var _error_alert_template = _.template($('#error_alert_template').html());
 var _success_alert_template = _.template($('#success_alert_template').html());
 
-var _project_template = _.template($('#project_template').html());
-var _blueprint_template = _.template($('#blueprint_template').html());
-
 var _google_msg_template = _.template($('#google_msg_template').html());
 var _bucket_template = _.template($('#bucket_template').html());
 
@@ -259,48 +256,6 @@ function show_settings() {
     $('#projects_path').val(_config.projects_path);
 }
 
-function show_projects() {
-    ajax_get('/projects/list/', {},
-        function(error) {
-            $('#projects_alert').hide();
-            $('#projects_table').hide();
-            error_alert('Error listing projects ('+error+')');
-        },
-        function(data) {    
-            var projects = data.projects;    
-            var html = '';
-    
-            for(var i = 0; i < projects.length; i++) {
-                html += _project_template({d: projects[i]});
-            }    
-            if(projects.length) {
-                $('#projects_alert').hide();
-                $('#projects_table tbody').html(html);
-                $('#projects_table').show();
-            } else {
-                $('#projects_alert').show();
-                $('#projects_table').hide();        
-            }
-        });
-}
-
-function show_blueprints() {
-    var blueprints = _settings.config.project_templates;
-    var html = '';
-
-    for(var i = 0; i < blueprints.length; i++) {
-        html += _blueprint_template({d: blueprints[i]});
-    }  
-    if(blueprints.length) {
-        $('#blueprints_alert').hide();
-        $('#blueprints_table tbody').html(html);
-        $('#blueprints_table').show();
-    } else {
-        $('#blueprints_alert').show();
-        $('#blueprints_table').hide();        
-    }
-}
-
 // Verify authorization code
 function handle_google_auth_code($context, code) {
     $context.trigger('progress_show', 'Verifying code');
@@ -428,10 +383,7 @@ $(function() {
             function(unused) {
                 _settings.config = data;
                 _config = _settings.config;
-                
-                show_projects();
-                show_blueprints();
-                
+                                
                 $('#settings_save').disable()
                 success_alert('Settings saved!');
             },
@@ -555,7 +507,7 @@ $(function() {
                 });
   
             $config_modal.trigger('show_panel', 'config_buckets_panel');      
-       })
+        })
         .on('show_path', function(event) {        
             $('#config_projects_path').val(_config.projects_path);
 
@@ -575,8 +527,6 @@ $(function() {
                             $config_modal.trigger('error_show', 'Error saving settings ('+error+')');
                         },
                         function(data) {
-                            show_projects();
-                            show_blueprints();
                             show_settings();
                             $('#tab_content').show();
                             success_alert('Your settings have been saved and your Tarbell installation has been configured!');
@@ -621,79 +571,12 @@ $(function() {
         });        
     
 // ------------------------------------------------------------
-// run modal
-// ------------------------------------------------------------
-
-    var $run_modal = modal_init($('#run_modal'))
-        .on('show.bs.modal', function(event) {
-            $run_modal.trigger('all_hide');
-            
-            $(this).data('data-project', 
-                $(event.relatedTarget).closest('tr').attr('data-project'));  
-            
-            $('#run_address').val('127.0.0.1:5000').enable();
-            $('#run_done_button, #run_button').show();              
-            $('#run_stop_button').hide();
-        })
-        .on('click', '#run_button', function(event) {   
-            $run_modal.trigger('all_hide');
-            
-            var project = $run_modal.data('data-project');
-           
-            var $address = $('#run_address');
-            var address = $address.val().trim();
-            if(!address) {
-                $address.focus().closest('.form-group').addClass('has-error');
-                return;
-            }
-            $address.closest('.form-group').removeClass('has-error');
-            
-            $run_modal.trigger('progress_show', 'Starting preview server');
-    
-            ajax_get('/project/run/', {
-                    project: project,
-                    address: address
-                }, 
-                function(error) {
-                    $run_modal.trigger('error_show', error);
-                },
-                function(data) {
-                    if(data.warning) {
-                        $run_modal.trigger('error_show', data.warning);
-                    }
-                    window.open('http://'+address);
-            
-                    $('#run_address').disable();
-                    $('#run_done_button, #run_button').hide();   
-                    $('#run_stop_button').show();
-                },
-                function() {
-                    $run_modal.trigger('progress_hide');
-                }
-            );
-        })
-        .on('click', '#run_stop_button', function(event) {
-            ajax_get('/project/stop/', {}, 
-                function(error) {
-                    $run_modal.trigger('error_show', error);
-                },
-                function(data) {
-                    $('#run_address').enable();              
-                    $('#run_stop_button').hide();
-                    $('#run_done_button, #run_button').show();   
-                }
-            );
-        });  
-
-// ------------------------------------------------------------
 // main
 // ------------------------------------------------------------
 
     if(_settings.file_missing || window.location.search == '?configure') {
         $('#config_modal').modal('show');
     } else {
-        show_projects();
-        show_blueprints();
         show_settings();
         $('#tab_content').show();
     }
