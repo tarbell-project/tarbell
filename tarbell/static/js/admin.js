@@ -9,7 +9,9 @@ var _error_alert_template = _.template($('#error_alert_template').html());
 var _success_alert_template = _.template($('#success_alert_template').html());
 
 var _google_msg_template = _.template($('#google_msg_template').html());
-var _bucket_template = _.template($('#bucket_template').html());
+
+var _edit_bucket_template = _.template($('#edit_bucket_template').html());
+var _add_bucket_template = _.template($('#add_bucket_template').html());
 
 //
 // progress modal
@@ -99,6 +101,7 @@ function bucket_disable(target) {
     $group.find('input').disable();
     $group.find('.bucket-disable').hide();
     $group.find('.bucket-enable').show();
+    $group.addClass('disabled');
     settings_dirty();
 }
 
@@ -108,6 +111,7 @@ function bucket_enable(target) {
     $group.find('input').enable();
     $group.find('.bucket-enable').hide();
     $group.find('.bucket-disable').show();
+    $group.removeClass('disabled');
 }
 
 // Remove set of S3 bucket controls
@@ -115,50 +119,24 @@ function bucket_remove(target) {
     $(target).closest('.form-group').remove();
 }
 
-// Add row of S3 bucket controls
-function bucket_add(target, data) {
+// Add set of S3 bucket controls
+function bucket_add(target, data, tmpl) {
     var d = $.extend(
         {name: '', access_key_id: '', secret_access_key: ''},
         data || {}
     );
-    var $group = $(target).closest('.form-group');    
-    $(_bucket_template(d)).insertBefore($group);
+    var $group = $(target).closest('.form-group');  
+    var tmpl = tmpl || _add_bucket_template;
+    $(tmpl(d)).insertBefore($group);
 }
 
-// Show google settings in controls in $scope
-function show_google($scope, cfg) {
-    if(_settings.client_secrets) {
-        $scope.find('.google-secrets-exists').show();
-        $scope.find('.google-authenticate').enable();
-        $scope.find('.google-emails').enable().val(cfg.google_account || '');
-        $scope.addClass('in');
-    } else {
-        $scope.find('.google-secrets-exists').hide();
-        $scope.find('.google-authenticate').disable();
-        $scope.find('.google-emails').disable().val(cfg.google_account || '');   
-        $scope.removeClass('in');
-    }
-}
 
-// Get and validate google settings from controls in $scope
-function get_google($scope, cfg) {
-    cfg.google_account = $scope.find('.google-emails').trimmed();
-}
-
-// Show S3 defaults in controls in $scope
-function show_s3_defaults($scope, cfg) {
-    $scope.find('.default-s3-access-key-id').val(cfg.default_s3_access_key_id || '');
-    $scope.find('.default-s3-secret-access-key').val(cfg.default_s3_secret_access_key || '');
-    $scope.find('.default-staging').val(cfg.default_s3_buckets.staging || '');
-    $scope.find('.default-production').val(cfg.default_s3_buckets.production || '');
-}
-
-// Get and validate S3 defaults from controls in $scope
-function get_s3_defaults($scope, cfg) {
-    var key = $scope.find('.default-s3-access-key-id').trimmed();
-    var secret = $scope.find('.default-s3-secret-access-key').trimmed();
-    var staging = $scope.find('.default-staging').trimmed();
-    var production = $scope.find('.default-production').trimmed();
+// Get and validate S3 defaults
+function get_s3_defaults(cfg) {
+    var key = $('#default_s3_access_key_id').trimmed();
+    var secret = $('#default_s3_secret_access_key').trimmed();
+    var staging = $('#default_s3_buckets_staging').trimmed();
+    var production = $('#default_s3_buckets_production').trimmed();
     
     if(!(key && secret) && (staging || production)) {
         return 'You must enter keys to specify default staging and production buckets';
@@ -174,27 +152,13 @@ function get_s3_defaults($scope, cfg) {
     });
 }
 
-// Show S3 credentials in controls in $scope
-function show_s3_credentials($scope, cfg) {
-    $scope.find('.bucket-group').remove();
-
-    var $el = $scope.find('.bucket-add');
-    
-    for(var name in cfg.s3_credentials) {
-        bucket_add($el, $.extend({name: name}, cfg.s3_credentials[name]));
-    } 
-    if(!Object.keys(cfg.s3_credentials).length) {
-        $el.click();
-    }
-}
-
-// Get and validate S3 credentials from controls in $scope
-function get_s3_credentials($scope, cfg) {
+// Get and validate S3 credentials
+function get_s3_credentials(cfg) {
     var error = '';
     var data = {};
     var has_defaults = cfg.default_s3_access_key_id && cfg.default_s3_secret_access_key;
 
-    $scope.find('.bucket-group').each(function(i, el) {
+    $('#s3').find('.bucket-group').not('.disabled').each(function(i, el) {    
         var $el = $(el);
         var url = $el.find('.bucket-url').trimmed();
         var key = $el.find('.bucket-key').trimmed(); 
@@ -237,11 +201,41 @@ function get_s3_credentials($scope, cfg) {
     $.extend(cfg.s3_credentials, data);
 }
 
+//
 // Initialize controls in settings tab
-function show_settings() {        
-    $('#use_google').prop('checked', _settings.client_secrets);
-    show_google($('#google'), _config);
-       
+//
+
+function show_s3_credentials() {
+    $('#s3_credentials').find('.bucket-group').remove();
+    
+    var $el = $('#s3_credentials').find('.bucket-add');
+    for(var name in _config.s3_credentials) {
+        bucket_add($el, $.extend({name: name}, _config.s3_credentials[name]), _edit_bucket_template);
+    }
+    if(!Object.keys(_config.s3_credentials).length) {
+        $el.click();
+    }  
+}
+
+function show_settings() {     
+    // Use Google?   
+    if(_settings.client_secrets) {
+        $('#use_google').prop('checked', true);
+        $('#google').addClass('in');
+        $('.google-secrets-exists').show();
+        $('#google_authenticate').enable();
+    
+    } else {
+        $('#use_google').prop('checked', false);
+        $('#google').removeClass('in');
+        $('.google-secrets-exists').hide();
+        $('#google_authenticate').disable();
+    }
+    
+    // Google Emails
+    $('#google_emails').enable().val(_config.google_account || '');
+           
+    // Use S3?
     if(_config.default_s3_access_key_id || _config.default_s3_secret_access_key) {
         $('#use_s3').prop('checked', true);
         $('#s3').addClass('in');    
@@ -249,10 +243,17 @@ function show_settings() {
         $('#use_s3').prop('checked', false);
         $('#s3').removeClass('in');
     } 
-        
-    show_s3_defaults($('#s3'), _config);    
-    show_s3_credentials($('#s3_credentials'), _config);    
 
+    // S3 defaults
+    $('#default_s3_access_key_id').val(_config.default_s3_access_key_id || '');
+    $('#default_s3_secret_access_key').val(_config.default_s3_secret_access_key || '');
+    $('#default_s3_buckets_staging').val(_config.default_s3_buckets.staging || '');
+    $('#default_s3_buckets_production').val(_config.default_s3_buckets.production || '');
+    
+    // Additional S3 credentials
+    show_s3_credentials(); 
+
+    // Projects path
     $('#projects_path').val(_config.projects_path);
 }
 
@@ -291,7 +292,7 @@ function handle_google_auth_secrets($context, file) {
                 function(data) {
                     _settings = data.settings;
                     _config = _settings.config;
-                    $('.google-authenticate, .google-emails').enable();
+                    $('#google_authenticate, #google_emails').enable();
                 },
                 function() {
                     $context.trigger('progress_hide');
@@ -331,11 +332,11 @@ $(function() {
         })
         .on('change', 'input[type="text"]', settings_dirty)
         .on('click', 'input[type="checkbox"]', settings_dirty)
-        .on('change', '.google-secrets-file', function(event) {
+        .on('change', '#google_secrets_file', function(event) {
             handle_google_auth_secrets($settings_tab, event.target.files[0]);
         })
-        .on('click', '.google-authenticate', function(event) {
-             ajax_get('/google/auth/url/', {},
+        .on('click', '#google_authenticate', function(event) {
+            ajax_get('/google/auth/url/', {},
                 function(error) {
                     error_alert(error);
                 },
@@ -354,16 +355,11 @@ $(function() {
         var data = $.extend(true, {}, _defaults);
 
         if($('#use_google').is(':checked')) {
-            error = get_google($('#google'), data);    
-            if(error) {
-                error_alert(error);
-                return;
-            }
+            data.google_account = $('#google_emails').trimmed();
         }
         
         if($('#use_s3').is(':checked')) {        
-            error = get_s3_defaults($('#s3'), data)
-                 || get_s3_credentials($('#s3'), data);               
+            error = get_s3_defaults(data) || get_s3_credentials(data);               
             if(error) {
                 error_alert(error);
                 return;
@@ -386,199 +382,19 @@ $(function() {
                                 
                 $('#settings_save').disable()
                 success_alert('Settings saved!');
+                
+                show_s3_credentials();
             },
             function() {
                 progress_hide();
             });
     });
- 
-// ------------------------------------------------------------
-// config modal
-// ------------------------------------------------------------
-            
-    var $config_modal = modal_init($('#config_modal'))
-        .on('show.bs.modal', function(event) { 
-            $config_modal.find('.config-panel').hide();                              
-            $('#config_save').hide();
-            $('#config_next').show();          
-            $config_modal.trigger('show_welcome');
-        })
-        .on('show_panel', function(event, id) {
-            $config_modal.trigger('all_hide')
-                .find('.config-panel:visible').hide();
-            $('#'+id).show();              
-        })
-        .on('show_welcome', function(event) {
-            $('#config_next')
-                .off('click.next')
-                .on('click.next', function(event) {
-                    $config_modal.trigger('show_google');
-                });      
-            
-            $(this).trigger('show_panel', 'config_welcome_panel');
-        })
-        .on('show_google', function(event) {
-            if(_settings.client_secrets) {
-                $('input[name="config_google"][value="1"]').click();
-            } else {
-                $('input[name="config_google"][value=""]').click(); 
-            }
-            
-            show_google($('#config_google_panel .config-collapse'), _config);
-                                           
-            $('#config_next')
-                .off('click.next')
-                .on('click.next', function(event) {
-                    var error = null;
-                    
-                    error = get_google($('#config_google_panel'), _config);
-                    if(error) {
-                        $config_modal.trigger('error_show', error);
-                    } else {           
-                        $config_modal.trigger('show_s3');
-                    }
-                });      
-            
-            $(this).trigger('show_panel', 'config_google_panel');
-        })
-        .on('show_s3', function(event) {      
-            var $scope = $('#config_s3_panel');
-                 
-            if(_config.default_s3_access_key_id
-            || _config.default_s3_secret_access_key) {
-                $scope.find('input[name="config_s3"][value="1"]').click(); 
-            } else {
-                $scope.find('input[name="config_s3"][value=""]').click(); 
-            }
-            
-            show_s3_defaults($scope, _config);
-
-            $('#config_next')
-                .off('click.next')
-                .on('click.next', function(event) {
-                    var error = null;
-                    
-                    if($scope.find('input[name="config_s3"]:checked').val()) {
-                        error = get_s3_defaults($scope, _config);
-                        
-                        if(error) {
-                            $config_modal.trigger('error_show', error);
-                        } else {                   
-                            $config_modal.trigger('show_buckets');
-                        }
-                    } else {
-                        $.extend(_config, {
-                            default_s3_access_key_id: '',
-                            default_s3_secret_access_key: '',
-                            default_s3_buckets: {
-                                staging: '',
-                                production: ''
-                            }
-                        });
-                    
-                        $config_modal.trigger('show_path');
-                    }
-                });
-                                        
-            $(this).trigger('show_panel', 'config_s3_panel');
-        })
-        .on('show_buckets', function(event) {
-            var $scope = $('#config_buckets_panel');
-            
-            show_s3_credentials($scope, _config);
-
-            if(Object.keys(_config.s3_credentials).length) {
-                $scope.find('input[name="config_buckets"][value="1"]').click(); 
-            } else {
-                $scope.find('input[name="config_buckets"][value=""]').click(); 
-            }     
-
-            $('#config_next')
-                .off('click.next')
-                .on('click.next', function(event) {
-                    error = get_s3_credentials($('#config_buckets_panel'), _config);
- 
-                     if(error) {
-                        $config_modal.trigger('error_show', error);
-                        return;
-                    }
-                           
-                    $config_modal.trigger('show_path');
-                });
   
-            $config_modal.trigger('show_panel', 'config_buckets_panel');      
-        })
-        .on('show_path', function(event) {        
-            $('#config_projects_path').val(_config.projects_path);
+// ------------------------------------------------------------
+// Main
+// ------------------------------------------------------------
 
-            $('#config_next')
-                .off('click.next')
-                .hide();
-            
-            $('#config_save')
-                .off('click.save')
-                .on('click.save', function(event) {         
-                    _config.projects_path = $('#config_projects_path').trimmed();
-                                
-                    ajax_post('/config/save/', {
-                            config: JSON.stringify(_config)
-                        },
-                        function(error) {
-                            $config_modal.trigger('error_show', 'Error saving settings ('+error+')');
-                        },
-                        function(data) {
-                            show_settings();
-                            $('#tab_content').show();
-                            success_alert('Your settings have been saved and your Tarbell installation has been configured!');
-                            $config_modal.modal('hide');
-                        },
-                        function() {
-                            $config_modal.trigger('progress_hide');
-                        });
-                })
-                .show();
-          
-            $(this).trigger('show_panel', 'config_path_panel'); 
-        })
-        // collapsables
-        .on('click', 'input[name="config_google"], input[name="config_s3"], input[name="config_buckets"]', function(event) {
-            var $el = $(this).closest('.config-panel').find('.config-collapse');
-            if($(this).val()) {
-                $el.show();
-            } else {
-                $el.hide();        
-            }
-        })
-        // client_secrets
-        .on('change', '.google-secrets-file', function(event) {
-            handle_google_auth_secrets($config_modal, event.target.files[0]);
-        })
-        .on('click', '.google-authenticate', function(event) {
-            ajax_get('/google/auth/url/', {},
-                function(error) {
-                    $config_modal.trigger('error_show', error);
-                },
-                function(data) {                    
-                    $config_modal.trigger('input_show', [
-                        _google_msg_template(data), 
-                        function(yes, code) {
-                            if(yes) {
-                                handle_google_auth_code($config_modal, code);
-                            }
-                        }
-                    ]);          
-                });
-        });        
+    show_settings();
+    $('#tab_content').show();
     
-// ------------------------------------------------------------
-// main
-// ------------------------------------------------------------
-
-    if(_settings.file_missing || window.location.search == '?configure') {
-        $('#config_modal').modal('show');
-    } else {
-        show_settings();
-        $('#tab_content').show();
-    }
- 
 });
