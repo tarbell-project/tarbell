@@ -122,7 +122,7 @@ def process_xlsx(content):
     """Turn Excel file contents into Tarbell worksheet data"""
     data = {}
     workbook = xlrd.open_workbook(file_contents=content)
-    worksheets = workbook.sheet_names()
+    worksheets = [w for w in workbook.sheet_names() if not w.startswith('_')]
     for worksheet_name in worksheets:
         worksheet = workbook.sheet_by_name(worksheet_name)
 
