@@ -249,7 +249,6 @@ def format_date(value, format='%b. %d, %Y', convert_tz=None):
 class TarbellSite:
     def __init__(self, path, client_secrets_path=None, quiet=False):
         self.app = Flask(__name__)
-        self.freezer = Freezer(self.app) # centralized freezer
 
         self.quiet = quiet
 
@@ -280,12 +279,13 @@ class TarbellSite:
         self.app.before_request(self.add_site_to_context)
         self.app.after_request(self.never_cache_preview)
 
-        self.freezer.register_generator(self.find_files)
+        # centralized freezer setup
         self.app.config.setdefault('FREEZER_RELATIVE_URLS', True)
         self.app.config.setdefault('FREEZER_DESTINATION', 
             os.path.join(os.path.realpath(self.path), '_site'))
-        #self.app.config.setdefault('FREEZER_IGNORE_MIMETYPE_WARNINGS', True)
 
+        self.freezer = Freezer(self.app) 
+        self.freezer.register_generator(self.find_files)
 
     def add_site_to_context(self):
         g.current_site = self
