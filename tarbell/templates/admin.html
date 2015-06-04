@@ -64,7 +64,7 @@
                     Enter the Google account(s) that should have access to new spreadsheets, separating multiple addresses with commas.
                     Leave this field blank to specify accounts for each new project.
                 </p>
-                <textarea id="google_emails" class="form-control google-emails" rows="3" placeholder="somebody@gmail.com" aria-describedby="google_emails_help"></textarea>
+                <textarea id="google_emails" class="form-control google-emails" rows="3" placeholder="somebody@gmail.com"></textarea>
             </div>
         </form>
     </div>
@@ -133,8 +133,7 @@
             <p class="form-control-static">
                 This is where your Tarbell projects will be located.  This path will be used by <code>tarbell list</code> and <code>tarbell switch</code>.
             </p>
-            <input type="text" class="form-control" id="projects_path" value="" 
-                placeholder="{{ defaults.projects_path }}" aria-describedby="projects_path_help">
+            <input type="text" class="form-control" id="projects_path" value="" placeholder="{{ defaults.projects_path }}">
         </div>
     </form>
 </p>
