@@ -125,6 +125,9 @@ def process_xlsx(content):
     workbook = xlrd.open_workbook(file_contents=content)
     worksheets = workbook.sheet_names()
     for worksheet_name in worksheets:
+        if worksheet_name.startswith('_'):
+            continue
+
         worksheet = workbook.sheet_by_name(worksheet_name)
 
         merged_cells = worksheet.merged_cells
