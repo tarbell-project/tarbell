@@ -26,6 +26,7 @@ from clint import arguments
 from clint.textui import colored
 
 from tarbell import __VERSION__ as VERSION
+MAJOR_VERSION = '.'.join(VERSION.split('.')[:2])
 
 # Handle relative imports from binary, see https://github.com/newsapps/flask-tarbell/issues/87
 if __name__ == "__main__" and __package__ is None:
@@ -212,7 +213,7 @@ def tarbell_install_blueprint(command, args):
             git = sh.git.bake(_cwd=tempdir, _tty_in=True, _tty_out=False, _err_to_out=True)
             puts(git.clone(template_url, '.'))
             puts(git.fetch())
-            puts(git.checkout(VERSION))
+            puts(git.checkout(MAJOR_VERSION))
 
             _install_requirements(tempdir)
 
@@ -436,12 +437,12 @@ def tarbell_update(command, args):
 
         git = sh.git.bake(_cwd=site.base.base_dir)
         git.fetch()
-        puts(colored.yellow("Checking out {0}".format(VERSION)))
-        puts(git.checkout(VERSION))
+        puts(colored.yellow("Checking out {0}".format(MAJOR_VERSION)))
+        puts(git.checkout(MAJOR_VERSION))
         puts(colored.yellow("Stashing local changes"))
         puts(git.stash())
         puts(colored.yellow("Pull latest changes"))
-        puts(git.pull('origin', VERSION))
+        puts(git.pull('origin', MAJOR_VERSION))
 
 
 
@@ -467,10 +468,10 @@ def _newproject(command, path, name, settings):
         puts(git.submodule.add(template['url'], '_blueprint'))
         puts(git.submodule.update(*['--init']))
 
-        # Get submodule branches, switch to current version
+        # Get submodule branches, switch to current major version
         submodule = sh.git.bake(_cwd=os.path.join(path, '_blueprint'))
         puts(submodule.fetch())
-        puts(submodule.checkout(VERSION))
+        puts(submodule.checkout(MAJOR_VERSION))
 
         # Create spreadsheet
         key = _create_spreadsheet(name, title, path, settings)
