@@ -308,13 +308,13 @@ def _setup_default_templates(settings, path, prompt=True):
     """Add some (hardcoded) default templates."""
     project_templates = [{
         "name": "Basic Bootstrap 3 template",
-        "url": "https://github.com/newsapps/tarbell-template",
+        "url": "https://github.com/tarbell-project/tarbell-template",
     }, {
         "name": "Searchable map template",
-        "url": "https://github.com/eads/tarbell-map-template",
+        "url": "https://github.com/tarbell-project/tarbell-map-template",
     }, {
         "name": "Tarbell template walkthrough",
-        "url": "https://github.com/hbillings/tarbell-tutorial-template",
+        "url": "https://github.com/tarbell-project/tarbell-tutorial-template",
     }]
     for project in project_templates:
         puts("+ Adding {0} ({1})".format(project["name"], project["url"]))
