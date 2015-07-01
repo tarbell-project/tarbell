@@ -13,161 +13,142 @@
 <script type="text/javascript" src="/static/js/json2.js"></script>
 </head>
 <body>
+<nav class="navbar navbar-default">
+  <div class="container-fluid">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="#"><img src="static/img/tarbell-logo.png" alt="Tarbell" height="25"></a>
+    </div>
 
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+      <ul class="nav navbar-nav">
+        <li><a href="tarbell.io" class="tagline">Simple static sites for storytellers</a></li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li><a href="http://tarbell.readthedocs.org/en/{{ version }}/">Read the docs</a></li>
+        <li><a href="//github.com/tarbell-project/tarbell/issues">Report a bug</a></li>
+        <li><a href="//github.com/tarbell-project/tarbell"><span>You are running</span> version {{ version }}</a></li>
+      </ul>
+    </div><!-- /.navbar-collapse -->
+  </div><!-- /.container-fluid -->
+</nav>
 <div class="container-fluid">
 <div class="row">
 <div class="col-xs-12">
 
-<div id="site_link">
-    <a href="http://www.tarbell.io/" target="_blank">tarbell.io</a>&nbsp;&nbsp;{{ version }}
-</div>
-
-<ul class="nav nav-tabs" role="tablist">
+<!--<ul class="nav nav-tabs" role="tablist">
     <li><a href="#projects_tab" role="tab" data-toggle="tab">Projects</a></li>
     <li><a href="#blueprints_tab" role="tab" data-toggle="tab">Blueprints</a></li>
     <li class="active"><a href="#settings_tab" role="tab" data-toggle="tab">Settings</a></li>
-</ul>
+</ul>-->
 
 <div id="tab_content" class="tab-content" style="display: none;">
+<div class="tab-pane active container" id="settings_tab">
+    <section class="row">
+      <div class="col-xs-2" id="logo-container">
+        <img src="static/img/ida-logo-full-name.png" height="180">
+      </div>
+      <div class="col-xs-10">
+        <h1>Welcome to your Tarbell dashboard!</h1>
+        <p>This is where you can set the local directory Tarbell uses for projects, update Google Spreadsheet information, and add Amazon S3 keys. If you need general help setting up new Tarbell projects, <a href="http://tarbell.readthedocs.org/en/{{ version }}/tutorial.html">take a look at the docs here.</a></p>
+      </div>
+    </section>
 
-<div class="tab-pane" id="projects_tab">   
-    <div id="projects_alert" class="alert alert-info" role="alert">
-        <strong>No Tarbell projects found!</strong>
-        <p>Run <code>tarbell newproject &lt;project&gt;</code> from the command line to create a new project.</p>
-    </div>
-    <table class="table" id="projects_table">
-        <thead>
-            <th class="col-xs-4">Directory</th>
-            <th class="col-xs-8">Title</th>
-        </thead>
-        <tbody>
-        </tbody>        
-    </table>     
-</div> <!-- // projects_tab-->
-
-<div class="tab-pane" id="blueprints_tab">   
-    <div id="blueprints_alert" class="alert alert-info" role="alert">
-        <strong>There are no Tarbell blueprints installed!</strong>
-        <p>Run <code>tarbell install-blueprint &lt;url to blueprint&gt;</code> from the command line to install Tarbell blueprints.</p>
-    </div>
-    <table class="table" id="blueprints_table">
-        <thead>
-            <th class="col-xs-5">Name</th>
-            <th class="col-xs-7">URL</th>
-        </thead>
-        <tbody>
-        </tbody>        
-    </table>  
-</div> <!-- // blueprints_tab-->
-
-<div class="tab-pane active" id="settings_tab">   
-<p class="section">
-    <div class="checkbox">
-        <label data-toggle="collapse" data-target="#google">
-            <input type="checkbox" id="use_google"> Use Google spreadsheets 
-        </label>
-        <a class="help" href="http://tarbell.readthedocs.org/en/{{ version }}/install.html#configure-google-spreadsheet-access-optional" target="_blank">
-            <i class="fa fa-question-circle"></i>
-        </a>
-    </div>
-    <div id="google" class="collapse">
+    <section class="row">
+      <div class="col-xs-12">
+        <h3>Default project path</h3>
         <form>
             <div class="form-group">
-                <label>Google credentials</label>
-                <div>
-                    <p class="form-control-static text-danger google-secrets-exists">A client_secrets.json file exists.</p>
-                    <span>                
-                        <span class="btn btn-default btn-file">
-                            Select New Secrets File <input type="file" class="google-secrets-file" accept="application/json">
-                        </span>
-                    </span>
-                    <a class="btn btn-default google-authenticate" disabled>Authenticate Secrets File</a>
-                </div>
-            </div>
-            <div class="form-group">           
-                <label>Google account(s) with access to new spreadsheets</label>
-                <textarea class="form-control google-emails" rows="3" placeholder="somebody@gmail.com" aria-describedby="google_emails_help"></textarea>
-                <span class="help-block" id="google_emails_help">
-                    Leave blank to specify for each new project; separate multiple addresses with commas
-                </span>
+                <label for="projects-path"><p class="side-note">Where should Tarbell create and install new projects on your computer?</p></label>
+                  <input type="text" class="form-control" id="projects_path" value=""
+                    placeholder="{{ defaults.projects_path }}" aria-describedby="projects_path_help">
             </div>
         </form>
-    </div>
+      </div>
+      <div class="col-xs-12 col-sm-6">
+        <h3>Google Spreadsheet settings</h3>
+        <p class="side-note">You can use Google Spreadsheets to manage the content of your Tarbell projects. <a class="help" href="http://tarbell.readthedocs.org/en/{{ version }}/install.html#configure-google-spreadsheet-access-optional" target="_blank">
+                <i class="fa fa-question-circle"></i>
+            </a>
 </p>
-<p class="section">
-    <div class="checkbox">
-        <label data-toggle="collapse" data-target="#s3">
-            <input type="checkbox" id="use_s3"> Use S3
-        </label>
-        <a class="help" href="http://tarbell.readthedocs.org/en/{{ version }}/install.html#configure-amazon-s3" target="_blank">
-            <i class="fa fa-question-circle"></i>
-        </a>
-    </div>
-    <div id="s3" class="collapse">
-        <form class="form-horizontal">
-            <div class="form-group">
-                <label for="default_s3_access_key_id" class="col-xs-4 control-label">Default Access Key</label>
-                <div class="col-xs-8">
-                    <input type="text" class="form-control default-s3-access-key-id" value="">
-                </div>    
-            </div>
-            <div class="form-group">
-                <label for="default_s3_secret_access_key" class="col-xs-4 control-label">Default Secret Access Key</label>
-                <div class="col-xs-8">
-                    <input type="text" class="form-control default-s3-secret-access-key" value="">
-                </div>    
-            </div>
-            <div class="form-group">
-                <label for="default_s3_buckets_staging" class="col-xs-4 control-label">Default staging bucket</label>
-                <div class="col-xs-8">
-                    <input type="text" class="form-control default-staging" value="">
-                </div>    
-            </div>
-            <div class="form-group">
-                <label for="default_s3_buckets_production" class="col-xs-4 control-label">Default production bucket</label>
-                <div class="col-xs-8">
-                    <input type="text" class="form-control default-production" value="">
-                </div>    
-            </div>
-        </form>
-        <form class="form-horizontal" id="s3_credentials">
-            <div class="form-group">
-                <div class="col-xs-12">
-                    <p>Specify any additional S3 buckets.  Be sure to enter an access key and secret access key if they differ from the defaults.</p>
+        <div id="google">
+            <form>
+                <div class="form-group">
+                    <label>Google credentials</label>
+                    <div class="form-control-static google-secrets-exists">
+                        <p ><i class="fa fa-exclamation-circle"></i>You're already authenticated. You can re-authenticate if you need to switch Google accounts or debug this workflow.</p>
+                        <a class="google-authenticate btn btn-default">Re-authenticate me  <i class="fa fa-arrow-circle-right"></i></a>
+                    </div>
+                    <button class="btn btn-file">Add credentials<input type="file" class="google-secrets-file" accept="application/json"></button>
                 </div>
-            </div>
-            <!-- #bucket_template insertion -->
-            <div class="form-group">
-                <div class="col-xs-11 bucket-control-text">
-                    <p class="form-control-static text-muted"><em>Add a row &gt;</em></p>
+                <div class="form-group">
+                    <label>Google account(s) with access to new spreadsheets
+                    <p class="side-note" id="google_emails_help">Leave blank to specify for each new project; separate multiple addresses with commas.</p></label>
+                    <textarea class="form-control google-emails" rows="3" placeholder="somebody@gmail.com" aria-describedby="google_emails_help"></textarea>
                 </div>
-       
-                <div class="col-xs-1">
-                    <a class="btn text-success bucket-add" href="#" onclick="bucket_add(this)">
-                        <i class="fa fa-lg fa-plus"></i></a>           
-                </div>
-            </div>
-        </form>
-    </div>
-</p>
-<p class="section">
-    <form>
-        <div class="form-group">   
-            <label>Projects Path</label>
-            <input type="text" class="form-control" id="projects_path" value="" 
-                placeholder="{{ defaults.projects_path }}" aria-describedby="projects_path_help">
-            <span class="help-block" id="projects_path_help">
-                The directory where your projects will be saved, or leave empty to use the default
-            </span>
+            </form>
         </div>
-    </form>
-</p>
+      </div>
+      <div class="col-xs-12 col-sm-6">
+        <h3>Publishing settings</h3>
+        <p class="side-note">Add your credentials here to use Tarbell to publish your static web pages.<a class="help" href="http://tarbell.readthedocs.org/en/{{ version }}/install.html#configure-amazon-s3" target="_blank">
+                <i class="fa fa-question-circle"></i>
+            </a></p>
+        <div class="checkbox">
+            <label data-toggle="collapse" data-target="#s3">
+                <input type="checkbox" id="use_s3"> Use Amazon S3
+            </label>
+        </div>
+        <div id="s3" class="collapse">
+            <form class="form-horizontal">
+                <div class="form-group">
+                    <label for="default_s3_access_key_id" class="control-label">Default Access Key</label>
+                    <input type="text" class="form-control default-s3-access-key-id" value="">
+                </div>
+                <div class="form-group">
+                    <label for="default_s3_secret_access_key" class="control-label">Default Secret Access Key</label>
+                    <input type="text" class="form-control default-s3-secret-access-key" value="">
+                </div>
+                <div class="form-group">
+                    <label for="default_s3_buckets_staging" class="control-label">Default staging bucket</label>
+                    <input type="text" class="form-control default-staging" value="">
+                </div>
+                <div class="form-group">
+                    <label for="default_s3_buckets_production" class="control-label">Default production bucket</label>
+                    <input type="text" class="form-control default-production" value="">
+                </div>
+            </form>
+            <form class="form-horizontal" id="s3_credentials">
+                <div class="form-group">
+                    <label>Additional S3 buckets (optional)</label>
+                    <p class="side-note">Be sure to enter an access key and secret access key if they differ from the defaults.</p>
+                </div>
+                <!-- #bucket_template insertion -->
+                <div class="form-group row">
+                    <div class="col-xs-11 bucket-control-text">
+                        <p class="form-control-static text-muted"><em>Add a row &gt;</em></p>
+                    </div>
+                    <div class="col-xs-1">
+                        <a class="btn text-success bucket-add" href="#" onclick="bucket_add(this)">
+                            <i class="fa fa-lg fa-plus"></i></a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </section>
 
-<div class="col-xs-12">
-    <div class="center-block">
-        <button type="button" class="btn btn-success" id="settings_save" disabled>Save Settings</button>
+    <div class="col-xs-12">
+        <div class="center-block">
+            <button type="button" class="btn btn-success" id="settings_save" disabled>Save Settings</button>
+        </div>
     </div>
-</div>
 
 </div> <!-- // settings_tab-->
 
@@ -207,7 +188,7 @@
                     </div>
                     <div class="form-group">
                         <input type="text" class="form-control" val="" placeholder="enter your confirmation code">
-                    </div>               
+                    </div>
                 </form>
             </div>
             <div class="modal-footer">
@@ -233,7 +214,7 @@
                     <span class="modal-msg text-success"></span>
                 </p>
                 <!-- welcome -->
-                <div class="config-panel" id="config_welcome_panel">                   
+                <div class="config-panel" id="config_welcome_panel">
                     <div class="row">
                         <div class="col-xs-3">
                             <img src="/static/img/ida-tarbell.jpg" width="100">
@@ -279,8 +260,8 @@
                                 Login to Google and go to <a href="https://console.developers.google.com/project" target="_blank">
                                 https://console.developers.google.com/project</a> to create an app and generate a client_secrets
                                 authentication file.  You should create credentials for an "installed app".
-                                </p>  
-                                <span>                
+                                </p>
+                                <span>
                                     <span class="btn btn-default btn-file">
                                         Select Secrets File <input type="file" class="google-secrets-file" accept="application/json">
                                     </span>
@@ -362,10 +343,10 @@
                                 <input type="radio" name="config_buckets" value=""> No
                             </label>
                         </div>
-                    </form>                   
+                    </form>
                     <div class="config-collapse">
                         <form class="form-horizontal">
-                            <div class="form-group bucket-group">
+                            <div class="form-group bucket-group row">
                                 <div class="col-xs-4">
                                     <input type="text" class="form-control bucket-url" value="" placeholder="bucket.myorg.com">
                                 </div>
@@ -377,18 +358,17 @@
                                 </div>
                                 <div class="col-xs-1">
                                     <a class="btn text-danger bucket-remove" href="#" onclick="bucket_remove(this)">
-                                        <i class="fa fa-lg fa-remove"></i></a>                         
-                                </div>
-                            </div>                            
+                                        <i class="fa fa-lg fa-remove"></i></a>                                </div>
+                            </div>
                             <div class="form-group">
                                 <div class="col-xs-11 bucket-control-text">
                                     <p class="form-control-static text-muted"><em>Add a row &gt;</em></p>
                                 </div>
                                 <div class="col-xs-1">
                                     <a class="btn text-success bucket-add" href="#" onclick="bucket_add(this)">
-                                        <i class="fa fa-lg fa-plus"></i></a>                         
+                                        <i class="fa fa-lg fa-plus"></i></a>
                                 </div>
-                            </div>                            
+                            </div>
                          </form>
                     </div>
                 </div>  <!-- // config_buckets_panel -->
@@ -530,7 +510,7 @@
 </script>
                        
 <script type="text/template" id="bucket_template">
-    <div class="form-group bucket-group">
+    <div class="form-group bucket-group row">
         <div class="col-xs-4">
             <input type="text" class="form-control bucket-url" value="<%= name %>" placeholder="bucket.myorg.com">
         </div>
