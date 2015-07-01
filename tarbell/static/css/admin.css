@@ -88,24 +88,6 @@ p.section:first-child {
 */
 .modal-msg {display: inline-block;margin: 4px 6px;}
 
-/*  in-modal confirm panel 
-*/
-.modal-confirm {
-    position:absolute;
-    top: 0;
-    left:0;
-    bottom: 0;
-    right: 0;
-    -webkit-border-radius: 6px;
-    -moz-border-radius: 6px;
-    border-radius: 6px;
-    background-color: #fff;
-    opacity: 0.85;
-    z-index: 1001;
-}
-.modal-confirm > div {display: table;width: 100%;height: 100%;}
-.modal-confirm > div > div {display: table-cell;text-align: center;vertical-align: middle;}
-.modal-confirm button {margin-left: 8px;margin-right: 8px;}
 
 /*  in-modal progress panel 
 */
@@ -126,26 +108,6 @@ p.section:first-child {
 .modal-progress > div {display: table;width: 100%;height: 100%;}
 .modal-progress > div > div {display: table-cell;text-align: center;vertical-align: middle;}
 .modal-progress i {margin-top: 10px;margin-bottom: 10px;}
-
-/*  in-modal (user) input panel 
-*/
-.modal-input {
-    position:absolute;
-    top: 0;
-    left:0;
-    bottom: 0;
-    right: 0;
-    min-height: 100px;
-    -webkit-border-radius: 6px;
-    -moz-border-radius: 6px;
-    border-radius: 6px;
-    background-color: #fff;
-    opacity: 0.98;
-    z-index: 1000;
-}
-.modal-input > div {display: table;width: 100%;height: 100%;}
-.modal-input > div > div {display: table-cell;vertical-align: middle;}
-.modal-input .modal-input-buttons {text-align: center;}
 
 
 /* file selection
@@ -179,18 +141,13 @@ p.section:first-child {
     color: white;
 }
 .btn-file input[type=file] {
-    position: absolute;
-    top: 0;
-    right: 0;
-    min-width: 100%;
-    min-height: 100%;
-    font-size: 100px;
-    text-align: right;
     filter: alpha(opacity=0);
     opacity: 0;
     outline: none;
     cursor: inherit;
     display: block;
+    height: 0;
+    width: 0;
 }
 
 /*  misc
@@ -256,26 +213,4 @@ span.side-note {
 #settings_save {
     padding-left: 30px;
     padding-right: 30px;
-}
-
-#blueprints_tab table,
-#projects_tab table {
-    border-bottom: 2px solid #ddd;
-}
-
-#projects_tab .project-title,
-#projects_tab .project-title:hover {
-    cursor: pointer;
-}
-
-
-/* config_modal
-*/
-
-.form-group label.radio-inline:first-child {
-    padding-left: 0;
-}
-
-.config-collapse {
-    margin-top: 12px;
 }

@@ -67,12 +67,12 @@ def backup(path, filename):
         ))
         shutil.copy(target, destination)
 
-def safe_write(data, path, backup=True):
+def safe_write(data, path, backup_existing=True):
     """Write data to path.  If path exists, backup first"""
     dirname = os.path.dirname(path)
     filename = os.path.basename(path)
     
-    if backup and os.path.exists(path):
+    if backup_existing and os.path.exists(path):
         backup(dirname, filename)
     
     print 'Writing %s' % path
@@ -111,22 +111,6 @@ def load_module_dict(module_name, module_path):
 
     del sys.modules[m.__name__]
     return d
-
-def list_projects(projects_dir):
-    """Get a list of projects"""
-    projects_list = []
-
-    path_prefix = os.path.expanduser(projects_dir)
-    for directory in os.listdir(path_prefix):
-        project_path = os.path.join(path_prefix, directory)
-        try:
-            config = load_module_dict('tarbell_config', project_path)
-            title = config.get('DEFAULT_CONTEXT').get("title", directory)
-            projects_list.append({'directory': directory, 'title': title})
-        except ImportError:
-            pass
-    
-    return projects_list
 
 def client_secrets_authorize_url(client_secrets_path):  
     """Get the client_secrets authorization url"""
