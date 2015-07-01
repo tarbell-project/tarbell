@@ -1,21 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<title>Tarbell Administration</title>
-<meta charset="utf-8">
-<meta name="description" content="Tarbell Administration">
-<link rel="stylesheet" href="/static/bootstrap-3.3.2-dist/css/bootstrap.min.css">
-<link rel="stylesheet" href="/static/font-awesome-4.3.0/css/font-awesome.min.css">
-<link rel="stylesheet" href="/static/css/admin.css">
-<script type="text/javascript" src="/static/js/jquery-1.10.2.min.js"></script>
-<script type="text/javascript" src="/static/js/underscore-1.8.2.min.js"></script>
-<script type="text/javascript" src="/static/bootstrap-3.3.2-dist/js/bootstrap.min.js"></script>
-<script type="text/javascript" src="/static/js/json2.js"></script>
+  <title>Tarbell Administration</title>
+  <meta charset="utf-8">
+  <meta name="description" content="Tarbell Administration">
+  <link rel="stylesheet" href="/static/bootstrap-3.3.2-dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/static/font-awesome-4.3.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="/static/css/admin.css">
+  <script type="text/javascript" src="/static/js/jquery-1.10.2.min.js"></script>
+  <script type="text/javascript" src="/static/js/underscore-1.8.2.min.js"></script>
+  <script type="text/javascript" src="/static/bootstrap-3.3.2-dist/js/bootstrap.min.js"></script>
+  <script type="text/javascript" src="/static/js/json2.js"></script>
 </head>
 <body>
 <nav class="navbar navbar-default">
   <div class="container-fluid">
-    <!-- Brand and toggle get grouped for better mobile display -->
     <div class="navbar-header">
       <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
         <span class="sr-only">Toggle navigation</span>
@@ -39,130 +38,12 @@
     </div><!-- /.navbar-collapse -->
   </div><!-- /.container-fluid -->
 </nav>
-<div class="container-fluid">
-<div class="row">
-<div class="col-xs-12">
-
-<!--<ul class="nav nav-tabs" role="tablist">
-    <li><a href="#projects_tab" role="tab" data-toggle="tab">Projects</a></li>
-    <li><a href="#blueprints_tab" role="tab" data-toggle="tab">Blueprints</a></li>
-    <li class="active"><a href="#settings_tab" role="tab" data-toggle="tab">Settings</a></li>
-</ul>-->
-
-<div id="tab_content" class="tab-content" style="display: none;">
-<div class="tab-pane active container" id="settings_tab">
-    <section class="row">
-      <div class="col-xs-2" id="logo-container">
-        <img src="static/img/ida-logo-full-name.png" height="180">
-      </div>
-      <div class="col-xs-10">
-        <h1>Welcome to your Tarbell dashboard!</h1>
-        <p>This is where you can set the local directory Tarbell uses for projects, update Google Spreadsheet information, and add Amazon S3 keys. If you need general help setting up new Tarbell projects, <a href="http://tarbell.readthedocs.org/en/{{ version }}/tutorial.html">take a look at the docs here.</a></p>
-      </div>
-    </section>
-
-    <section class="row">
-      <div class="col-xs-12">
-        <h3>Default project path</h3>
-        <form>
-            <div class="form-group">
-                <label for="projects-path"><p class="side-note">Where should Tarbell create and install new projects on your computer?</p></label>
-                <!--This is where your Tarbell projects will be located.  This path will be used by <code>tarbell list</code> and <code>tarbell switch</code>-->
-                  <input type="text" class="form-control" id="projects_path" value=""
-                    placeholder="{{ defaults.projects_path }}" aria-describedby="projects_path_help">
-    </section>
-    <section class="row">
-      <div class="col-xs-12 col-sm-6" id="google">
-        <h3>Google Spreadsheet settings</h3>
-        <p class="side-note">You can use Google Spreadsheets to manage the content of your Tarbell projects. <a class="help" href="http://tarbell.readthedocs.org/en/{{ version }}/install.html#configure-google-spreadsheet-access-optional" target="_blank"><i class="fa fa-question-circle"></i></a></p>
-        <form>
-            <div class="form-group">
-                <label>Google credentials</label>
-                <div class="form-control-static google-secrets-exists">
-                  <p ><i class="fa fa-exclamation-circle"></i>You're already authenticated. You can re-authenticate if you need to switch Google accounts or debug this workflow.</p>
-                  <a class="google-authenticate btn btn-default">Re-authenticate me  <i class="fa fa-arrow-circle-right"></i></a>
-                </div>
-                <p class="form-control-static">
-                    Login to Google and go to <a href="https://console.developers.google.com/project" target="_blank">
-                    https://console.developers.google.com/project</a> to create an app and generate a client_secrets
-                    authentication file.  You should create credentials for an "installed app".
-                </p>
-                  <button class="btn btn-default btn-file">
-                        Select New Secrets File <input id="google_secrets_file" type="file" accept="application/json">
-                  </button>
-                <a id="google_authenticate" class="btn btn-default" disabled>Authenticate Secrets File</a>
-            </div>
-            <div class="form-group">
-                <label>Google account(s) with access to new spreadsheets</label>
-                <p class="form-control-static">
-                    Enter the Google account(s) that should have access to new spreadsheets, separating multiple addresses with commas.
-                    Leave this field blank to specify accounts for each new project.
-                </p>
-                <textarea id="google_emails" class="form-control google-emails" rows="3" placeholder="somebody@gmail.com"></textarea>
-            </div>
-        </form>
-      </div>
-      <div class="col-xs-12 col-sm-6">
-        <h3>Publishing settings</h3>
-        <p class="side-note">Add your credentials here to use Tarbell to publish your static web pages.<a class="help" href="http://tarbell.readthedocs.org/en/{{ version }}/install.html#configure-amazon-s3" target="_blank">
-                <i class="fa fa-question-circle"></i>
-            </a></p>
-        <div class="checkbox">
-            <label data-toggle="collapse" data-target="#s3">
-                <input type="checkbox" id="use_s3"> Use Amazon S3
-            </label>
-        </div>
-        <div id="s3" class="collapse">
-            <form class="form-horizontal">
-                <div class="form-group">
-                    <label for="default_s3_access_key_id" class="control-label">Default Access Key</label>
-                    <input type="text" class="form-control default-s3-access-key-id" value="">
-                </div>
-                <div class="form-group">
-                    <label for="default_s3_secret_access_key" class="control-label">Default Secret Access Key</label>
-                    <input type="text" class="form-control default-s3-secret-access-key" value="">
-                </div>
-                <div class="form-group">
-                    <label for="default_s3_buckets_staging" class="control-label">Default staging bucket</label>
-                    <input type="text" class="form-control default-staging" value="">
-                </div>
-                <div class="form-group">
-                    <label for="default_s3_buckets_production" class="control-label">Default production bucket</label>
-                    <input type="text" class="form-control default-production" value="">
-                </div>
-            </form>
-            <form class="form-horizontal" id="s3_credentials">
-                <div class="form-group">
-                    <label>Additional S3 buckets (optional)</label>
-                    <p class="side-note">Be sure to enter an access key and secret access key if they differ from the defaults.</p>
-                </div>
-                <!-- #bucket_template insertion -->
-                <div class="form-group row">
-                    <div class="col-xs-11 bucket-control-text">
-                        <p class="form-control-static text-muted"><em>Add a row &gt;</em></p>
-                    </div>
-                    <div class="col-xs-1">
-                        <a class="btn text-success bucket-add" href="#" onclick="bucket_add(this)">
-                            <i class="fa fa-lg fa-plus"></i></a>
-                    </div>
-                </div>
-            </form>
-</section>
-
-    <div class="col-xs-12">
-        <div class="center-block">
-            <button type="button" class="btn btn-success" id="settings_save" disabled>Save Settings</button>
-        </div>
-    </div>
-
-
-</div> <!-- // settings_tab-->
-
-</div> <!-- // tab-content -->
-
-</div> <!-- // col-xs-12 -->
-</div> <!-- // row -->
+<div class="container">
+  {% include "_settings.html" %}
 </div> <!-- // container-fluid -->
+<footer class="container-fluid">
+<p>Released under some open source license or other.</p>
+</footer>
 
 <!-- MODAL: progress -->
 <div id="progress_modal" class="modal fade" data-backdrop="static" data-keyboard="false">
@@ -222,47 +103,45 @@
 </script>
 
 <script type="text/template" id="google_msg_template">
-    <a href="<%= url %>" target="_blank">Click here</a> to authorize this
-    application to create and access Google spreadsheets to use with Tarbell
-    projects. After authenticating, you will receive a confirmation code.
-    Enter it below.
+    <a href="<%= url %>" target="_blank">Click here</a> to authorize this application to create and access Google spreadsheets to use with Tarbell projects. After authenticating, you will receive a confirmation code. Enter it below.
 </script>
+
+<!-- When does this template actually get used? -->
 <script type="text/template" id="edit_bucket_template">
-    <div class="form-group bucket-group">
-        <div class="col-xs-4">
+    <div class="form-group bucket-group row">
+        <div class="col-xs-1">
+            <a class="btn text-danger bucket-disable" href="javascript:" onclick="bucket_disable(this)"><i class="fa fa-lg fa-remove"></i></a>
+        </div>
+        <div class="col-xs-11">
             <input type="text" class="form-control bucket-url" value="<%= name %>" placeholder="bucket.myorg.com">
         </div>
-        <div class="col-xs-3">
-            <input type="text" class="form-control bucket-key" value="<%= access_key_id %>" placeholder="access key id">            
+        <div class="col-xs-6">
+            <input type="text" class="form-control bucket-key" value="<%= access_key_id %>" placeholder="access key id">
         </div>
-        <div class="col-xs-4">
+        <div class="col-xs-6">
             <input type="text" class="form-control bucket-secret" value="<%= secret_access_key %>" placeholder="secret access key">
         </div>
         <div class="col-xs-1">
-            <a class="btn text-danger bucket-disable" href="javascript:" onclick="bucket_disable(this)">
-                <i class="fa fa-lg fa-remove"></i></a>                         
-            <a class="btn text-success bucket-enable" href="javascript:" onclick="bucket_enable(this)" style="display: none;">
-                <i class="fa fa-lg fa-plus"></i></a>                         
+          <a class="btn text-success bucket-enable" href="javascript:" onclick="bucket_enable(this)" style="display: none;"><i class="fa fa-lg fa-plus"></i></a>
         </div>
-    </div>                            
+    </div>
 </script>
 
 <script type="text/template" id="add_bucket_template">
-    <div class="form-group bucket-group">
-        <div class="col-xs-4">
+    <div class="form-group bucket-group row">
+        <div class="col-xs-12">
             <input type="text" class="form-control bucket-url" value="<%= name %>" placeholder="bucket.myorg.com">
         </div>
-        <div class="col-xs-3">
-            <input type="text" class="form-control bucket-key" value="<%= access_key_id %>" placeholder="access key id">            
+        <div class="col-xs-6">
+            <input type="text" class="form-control bucket-key" value="<%= access_key_id %>" placeholder="access key id">
         </div>
-        <div class="col-xs-4">
+        <div class="col-xs-6">
             <input type="text" class="form-control bucket-secret" value="<%= secret_access_key %>" placeholder="secret access key">
         </div>
-        <div class="col-xs-1">
-            <a class="btn text-danger bucket-remove" href="javascript:" onclick="bucket_remove(this)">
-                <i class="fa fa-lg fa-remove"></i></a>                         
+        <div class="col-xs-12 col-sm-3 col-sm-offset-9">
+            <a class="btn text-danger bucket-remove" href="javascript:" onclick="bucket_remove(this)">Remove this bucket</a>
         </div>
-    </div>                            
+    </div>
 </script>
 
 

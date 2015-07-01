@@ -214,44 +214,43 @@ function show_s3_credentials() {
     }
     if(!Object.keys(_config.s3_credentials).length) {
         $el.click();
-    }  
+    }
 }
 
-function show_settings() {     
-    // Use Google?   
+function show_settings() {
+    // Use Google?
     if(_settings.client_secrets) {
         $('#use_google').prop('checked', true);
-        $('#google').addClass('in');
         $('.google-secrets-exists').show();
+        $('.google-secrets-needed').hide();
         $('#google_authenticate').enable();
-    
     } else {
         $('#use_google').prop('checked', false);
-        $('#google').removeClass('in');
         $('.google-secrets-exists').hide();
+        $('.google-secrets-needed').show();
         $('#google_authenticate').disable();
     }
-    
+
     // Google Emails
     $('#google_emails').enable().val(_config.google_account || '');
-           
+
     // Use S3?
     if(_config.default_s3_access_key_id || _config.default_s3_secret_access_key) {
         $('#use_s3').prop('checked', true);
-        $('#s3').addClass('in');    
+        $('#s3').addClass('in');
     } else {
         $('#use_s3').prop('checked', false);
         $('#s3').removeClass('in');
-    } 
+    }
 
     // S3 defaults
     $('#default_s3_access_key_id').val(_config.default_s3_access_key_id || '');
     $('#default_s3_secret_access_key').val(_config.default_s3_secret_access_key || '');
     $('#default_s3_buckets_staging').val(_config.default_s3_buckets.staging || '');
     $('#default_s3_buckets_production').val(_config.default_s3_buckets.production || '');
-    
+
     // Additional S3 credentials
-    show_s3_credentials(); 
+    show_s3_credentials();
 
     // Projects path
     $('#projects_path').val(_config.projects_path);
@@ -260,31 +259,30 @@ function show_settings() {
 // Verify authorization code
 function handle_google_auth_code($context, code) {
     $context.trigger('progress_show', 'Verifying code');
-      
+
     ajax_get('/google/auth/code/', {code: code},
         function(error) {
             $context.trigger('error_show', error);
         },
         function(data) {
-            $context.trigger('success_show', 'Authentication successful');               
+            $context.trigger('success_show', 'Authentication successful');
         },
         function() {
             $context.trigger('progress_hide');
-        });  
+        });
 }
 
 // Handle new client_secrets file selection
 function handle_google_auth_secrets($context, file) {
      if(file) {
         var reader = new FileReader();
-        
         reader.onerror = function() {
             $context.trigger('error_show', 'Error loading file');
         };
-       
+
         reader.onload = function() {
             $context.trigger('progress_show', 'Copying file');
-        
+
             ajax_post('/google/auth/secrets/', {content: reader.result},
                 function(error) {
                     $context.trigger('error_show', 'Error copying file ('+error+')');
@@ -296,11 +294,11 @@ function handle_google_auth_secrets($context, file) {
                 },
                 function() {
                     $context.trigger('progress_hide');
-                });                
+                });
         };
 
         $context.trigger('progress_show', 'Loading file');
-        reader.readAsDataURL(file);  
+        reader.readAsDataURL(file);
     }
 }
 
