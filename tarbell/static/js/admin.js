@@ -10,7 +10,6 @@ var _success_alert_template = _.template($('#success_alert_template').html());
 
 var _google_msg_template = _.template($('#google_msg_template').html());
 
-var _edit_bucket_template = _.template($('#edit_bucket_template').html());
 var _add_bucket_template = _.template($('#add_bucket_template').html());
 
 //
@@ -32,11 +31,11 @@ function progress_hide() {
 
 function input_show(msg, callback) {
     var $input = $('#input_modal').find('input[type="text"]');
-    
+
     var $input_modal = $('#input_modal')
         .on('show.bs.modal', function(event) {
-            $input_modal.find('.modal-msg').html(msg);   
-            $input.val('');       
+            $input_modal.find('.modal-msg').html(msg);
+            $input.val('');
         })
         .on('click', '.btn-default', function(event) {
             $input_modal.modal('hide');
@@ -49,11 +48,11 @@ function input_show(msg, callback) {
                     .closest('.form-group').addClass('has-error');
                 return;
             }
- 
+
             $input_modal.modal('hide');
-            callback(true, value);       
+            callback(true, value);
         });
-        
+
     $input_modal.modal('show');
 }
 
@@ -70,21 +69,21 @@ function alert_hide() {
 }
 
 function error_hide() {
-    $('div.tab-pane').find('div[role="alert"].alert-danger').remove();   
+    $('div.tab-pane').find('div[role="alert"].alert-danger').remove();
 }
 
 function error_alert(message) {
     error_hide();
-    $('div.tab-pane.active').prepend(_error_alert_template({message: message}));    
+    $('div.tab-pane.active').prepend(_error_alert_template({message: message}));
 }
 
 function success_hide() {
-    $('div.tab-pane').find('div[role="alert"].alert-success').remove();   
+    $('div.tab-pane').find('div[role="alert"].alert-success').remove();
 }
 
 function success_alert(message) {
     success_hide();
-    $('div.tab-pane.active').prepend(_success_alert_template({message: message}));    
+    $('div.tab-pane.active').prepend(_success_alert_template({message: message}));
 }
 
 //
@@ -93,16 +92,6 @@ function success_alert(message) {
 
 function settings_dirty() {
     $('#settings_save').enable();
-}
-
-// Disable row of S3 bucket controls
-function bucket_disable(target) {
-    var $group = $(target).closest('.form-group');
-    $group.find('input').disable();
-    $group.find('.bucket-disable').hide();
-    $group.find('.bucket-enable').show();
-    $group.addClass('disabled');
-    settings_dirty();
 }
 
 // Enable row of S3 bucket controls
@@ -125,7 +114,7 @@ function bucket_add(target, data, tmpl) {
         {name: '', access_key_id: '', secret_access_key: ''},
         data || {}
     );
-    var $group = $(target).closest('.form-group');  
+    var $group = $(target).closest('.form-group');
     var tmpl = tmpl || _add_bucket_template;
     $(tmpl(d)).insertBefore($group);
 }
@@ -133,15 +122,15 @@ function bucket_add(target, data, tmpl) {
 
 // Get and validate S3 defaults
 function get_s3_defaults(cfg) {
-    var key = $('#default_s3_access_key_id').trimmed();
-    var secret = $('#default_s3_secret_access_key').trimmed();
-    var staging = $('#default_s3_buckets_staging').trimmed();
-    var production = $('#default_s3_buckets_production').trimmed();
-    
+    var key = $('#default-s3-access-key-id').trimmed();
+    var secret = $('#default-s3-secret-access-key').trimmed();
+    var staging = $('#default-s3-buckets-staging').trimmed();
+    var production = $('#default-s3-buckets-production').trimmed();
+
     if(!(key && secret) && (staging || production)) {
         return 'You must enter keys to specify default staging and production buckets';
     }
-    
+
     $.extend(cfg, {
         default_s3_access_key_id: key,
         default_s3_secret_access_key: secret,
@@ -158,18 +147,18 @@ function get_s3_credentials(cfg) {
     var data = {};
     var has_defaults = cfg.default_s3_access_key_id && cfg.default_s3_secret_access_key;
 
-    $('#s3').find('.bucket-group').not('.disabled').each(function(i, el) {    
+    $('#s3').find('.bucket-group').not('.disabled').each(function(i, el) {
         var $el = $(el);
         var url = $el.find('.bucket-url').trimmed();
-        var key = $el.find('.bucket-key').trimmed(); 
-        var secret = $el.find('.bucket-secret').trimmed(); 
-        
+        var key = $el.find('.bucket-key').trimmed();
+        var secret = $el.find('.bucket-secret').trimmed();
+
         if(url) {
             if(key && secret) {         // entered both
                 data[url] = {
                     access_key_id: key,
                     secret_access_key: secret
-                };             
+                };
             } else if(key || secret) {  // entered only one
                 if(has_defaults) {
                     error = 'You must enter an access key ID and a secret access key for each bucket (or leave both blank to use defaults)';
@@ -177,11 +166,11 @@ function get_s3_credentials(cfg) {
                     error = 'You must enter an access key ID and a secret access key for each bucket';                
                 }
             } else {                    // entered neither
-                if(has_defaults) {  
+                if(has_defaults) {
                     data[url] = {
                         access_key_id: settings.default_s3_access_key_id,
                         secret_access_key: settings.default_s3_secret_access_key
-                    };              
+                    };
                 } else {
                     error = 'You must enter an access key ID and a secret access key for each bucket';
                 }
@@ -192,12 +181,12 @@ function get_s3_credentials(cfg) {
         if(error) {
             return false;
         }
-    });     
-    
+    });
+
     if(error) {
         return error;
     }
-    
+
     $.extend(cfg.s3_credentials, data);
 }
 
@@ -207,10 +196,10 @@ function get_s3_credentials(cfg) {
 
 function show_s3_credentials() {
     $('#s3_credentials').find('.bucket-group').remove();
-    
+
     var $el = $('#s3_credentials').find('.bucket-add');
     for(var name in _config.s3_credentials) {
-        bucket_add($el, $.extend({name: name}, _config.s3_credentials[name]), _edit_bucket_template);
+        bucket_add($el, $.extend({name: name}, _config.s3_credentials[name]), _add_bucket_template);
     }
     if(!Object.keys(_config.s3_credentials).length) {
         $el.click();
@@ -244,10 +233,10 @@ function show_settings() {
     }
 
     // S3 defaults
-    $('#default_s3_access_key_id').val(_config.default_s3_access_key_id || '');
-    $('#default_s3_secret_access_key').val(_config.default_s3_secret_access_key || '');
-    $('#default_s3_buckets_staging').val(_config.default_s3_buckets.staging || '');
-    $('#default_s3_buckets_production').val(_config.default_s3_buckets.production || '');
+    $('#default-s3-access-key-id').val(_config.default_s3_access_key_id || '');
+    $('#default-s3-secret-access-key').val(_config.default_s3_secret_access_key || '');
+    $('#default-s3-buckets-staging').val(_config.default_s3_buckets.staging || '');
+    $('#default-s3-buckets-production').val(_config.default_s3_buckets.production || '');
 
     // Additional S3 credentials
     show_s3_credentials();
@@ -266,6 +255,7 @@ function handle_google_auth_code($context, code) {
         },
         function(data) {
             $context.trigger('success_show', 'Authentication successful');
+            show_settings();
         },
         function() {
             $context.trigger('progress_hide');
@@ -304,31 +294,31 @@ function handle_google_auth_secrets($context, file) {
 
 
 $(function() {
-        
     // Clear alerts/states when switching from tab to tab
-    $('a[data-toggle="tab"]').on('hide.bs.tab', function(event) {      
+    $('a[data-toggle="tab"]').on('hide.bs.tab', function(event) {
         alert_hide();
-        $('.form-group, .input-group').removeClass('has-error');        
+        $('.form-group, .input-group').removeClass('has-error');
     });
-   
+
 // ------------------------------------------------------------
 // settings tab
 // ------------------------------------------------------------
-     
+
     var $settings_tab = $('#settings_tab')
         // mimic modal functions so we can re-use core routines
         .on('error_hide', error_hide)
-        .on('error_show', function(event, msg) { 
-            error_alert(msg); 
+        .on('error_show', function(event, msg) {
+            error_alert(msg);
         })
         .on('progress_hide', progress_hide)
         .on('progress_show', function(event, msg) {
             progress_show(msg);
-        })  
+        })
         .on('success_show', function(event, msg) {
             success_alert(msg);
         })
         .on('change', 'input[type="text"]', settings_dirty)
+        .on('change', 'textarea', settings_dirty)
         .on('click', 'input[type="checkbox"]', settings_dirty)
         .on('change', '#google_secrets_file', function(event) {
             handle_google_auth_secrets($settings_tab, event.target.files[0]);
@@ -344,30 +334,41 @@ $(function() {
                             handle_google_auth_code($settings_tab, code);
                         }
                     });
-                });                    
+                });
         });
 
     // Save settings
-    $('#settings_save').click(function(event) {  
-        var error = null;   
+    $('#settings_save').click(function(event) {
+        var error = null;
         var data = $.extend(true, {}, _defaults);
 
-        if($('#use_google').is(':checked')) {
+        if($('#google_emails').val()) {
             data.google_account = $('#google_emails').trimmed();
         }
-        
-        if($('#use_s3').is(':checked')) {        
-            error = get_s3_defaults(data) || get_s3_credentials(data);               
+
+        //if($('#use_s3').is(':checked')) {
+            //error = get_s3_defaults(data) || get_s3_credentials(data);
+            //if(error) {
+                //error_alert(error);
+                //return;
+            //}
+        //}
+        try {
+          //get_s3_defaults(data);
+          error = get_s3_defaults(data) || get_s3_credentials(data);
             if(error) {
                 error_alert(error);
                 return;
             }
+          console.log("error", error);
         }
-        
+        catch(e) {
+          console.log(e);
+        }
         data.projects_path = $('#projects_path').val();
-                                     
+
         progress_show('Saving configuration');
-         
+
         ajax_post('/config/save/', {
                 config: JSON.stringify(data)
             },
@@ -377,22 +378,22 @@ $(function() {
             function(unused) {
                 _settings.config = data;
                 _config = _settings.config;
-                                
+
                 $('#settings_save').disable()
                 success_alert('Settings saved!');
-                
+
                 show_s3_credentials();
             },
             function() {
                 progress_hide();
             });
     });
-  
+
 // ------------------------------------------------------------
 // Main
 // ------------------------------------------------------------
 
     show_settings();
     $('#tab_content').show();
-    
+
 });

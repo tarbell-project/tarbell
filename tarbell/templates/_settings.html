@@ -20,38 +20,38 @@
   <section class="row">
     <div class="col-xs-12 col-sm-6" id="google">
       <h3>Google Spreadsheet settings</h3>
-      <p class="description">You can use Google Spreadsheets to manage the content of your Tarbell projects. <a class="help" href="http://tarbell.readthedocs.org/en/{{ version }}/install.html#configure-google-spreadsheet-access-optional" target="_blank"><i class="fa fa-question-circle"></i></a></p>
+      <p class="description">Create a Google Drive credential file to manage the content of your Tarbell projects directly in Google Spreadsheets. <a class="help" href="http://tarbell.readthedocs.org/en/{{ version }}/install.html#configure-google-spreadsheet-access-optional" target="_blank"><i class="fa fa-question-circle"></i></a></p>
 
 
       <div class="google-secrets-exists">
-        <p><i class="fa fa-exclamation-circle"></i> You're already authenticated. You can re-authenticate if you need to switch Google accounts or debug this workflow.</p>
-        <a class="google-authenticate btn btn-default">Re-authenticate me  <i class="fa fa-arrow-circle-right"></i></a>
+        <p>You're authenticated. You can re-authenticate if you need to switch Google accounts or debug this workflow.</p>
+        <a id="google-authenticate" class="btn btn-default">Re-authenticate me  <i class="fa fa-arrow-circle-right"></i></a>
       </div>
 
       <div class="google-secrets-needed">
         <p>In order to allow Tarbell to create new Google Spreadsheets, you’ll need to download a <code>client_secrets.json</code> credential file to access the Google Drive API.</p>
         <label>Set up Google credentials</label>
         <p class="description">For a detailed walk-through of this process, including screenshots, see <a href="http://tarbell.readthedocs.org/en/1.0/install.html#configure-google-spreadsheet-access-optional">the Tarbell installation and set-up guide.</a></p>
-        <div class="step"><span>1</span><p><a href="https://console.developers.google.com/project" target="_blank">Log in</a> to the Google Developer Console.</p></div>
-        <div class="step"><span>2</span><p>Under the "APIs & auth" section, click "APIs" and enable Google Drive API.</p></div>
-        <div class="step"><span>3</span><p>In "Credentials" (just under "APIs"), click the big "Create New Client ID" button. Create credentials for an "installed app."</p></div>
-        <div class="step"><span>4</span><p>Give your project a name under "Consent Screen."</p></div>
+        <div class="step"><span>1</span><p><a href="https://console.developers.google.com/project" target="_blank">Log in</a> to the Google Developer Console. Select "Create an empty project." Give your project a name, accept the terms and click "Create."</p></div>
+        <div class="step"><span>2</span><p>Enable Google Drive API in the "APIs & auth > APIs" section in the sidebar.</p></div>
+        <div class="step"><span>3</span><p>In "APIs & auth > Credentials", choose "Create New Client ID." Create credentials for an "installed app" and continue to the consent screen.</p></div>
+        <div class="step"><span>4</span><p>Enter a "Product Name" on the consent screen and hit "Save." Choose "Installed App" and "Other" from the pop-up that appears. Choose "Create Client ID."</p></div>
         <div class="step"><span>5</span><p>Download your credentials by clicking "Download JSON."</p></div>
         <div class="step"><span>6</span><p>Rename the file you just downloaded to <code>client_secrets.json</code> and save it somewhere. (By default, Tarbell will look for this file in your Downloads directory.)</p></div>
         <div class="step"><span>7</span><p>Add your new credential file, and then authenticate it with Google.</p>
           <form>
             <button class="btn btn-default btn-file">Select new credential file<input id="google_secrets_file" type="file" accept="application/json" /></button>
-            <a id="google_authenticate" class="btn btn-default" disabled>Authenticate credential file</a>
+            <a id="google_authenticate" class="btn btn-default" disabled>Authenticate me</a>
           </form>
       </div>
+    </div>
       <div class="form-group">
         <form>
           <label>Google account(s) with access to new spreadsheets</label>
-          <p class="side-note">Enter the Google account(s) that should have access to new spreadsheets, separating multiple addresses with commas. Leave this field blank to specify accounts for each new project.</p>
+          <p class="description">Enter the Google account(s) that should have access to new spreadsheets, separating multiple addresses with commas. Leave this field blank to specify accounts for each new project.</p>
           <textarea id="google_emails" class="form-control google-emails" rows="3" placeholder="somebody@gmail.com"></textarea>
         </form>
       </div>
-    </div>
     </div>
     <div class="col-xs-12 col-sm-6">
       <h3>Publishing settings</h3>
@@ -59,20 +59,20 @@
       <div id="s3">
           <form>
               <div class="form-group">
-                  <label for="default_s3_access_key_id" class="control-label">Default Access Key</label>
-                  <input type="text" class="form-control default-s3-access-key-id" value="">
+                  <label for="default_s3_access_key_id" class="control-label">Default Access Key ID</label>
+                  <input type="text" class="form-control" id="default-s3-access-key-id" placeholder="access key id">
               </div>
               <div class="form-group">
                   <label for="default_s3_secret_access_key" class="control-label">Default Secret Access Key</label>
-                  <input type="text" class="form-control default-s3-secret-access-key" value="">
+                  <input type="text" class="form-control" id="default-s3-secret-access-key" placeholder="secret access key" value="">
               </div>
               <div class="form-group">
                   <label for="default_s3_buckets_staging" class="control-label">Default staging bucket</label>
-                  <input type="text" class="form-control default-staging" value="">
+                  <input type="text" class="form-control" id="default-s3-buckets-staging" placeholder="staging bucket name" value="">
               </div>
               <div class="form-group">
                   <label for="default_s3_buckets_production" class="control-label">Default production bucket</label>
-                  <input type="text" class="form-control default-production" value="">
+                  <input type="text" class="form-control" id="default-s3-buckets-production" placeholder="production bucket name" value="">
               </div>
           </form>
           <form id="s3_credentials">
@@ -83,14 +83,14 @@
               <!-- #bucket_template insertion -->
               <div class="form-group row">
                   <div class="col-xs-12 bucket-control-text">
-                      <a class="btn btn-default bucket-add" href="#" onclick="bucket_add(this); e.preventDefault();"><i class="fa fa-lg fa-plus"></i> Add another bucket</a>
+                      <a class="btn btn-default bucket-add" href="#" onclick="bucket_add(this)"><i class="fa fa-lg fa-plus"></i> Add another bucket</a>
                   </div>
               </div>
           </form>
   </section>
   <section class="row">
     <div class="col-xs-12">
-      <button type="button" class="btn btn-success btn-large" id="settings_save" disabled>Save Settings</button>
+      <button type="button" class="btn btn-success btn-lge" id="settings_save" disabled>Save Settings</button>
     </div>
   </div>
 </div><!--settings_tab -->

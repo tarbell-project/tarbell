@@ -106,27 +106,6 @@
     <a href="<%= url %>" target="_blank">Click here</a> to authorize this application to create and access Google spreadsheets to use with Tarbell projects. After authenticating, you will receive a confirmation code. Enter it below.
 </script>
 
-<!-- When does this template actually get used? -->
-<script type="text/template" id="edit_bucket_template">
-    <div class="form-group bucket-group row">
-        <div class="col-xs-1">
-            <a class="btn text-danger bucket-disable" href="javascript:" onclick="bucket_disable(this)"><i class="fa fa-lg fa-remove"></i></a>
-        </div>
-        <div class="col-xs-11">
-            <input type="text" class="form-control bucket-url" value="<%= name %>" placeholder="bucket.myorg.com">
-        </div>
-        <div class="col-xs-6">
-            <input type="text" class="form-control bucket-key" value="<%= access_key_id %>" placeholder="access key id">
-        </div>
-        <div class="col-xs-6">
-            <input type="text" class="form-control bucket-secret" value="<%= secret_access_key %>" placeholder="secret access key">
-        </div>
-        <div class="col-xs-1">
-          <a class="btn text-success bucket-enable" href="javascript:" onclick="bucket_enable(this)" style="display: none;"><i class="fa fa-lg fa-plus"></i></a>
-        </div>
-    </div>
-</script>
-
 <script type="text/template" id="add_bucket_template">
     <div class="form-group bucket-group row">
         <div class="col-xs-12">

@@ -1,7 +1,7 @@
 /* Colors
  * Dark purple: #422D62
  * Medium purple: #714fa5
- * Light purple: #F5EFF9
+ * Light purple: #F5EFF9 or #d7d7e7
  * Grey: #787579
  */
 
@@ -24,9 +24,9 @@ p a,
 .btn-link {
     /*color: #00A8EE;*/
     color: #422D62;
-    border-bottom: 1px solid #714fa5;
-    box-shadow: inset 0 -1px 0 #714fa5;
-    transition: box-shadow 0.5s ease;
+    border-bottom: 2px solid #d7d7e7;
+    background-color: transparent;
+    transition: background-color 0.3s ease;
 }
 
 p a:active,
@@ -37,10 +37,14 @@ p a:focus,
 .btn-link:focus {
     text-decoration: none;
     color: #422D62;
-    box-shadow: inset 0 -4px 0 #714fa5;
+    background-color: #d7d7e7;
 }
 
-p a.help { border-bottom: 0; box-shadow: none; }
+p a.help { border-bottom: 0; background-color: transparent; font-size: 1.3em; line-height: 0.8em;}
+
+p a.help:hover,
+p a.help:active,
+p a.help:focus { border-bottom: 0; background-color: transparent;  }
 
 p.section { margin-top: 20px; }
 p.section:first-child { margin-top: 0; }
@@ -76,9 +80,10 @@ span.description {
 .navbar-brand { padding-top: 11px; }
 
 .navbar-default {
-  /*background-color: #f2fbfe;*/
-  background-color: #F5EFF9;
-  border-bottom:solid 1px #d7d7e7;
+  /*background-color: #F5EFF9;*/
+  /*border-bottom:solid 1px #d7d7e7;*/
+  background-color: #d7d7e7;
+  border-bottom:solid 1px #d0d0d0;
   box-shadow: 0px 0px 12px #d0d0d0;
   border-radius: 0;
   }
@@ -102,8 +107,9 @@ textarea.form-control {
     border-top: 0;
     border-left: 0;
     border-right: 0;
-    border-bottom: 1px solid #e7e7e7;
+    /*border-bottom: 1px solid #e7e7e7;*/
     /*border-bottom: 1px solid #00A8EE;*/
+    border-bottom: 1px solid #d7d7e7;
     box-shadow: none;
     webkit-box-shadow: none;
     border-radius: 0;
@@ -129,7 +135,7 @@ textarea.form-control {
     background-color:  #714fa5;
     border-color: #e7e7e7;
     color: white;
-    transition: background-color 0.5s ease;
+    transition: background-color 0.3s ease;
     /*box-shadow: 0px 0px 4px #d0d0d0;*/
 }
 .btn-default.active,
@@ -189,7 +195,6 @@ textarea.form-control {
 .google-secrets-exists {
     /*background: #FFF6E0;*/
     padding: 5px;
-    font-size: 14px;
     margin-bottom: 10px;
     /*border: 1px solid #C2C579;*/
 }
@@ -204,10 +209,10 @@ textarea.form-control {
   font-weight: bold;
   float: left;
   clear: both;
-  background: #F5EFF9;
+  background: #d7d7e7;
   margin-right: 20px;
   border-radius: 1000px;
-  border: 1px solid #d7d7e7;
+  border: 1px solid #BBB6BD;
   margin-top: -7px;
 }
 .step p,
