@@ -42,7 +42,7 @@ Tarbell makes use of familiar, flexible tools to take the magic (and frustration
         "clint==0.4.1",
         "gnureadline==6.3.3",
         "google-api-python-client==1.3.1",
-        "keyring==4.0",
+        "keyring==5.3",
         "python-dateutil>=2.2",
         "requests==2.3.0",
         "sh==1.09",
