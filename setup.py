@@ -38,7 +38,7 @@ Tarbell makes use of familiar, flexible tools to take the magic (and frustration
         "Markdown==2.4.1",
         "MarkupSafe==0.23",
         "PyYAML==3.11",
-        "boto==2.34.0",
+        "boto==2.38.0",
         "clint==0.4.1",
         "gnureadline==6.3.3",
         "google-api-python-client==1.3.1",
