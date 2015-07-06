@@ -1,4 +1,6 @@
-Copyright (c) 2012-2013 Chicago Tribune
+Copyright (c) 2012-2015, David Eads
+
+Copyright (c) 2012-2014, Chicago Tribune
 
 Copyright (c) 2013, Kenneth Reitz
 
