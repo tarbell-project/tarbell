@@ -72,9 +72,9 @@ function error_hide() {
     $('div.tab-pane').find('div[role="alert"].alert-danger').remove();
 }
 
-function error_alert(message) {
+function error_alert(target, message) {
     error_hide();
-    $('div.tab-pane.active').prepend(_error_alert_template({message: message}));
+    $(target).prepend(_error_alert_template({message: message}));
 }
 
 function success_hide() {
@@ -128,7 +128,7 @@ function get_s3_defaults(cfg) {
     var production = $('#default-s3-buckets-production').trimmed();
 
     if(!(key && secret) && (staging || production)) {
-        return 'You must enter keys to specify default staging and production buckets';
+        return 'You must enter keys to specify default staging and production buckets.';
     }
 
     $.extend(cfg, {
@@ -209,12 +209,10 @@ function show_s3_credentials() {
 function show_settings() {
     // Use Google?
     if(_settings.client_secrets) {
-        $('#use_google').prop('checked', true);
         $('.google-secrets-exists').show();
         $('.google-secrets-needed').hide();
         $('.google_authenticate').enable();
     } else {
-        $('#use_google').prop('checked', false);
         $('.google-secrets-exists').hide();
         $('.google-secrets-needed').show();
         $('.google_authenticate').disable();
@@ -225,10 +223,8 @@ function show_settings() {
 
     // Use S3?
     if(_config.default_s3_access_key_id || _config.default_s3_secret_access_key) {
-        $('#use_s3').prop('checked', true);
         $('#s3').addClass('in');
     } else {
-        $('#use_s3').prop('checked', false);
         $('#s3').removeClass('in');
     }
 
@@ -325,7 +321,7 @@ $(function() {
         // mimic modal functions so we can re-use core routines
         .on('error_hide', error_hide)
         .on('error_show', function(event, msg) {
-            error_alert(msg);
+            error_alert($('#default-error-container'), msg);
         })
         .on('progress_hide', progress_hide)
         .on('progress_show', function(event, msg) {
@@ -349,7 +345,6 @@ $(function() {
           bucket_add(this);
         })
         .on('click', '.google_authenticate', function(event) {
-            console.log("google_auth");
             google_authenticate();
         });
 
@@ -362,21 +357,14 @@ $(function() {
             data.google_account = $('#google_emails').trimmed();
         }
 
-        //if($('#use_s3').is(':checked')) {
-            //error = get_s3_defaults(data) || get_s3_credentials(data);
-            //if(error) {
-                //error_alert(error);
-                //return;
-            //}
-        //}
         try {
-          //get_s3_defaults(data);
+          // Display an error message instead of saving if there are missing S3 creds
           error = get_s3_defaults(data) || get_s3_credentials(data);
             if(error) {
-                error_alert(error);
+                error_alert($('#default-error-container'), error);
+                $('#settings_save').disable()
                 return;
             }
-          console.log("error", error);
         }
         catch(e) {
           console.log(e);
@@ -389,7 +377,7 @@ $(function() {
                 config: JSON.stringify(data)
             },
             function(error) {
-                error_alert('Error saving settings ('+error+')');
+                error_alert($('#default-error-container'), 'Error saving settings ('+error+')');
             },
             function(unused) {
                 _settings.config = data;
