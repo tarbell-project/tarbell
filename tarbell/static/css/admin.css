@@ -198,6 +198,9 @@ textarea.form-control {
     margin-bottom: 10px;
     /*border: 1px solid #C2C579;*/
 }
+.google-secrets-exists .form-group {
+    margin-top: 25px;
+}
 
 .step { margin: 40px 0; width: 90%; }
 
@@ -219,11 +222,11 @@ textarea.form-control {
 .step button { margin-left: 60px; }
 
 /* AWS settings */
-
 .bucket-disable,
 .bucket-enable,
 .bucket-add,
-.bucket-remove {
+.bucket-remove,
+.cancel{
     padding-left: 6px;
     padding-right: 6px;
     font-size: 12px;
@@ -238,7 +241,6 @@ textarea.form-control {
 .bucket-remove:hover {
     text-decoration: underline;
 }
-
 .bucket-control-text { text-align: right; }
 
 /* Footer */

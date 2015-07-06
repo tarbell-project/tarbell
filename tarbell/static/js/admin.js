@@ -37,11 +37,11 @@ function input_show(msg, callback) {
             $input_modal.find('.modal-msg').html(msg);
             $input.val('');
         })
-        .on('click', '.btn-default', function(event) {
+        .on('click', '.cancel', function(event) {
             $input_modal.modal('hide');
             callback(false);
         })
-        .on('click', '.btn-primary', function(event) {
+        .on('click', '.submit', function(event) {
             var value = $input.trimmed();
             if(!value) {
                 $input.focus()
@@ -265,6 +265,21 @@ function handle_google_auth_code($context, code) {
         });
 }
 
+// open authentication modal
+function google_authenticate(){
+  ajax_get('/google/auth/url/', {},
+      function(error) {
+          error_alert(error);
+      },
+      function(data) {
+          input_show(_google_msg_template(data), function(yes, code) {
+              if(yes) {
+                  handle_google_auth_code($('settings_tab'), code);
+              }
+          });
+      });
+}
+
 // Handle new client_secrets file selection
 function handle_google_auth_secrets($context, file) {
      if(file) {
@@ -283,7 +298,7 @@ function handle_google_auth_secrets($context, file) {
                 function(data) {
                     _settings = data.settings;
                     _config = _settings.config;
-                    $('.google_authenticate, #google_emails').enable();
+                    google_authenticate();
                 },
                 function() {
                     $context.trigger('progress_hide');
@@ -294,7 +309,6 @@ function handle_google_auth_secrets($context, file) {
         reader.readAsDataURL(file);
     }
 }
-
 
 $(function() {
     // Clear alerts/states when switching from tab to tab
@@ -335,17 +349,8 @@ $(function() {
           bucket_add(this);
         })
         .on('click', '.google_authenticate', function(event) {
-            ajax_get('/google/auth/url/', {},
-                function(error) {
-                    error_alert(error);
-                },
-                function(data) {
-                    input_show(_google_msg_template(data), function(yes, code) {
-                        if(yes) {
-                            handle_google_auth_code($settings_tab, code);
-                        }
-                    });
-                });
+            console.log("google_auth");
+            google_authenticate();
         });
 
     // Save settings

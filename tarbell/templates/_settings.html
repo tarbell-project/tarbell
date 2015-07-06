@@ -25,8 +25,15 @@
 
       <div class="google-secrets-exists">
         <p>You're authenticated. You can re-authenticate if you need to switch Google accounts or debug this workflow.</p>
-        <a class="google-authenticate btn btn-default">Re-authenticate me  <i class="fa fa-arrow-circle-right"></i></a>
+        <a class="google_authenticate btn btn-default">Re-authenticate me  <i class="fa fa-arrow-circle-right"></i></a>
         <button class="btn btn-default btn-file">Select new credential file<input id="google_secrets_file" type="file" accept="application/json" /></button>
+        <div class="form-group">
+          <form>
+            <label>Google account(s) with access to new spreadsheets</label>
+            <p class="description">Enter the Google account(s) that should have access to new spreadsheets, separating multiple addresses with commas. Leave this field blank to specify accounts for each new project.</p>
+            <textarea id="google_emails" class="form-control google-emails" rows="3" placeholder="somebody@gmail.com"></textarea>
+          </form>
+        </div>
       </div>
 
       <div class="google-secrets-needed">
@@ -46,13 +53,6 @@
           </form>
       </div>
     </div>
-      <div class="form-group">
-        <form>
-          <label>Google account(s) with access to new spreadsheets</label>
-          <p class="description">Enter the Google account(s) that should have access to new spreadsheets, separating multiple addresses with commas. Leave this field blank to specify accounts for each new project.</p>
-          <textarea id="google_emails" class="form-control google-emails" rows="3" placeholder="somebody@gmail.com"></textarea>
-        </form>
-      </div>
     </div>
     <div class="col-xs-12 col-sm-6">
       <h3>Publishing settings</h3>
