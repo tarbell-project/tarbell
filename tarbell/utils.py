@@ -51,6 +51,13 @@ def split_sentences(s, pad=0):
     return "\n".join(sentences)
 
 
+def ensure_directory(path):
+    """Ensure directory exists for a given file path"""
+    dirname = os.path.dirname(path)
+    if not os.path.exists(dirname):
+        os.makedirs(dirname)
+
+
 def show_error(msg):
     """Displays error message."""
     sys.stdout.flush()

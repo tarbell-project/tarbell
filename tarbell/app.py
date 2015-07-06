@@ -638,6 +638,8 @@ class TarbellSite:
         return content
 
     def generate_static_site(self, output_root, extra_context):
+        self.app.config['BUILD_PATH'] = output_root
+
         if self.base:
             base_dir = os.path.join(self.path, self.blueprint_name)
             for root, dirs, files in self.filter_files(base_dir):
