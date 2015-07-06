@@ -212,12 +212,12 @@ function show_settings() {
         $('#use_google').prop('checked', true);
         $('.google-secrets-exists').show();
         $('.google-secrets-needed').hide();
-        $('#google_authenticate').enable();
+        $('.google_authenticate').enable();
     } else {
         $('#use_google').prop('checked', false);
         $('.google-secrets-exists').hide();
         $('.google-secrets-needed').show();
-        $('#google_authenticate').disable();
+        $('.google_authenticate').disable();
     }
 
     // Google Emails
@@ -251,13 +251,16 @@ function handle_google_auth_code($context, code) {
 
     ajax_get('/google/auth/code/', {code: code},
         function(error) {
+          console.log("error");
             $context.trigger('error_show', error);
         },
         function(data) {
+            console.log("data");
             $context.trigger('success_show', 'Authentication successful');
             show_settings();
         },
         function() {
+          console.log("hiding progress");
             $context.trigger('progress_hide');
         });
 }
@@ -280,7 +283,7 @@ function handle_google_auth_secrets($context, file) {
                 function(data) {
                     _settings = data.settings;
                     _config = _settings.config;
-                    $('#google_authenticate, #google_emails').enable();
+                    $('.google_authenticate, #google_emails').enable();
                 },
                 function() {
                     $context.trigger('progress_hide');
@@ -323,7 +326,15 @@ $(function() {
         .on('change', '#google_secrets_file', function(event) {
             handle_google_auth_secrets($settings_tab, event.target.files[0]);
         })
-        .on('click', '#google_authenticate', function(event) {
+        .on('click', '.bucket-remove', function(event){
+          event.preventDefault();
+          bucket_remove(this);
+        })
+        .on('click', '.bucket-add', function(event){
+          event.preventDefault();
+          bucket_add(this);
+        })
+        .on('click', '.google_authenticate', function(event) {
             ajax_get('/google/auth/url/', {},
                 function(error) {
                     error_alert(error);
@@ -394,6 +405,6 @@ $(function() {
 // ------------------------------------------------------------
 
     show_settings();
-    $('#tab_content').show();
 
+    $('#tab_content').show();
 });

@@ -42,7 +42,8 @@
   {% include "_settings.html" %}
 </div> <!-- // container-fluid -->
 <footer class="container-fluid">
-<p>Released under some open source license or other.</p>
+  <p>Tarbell was created by the Chicago Tribune News Applications Team and is maintained by her contributors.</p>
+  <p>Copyright © 2012-2015, David Eads | Copyright © 2012-2014, Chicago Tribune | Copyright © 2013, Kenneth Reitz</p>
 </footer>
 
 <!-- MODAL: progress -->
@@ -79,8 +80,8 @@
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-default">Cancel</button>
-                <button type="button" class="btn btn-primary">Submit Code</button>
+                <button type="button" class="btn btn-link">Cancel</button>
+                <button type="button" class="btn btn-default">Submit Code</button>
             </div>
         </div>
     </div>
@@ -117,8 +118,8 @@
         <div class="col-xs-6">
             <input type="text" class="form-control bucket-secret" value="<%= secret_access_key %>" placeholder="secret access key">
         </div>
-        <div class="col-xs-12 col-sm-3 col-sm-offset-9">
-            <a class="btn text-danger bucket-remove" href="javascript:" onclick="bucket_remove(this)">Remove this bucket</a>
+        <div class="col-xs-12 col-sm-5 col-sm-offset-7">
+            <a class="text-danger bucket-remove" href="#">Remove this bucket</a>
         </div>
     </div>
 </script>

@@ -25,7 +25,8 @@
 
       <div class="google-secrets-exists">
         <p>You're authenticated. You can re-authenticate if you need to switch Google accounts or debug this workflow.</p>
-        <a id="google-authenticate" class="btn btn-default">Re-authenticate me  <i class="fa fa-arrow-circle-right"></i></a>
+        <a class="google-authenticate btn btn-default">Re-authenticate me  <i class="fa fa-arrow-circle-right"></i></a>
+        <button class="btn btn-default btn-file">Select new credential file<input id="google_secrets_file" type="file" accept="application/json" /></button>
       </div>
 
       <div class="google-secrets-needed">
@@ -41,7 +42,7 @@
         <div class="step"><span>7</span><p>Add your new credential file, and then authenticate it with Google.</p>
           <form>
             <button class="btn btn-default btn-file">Select new credential file<input id="google_secrets_file" type="file" accept="application/json" /></button>
-            <a id="google_authenticate" class="btn btn-default" disabled>Authenticate me</a>
+            <a class="google_authenticate btn btn-default" disabled>Authenticate me</a>
           </form>
       </div>
     </div>
@@ -83,14 +84,14 @@
               <!-- #bucket_template insertion -->
               <div class="form-group row">
                   <div class="col-xs-12 bucket-control-text">
-                      <a class="btn btn-default bucket-add" href="#" onclick="bucket_add(this)"><i class="fa fa-lg fa-plus"></i> Add another bucket</a>
+                      <a class="btn btn-default bucket-add" href="#"><i class="fa fa-lg fa-plus"></i> Add another bucket</a>
                   </div>
               </div>
           </form>
   </section>
   <section class="row">
     <div class="col-xs-12">
-      <button type="button" class="btn btn-success btn-lge" id="settings_save" disabled>Save Settings</button>
+      <button type="button" class="btn btn-success btn-lge" id="settings_save" disabled>Save settings</button>
     </div>
   </div>
 </div><!--settings_tab -->
