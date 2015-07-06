@@ -8,7 +8,7 @@ import sys
 import tempfile
 
 from boto.exception import S3ResponseError
-from boto.s3.connection import S3Connection
+from boto.s3.connection import S3Connection, OrdinaryCallingFormat
 from boto.s3.key import Key
 from clint.textui import puts
 
@@ -29,7 +29,11 @@ class S3Url(str):
 
 class S3Sync:
     def __init__(self, directory, bucket, access_key_id, secret_access_key, force=False):
-        connection = S3Connection(access_key_id, secret_access_key)
+        if '.' in bucket:
+            connection = S3Connection(access_key_id, secret_access_key, calling_format=OrdinaryCallingFormat())
+        else:
+            connection = S3Connection(access_key_id, secret_access_key)
+
         self.force = force
         self.bucket = bucket
         self.directory = directory.rstrip('/')
