@@ -712,7 +712,7 @@ def _add_user_to_file(file_id, service, user_email,
 
 
 def _copy_config_template(name, title, template, path, key, settings):
-        """Get and render tarbell_config.py.template from blueprint"""
+        """Get and render tarbell_config.py.template from Tarbell default"""
         puts("\nCopying configuration file")
         context = settings.config
         context.update({
