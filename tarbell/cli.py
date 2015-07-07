@@ -393,9 +393,11 @@ def tarbell_newproject(command, args):
 def tarbell_serve(command, args):
     """Serve the current Tarbell project."""
     with ensure_project(command, args) as site:
-        address = list_get(args, 0, "").split(":")
-        ip = list_get(address, 0, '127.0.0.1')
-        port = int(list_get(address, 1, '5000'))
+        with ensure_settings(command, args) as settings:
+            address = list_get(args, 0, "").split(":")
+            ip = list_get(address, 0, settings.config['default_server_ip'])
+            port = int(list_get(address, 1, settings.config['default_server_port']))
+
         puts("\n * Running local server. Press {0} to stop the server".format(colored.red("ctrl-c")))
         puts(" * Edit this project's templates at {0}".format(colored.yellow(site.path)))
         try:
