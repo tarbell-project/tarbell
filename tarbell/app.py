@@ -88,20 +88,6 @@ class TarbellFileSystemLoader(BaseLoader):
             return contents, filename, uptodate
         raise TemplateNotFound(template)
 
-    def list_templates(self):
-        found = set()
-        for searchpath in self.searchpath:
-            for dirpath, dirnames, filenames in self.filter_files(searchpath):
-                for filename in filenames:
-                    template = os.path.join(dirpath, filename) \
-                        [len(searchpath):].strip(os.path.sep) \
-                                          .replace(os.path.sep, '/')
-                    if template[:2] == './':
-                        template = template[2:]
-                    if template not in found:
-                        found.add(template)
-        return sorted(found)
-
 
 def silent_none(value):
     if value is None:
