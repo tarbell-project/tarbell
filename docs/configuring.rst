@@ -48,6 +48,8 @@ The settings file uses a simple YAML-based format::
   - name: Searchable map template
     url: https://github.com/eads/tarbell-map-template
   projects_path: /Users/davideads/tarbell
+  default_server_ip: 127.0.0.1
+  default_server_port: 5000
   s3_credentials:
     26thandcalifornia.recoveredfactory.net:
       access_key_id: <KEY ID>
@@ -69,6 +71,10 @@ This example shows every possible setting.
     alias->s3 url pairs to be used during project creation for setting up default bucket aliases. These are only used during project creation and can be overridden on a per-project basis.
 ``s3_credentials``
     Define S3 credentials using a ``bucket-uri->{ access_key_id: ..., secret_access_key: ...}`` data strucutre. 
+``default_server_ip``
+    Default preview server IP address
+``default_server_port``
+    Default preview server port
 
 Google SDK client secrets (``~/.tarbell/client_secrets.json``)
 --------------------------------------------------------------

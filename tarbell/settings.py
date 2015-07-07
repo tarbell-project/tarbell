@@ -25,6 +25,8 @@ class Settings:
 
         self.config["project_templates"] = self.config.get("project_templates", [])
         self.config["project_templates"].append(EMPTY_BLUEPRINT)
+        self.config["default_server_ip"] = self.config.get("default_server_ip", "127.0.0.1")
+        self.config["default_server_port"] = self.config.get("default_server_port", "5000")
 
         client_secrets_path = os.path.join(os.path.dirname(self.path), "client_secrets.json")
         try:

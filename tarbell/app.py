@@ -89,20 +89,6 @@ class TarbellFileSystemLoader(BaseLoader):
             return contents, filename, uptodate
         raise TemplateNotFound(template)
 
-    def list_templates(self):
-        found = set()
-        for searchpath in self.searchpath:
-            for dirpath, dirnames, filenames in self.filter_files(searchpath):
-                for filename in filenames:
-                    template = os.path.join(dirpath, filename) \
-                        [len(searchpath):].strip(os.path.sep) \
-                                          .replace(os.path.sep, '/')
-                    if template[:2] == './':
-                        template = template[2:]
-                    if template not in found:
-                        found.add(template)
-        return sorted(found)
-
 
 def silent_none(value):
     if value is None:
@@ -126,6 +112,9 @@ def process_xlsx(content):
     workbook = xlrd.open_workbook(file_contents=content)
     worksheets = [w for w in workbook.sheet_names() if not w.startswith('_')]
     for worksheet_name in worksheets:
+        if worksheet_name.startswith('_'):
+            continue
+
         worksheet = workbook.sheet_by_name(worksheet_name)
 
         merged_cells = worksheet.merged_cells
@@ -647,6 +636,7 @@ class TarbellSite:
     def generate_static_site(self, output_root=None, extra_context=None):
         # use this hook for registering URLs to freeze
         self.call_hook("generate", self, output_root, extra_context)
+        self.app.config['BUILD_PATH'] = output_root
 
         if output_root is not None:
             # realpath or this gets generated relative to the tarbell package
