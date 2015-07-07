@@ -26,6 +26,7 @@ from clint import arguments
 from clint.textui import colored
 
 from tarbell import __VERSION__ as VERSION
+MAJOR_VERSION = '.'.join(VERSION.split('.')[:2])
 
 # Handle relative imports from binary, see https://github.com/newsapps/flask-tarbell/issues/87
 if __name__ == "__main__" and __package__ is None:
@@ -113,11 +114,21 @@ def tarbell_generate(command, args, skip_args=False, extra_context=None, quiet=F
 
     output_root = None
     with ensure_settings(command, args) as settings, ensure_project(command, args) as site:
+
         if not skip_args:
             output_root = list_get(args, 0, False)
-            is_folder = os.path.exists(output_root)
+
+            if output_root:
+                is_folder = os.path.exists(output_root)
+            else:
+                puts("\nYou must specify an output directory (e.g. `{0}`)".format(
+                    colored.cyan("tarbell generate _out")
+                ))
+                sys.exit()
+
         if quiet:
             site.quiet = True
+        
         if not output_root:
             output_root = tempfile.mkdtemp(prefix="{0}-".format(site.project.__name__))
             is_folder = False
@@ -146,7 +157,6 @@ def tarbell_generate(command, args, skip_args=False, extra_context=None, quiet=F
         if not quiet:
             puts("\nCreated site in {0}".format(colored.cyan(output_root)))
 
-        site.call_hook("generate", site, output_root, quiet)
         return output_root
 
 
@@ -212,7 +222,7 @@ def tarbell_install_blueprint(command, args):
             git = sh.git.bake(_cwd=tempdir, _tty_in=True, _tty_out=False, _err_to_out=True)
             puts(git.clone(template_url, '.'))
             puts(git.fetch())
-            puts(git.checkout(VERSION))
+            puts(git.checkout(MAJOR_VERSION))
 
             _install_requirements(tempdir)
 
@@ -386,9 +396,11 @@ def tarbell_newproject(command, args):
 def tarbell_serve(command, args):
     """Serve the current Tarbell project."""
     with ensure_project(command, args) as site:
-        address = list_get(args, 0, "").split(":")
-        ip = list_get(address, 0, '127.0.0.1')
-        port = int(list_get(address, 1, '5000'))
+        with ensure_settings(command, args) as settings:
+            address = list_get(args, 0, "").split(":")
+            ip = list_get(address, 0, settings.config['default_server_ip'])
+            port = int(list_get(address, 1, settings.config['default_server_port']))
+
         puts("\n * Running local server. Press {0} to stop the server".format(colored.red("ctrl-c")))
         puts(" * Edit this project's templates at {0}".format(colored.yellow(site.path)))
         try:
@@ -436,12 +448,12 @@ def tarbell_update(command, args):
 
         git = sh.git.bake(_cwd=site.base.base_dir)
         git.fetch()
-        puts(colored.yellow("Checking out {0}".format(VERSION)))
-        puts(git.checkout(VERSION))
+        puts(colored.yellow("Checking out {0}".format(MAJOR_VERSION)))
+        puts(git.checkout(MAJOR_VERSION))
         puts(colored.yellow("Stashing local changes"))
         puts(git.stash())
         puts(colored.yellow("Pull latest changes"))
-        puts(git.pull('origin', VERSION))
+        puts(git.pull('origin', MAJOR_VERSION))
 
 
 
@@ -467,10 +479,10 @@ def _newproject(command, path, name, settings):
         puts(git.submodule.add(template['url'], '_blueprint'))
         puts(git.submodule.update(*['--init']))
 
-        # Get submodule branches, switch to current version
+        # Get submodule branches, switch to current major version
         submodule = sh.git.bake(_cwd=os.path.join(path, '_blueprint'))
         puts(submodule.fetch())
-        puts(submodule.checkout(VERSION))
+        puts(submodule.checkout(MAJOR_VERSION))
 
         # Create spreadsheet
         key = _create_spreadsheet(name, title, path, settings)
@@ -705,7 +717,7 @@ def _add_user_to_file(file_id, service, user_email,
 
 
 def _copy_config_template(name, title, template, path, key, settings):
-        """Get and render tarbell_config.py.template from blueprint"""
+        """Get and render tarbell_config.py.template from Tarbell default"""
         puts("\nCopying configuration file")
         context = settings.config
         context.update({

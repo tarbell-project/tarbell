@@ -15,6 +15,19 @@ Install Tarbell with `pip install tarbell`
 
   Tarbell does not work on Windows machines.
 
+  To install on Ubuntu (tested with Ubuntu 14.04 LTS), install these dependencies first:
+
+  .. code-block:: bash
+
+      apt-get install build-essential git python-pip python-dev libncurses5-dev
+
+  To install with Fedora 21, install these dependencies from Edward Borasky's `Tarbell docker image <https://registry.hub.docker.com/u/znmeb/osjourno-tarbell/dockerfile/>`_ (untested).
+
+  .. code-block:: bash
+
+    yum install gcc git libyaml-devel make patch python-devel python-pip readline-devel tar
+
+
 Configure Tarbell with `tarbell configure`
 ------------------------------------------
 

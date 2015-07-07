@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 import codecs
 import csv
+import datetime
+import dateutil
 import fnmatch
 import imp
-import json
 import markdown as md
 import mimetypes
 import os
@@ -16,7 +17,8 @@ import xlrd
 
 from httplib import BadStatusLine
 from flask import Flask, render_template, send_from_directory, Response, g, jsonify
-from jinja2 import contextfunction, Markup, TemplateSyntaxError
+from flask_frozen import Freezer, walk_directory
+from jinja2 import contextfunction, Markup
 from jinja2.loaders import BaseLoader
 from jinja2.utils import open_if_exists
 from jinja2.exceptions import TemplateNotFound
@@ -25,7 +27,7 @@ from pprint import pformat
 from slughifi import slughifi
 from string import uppercase
 from werkzeug.wsgi import FileWrapper
-from clint.textui import puts, colored
+from clint.textui import puts
 
 from .errors import MergedCellError
 from .oauth import get_drive_api
@@ -87,20 +89,6 @@ class TarbellFileSystemLoader(BaseLoader):
             return contents, filename, uptodate
         raise TemplateNotFound(template)
 
-    def list_templates(self):
-        found = set()
-        for searchpath in self.searchpath:
-            for dirpath, dirnames, filenames in self.filter_files(searchpath):
-                for filename in filenames:
-                    template = os.path.join(dirpath, filename) \
-                        [len(searchpath):].strip(os.path.sep) \
-                                          .replace(os.path.sep, '/')
-                    if template[:2] == './':
-                        template = template[2:]
-                    if template not in found:
-                        found.add(template)
-        return sorted(found)
-
 
 def silent_none(value):
     if value is None:
@@ -122,8 +110,11 @@ def process_xlsx(content):
     """Turn Excel file contents into Tarbell worksheet data"""
     data = {}
     workbook = xlrd.open_workbook(file_contents=content)
-    worksheets = workbook.sheet_names()
+    worksheets = [w for w in workbook.sheet_names() if not w.startswith('_')]
     for worksheet_name in worksheets:
+        if worksheet_name.startswith('_'):
+            continue
+
         worksheet = workbook.sheet_by_name(worksheet_name)
 
         merged_cells = worksheet.merged_cells
@@ -277,6 +268,14 @@ class TarbellSite:
 
         self.app.before_request(self.add_site_to_context)
         self.app.after_request(self.never_cache_preview)
+
+        # centralized freezer setup
+        self.app.config.setdefault('FREEZER_RELATIVE_URLS', True)
+        self.app.config.setdefault('FREEZER_DESTINATION', 
+            os.path.join(os.path.realpath(self.path), '_site'))
+
+        self.freezer = Freezer(self.app) 
+        self.freezer.register_generator(self.find_files)
 
     def add_site_to_context(self):
         g.current_site = self
@@ -457,7 +456,8 @@ class TarbellSite:
         Serve site context as JSON. Useful for debugging.
         """
         if not self.project.CREATE_JSON:
-            return ""
+            # nothing to see here, but the right mimetype
+            return jsonify()
 
         if not self.data:
             # this sets site.data by spreadsheet or gdoc
@@ -633,21 +633,15 @@ class TarbellSite:
         resp, content = self.client._http.request(downloadurl)
         return content
 
-    def generate_static_site(self, output_root, extra_context):
-        if self.base:
-            base_dir = os.path.join(self.path, self.blueprint_name)
-            for root, dirs, files in self.filter_files(base_dir):
-                for filename in files:
-                    self._copy_file(root.replace(self.blueprint_name, ""), filename, output_root, extra_context)
+    def generate_static_site(self, output_root=None, extra_context=None):
+        # use this hook for registering URLs to freeze
+        self.call_hook("generate", self, output_root, extra_context)
+        self.app.config['BUILD_PATH'] = output_root
 
-        for root, dirs, files in self.filter_files(self.path):
-            #don't copy stuff in the file that we just created
-            if root != os.path.abspath(output_root):
-                for filename in files:
-                    self._copy_file(root, filename, output_root, extra_context)
-
-        if self.project.CREATE_JSON:
-            self._copy_file(self.path, 'data.json', output_root, extra_context)
+        if output_root is not None:
+            # realpath or this gets generated relative to the tarbell package
+            self.app.config['FREEZER_DESTINATION'] = os.path.realpath(output_root)
+        self.freezer.freeze()
 
     def filter_files(self, path):
         excludes = r'|'.join([fnmatch.translate(x) for x in self.project.EXCLUDES]) or r'$.'
@@ -668,38 +662,15 @@ class TarbellSite:
             files[:] = paths
             yield root, dirs, files
 
-    def _copy_file(self, root, filename, output_root, extra_context=None):
-        # Remove double slashes if they exist
-        root = root.replace("//", "/")
+    def find_files(self):
+        """
+        Find all file paths for publishing, yield (urlname, kwargs)
+        """
+        # yield blueprint paths first
+        for path in walk_directory(os.path.join(self.path, self.blueprint_name), ignore=self.project.EXCLUDES):
+            yield 'preview', {'path': path}
 
-        # Strip out full filesystem paths
-        rel_path = os.path.join(root.replace(self.path, ""), filename)
+        # then yield project paths
+        for path in walk_directory(self.path, ignore=self.project.EXCLUDES):
+            yield 'preview', {'path': path}
 
-        if rel_path.startswith("/"):
-            rel_path = rel_path[1:]
-
-        output_path = os.path.join(output_root, rel_path)
-        output_dir = os.path.dirname(output_path)
-
-        if not self.quiet:
-            puts("Writing {0}".format(output_path))
-
-        with self.app.test_request_context():
-
-            # call any pre-request hooks
-            self.app.preprocess_request()
-
-            # render
-            if filename == 'data.json':
-                preview = self.data_json(extra_context, publish=True)
-            else:
-                preview = self.preview(rel_path, extra_context=extra_context, publish=True)
-            
-            if not os.path.exists(output_dir):
-                os.makedirs(output_dir)
-            
-            with open(output_path, "wb") as f:
-                if isinstance(preview.response, FileWrapper):
-                    f.write(preview.response.file.read())
-                else:
-                    f.write(preview.data)
