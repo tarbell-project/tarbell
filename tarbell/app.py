@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 import codecs
 import csv
-import datetime
 import dateutil
+import datetime
 import fnmatch
 import imp
 import markdown as md

@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Tarbell Administration</title>
+  <meta charset="utf-8">
+  <meta name="description" content="Tarbell Administration">
+  <link rel="stylesheet" href="/static/bootstrap-3.3.2-dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/static/font-awesome-4.3.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="/static/css/admin.css">
+  <script type="text/javascript" src="/static/js/jquery-1.10.2.min.js"></script>
+  <script type="text/javascript" src="/static/js/underscore-1.8.2.min.js"></script>
+  <script type="text/javascript" src="/static/bootstrap-3.3.2-dist/js/bootstrap.min.js"></script>
+  <script type="text/javascript" src="/static/js/json2.js"></script>
+</head>
+<body>
+<nav class="navbar navbar-default">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="#"><img src="static/img/tarbell-logo.png" alt="Tarbell" height="25"></a>
+    </div>
+
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+      <ul class="nav navbar-nav">
+        <li><a href="tarbell.io" class="tagline">Simple static sites for storytellers</a></li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li><a href="http://tarbell.readthedocs.org/en/{{ version }}/">Read the docs</a></li>
+        <li><a href="//github.com/tarbell-project/tarbell/issues">Report a bug</a></li>
+        <li><a href="//github.com/tarbell-project/tarbell"><span>You are running</span> version {{ version }}</a></li>
+      </ul>
+    </div><!-- /.navbar-collapse -->
+  </div><!-- /.container-fluid -->
+</nav>
+<div class="container">
+  {% include "_settings.html" %}
+</div> <!-- // container-fluid -->
+<footer class="container-fluid">
+  <p>Tarbell was created by the Chicago Tribune News Applications Team and is maintained by her contributors.</p>
+  <p>Copyright © 2012-2015, David Eads | Copyright © 2012-2014, Chicago Tribune | Copyright © 2013, Kenneth Reitz</p>
+</footer>
+
+<!-- MODAL: progress -->
+<div id="progress_modal" class="modal fade" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-body">
+            <div class="modal-progress">
+                <div>
+                    <div>
+                        <i class="fa fa-3x fa-spinner fa-spin"></i>
+                        <p><span class="modal-msg"></span>...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: input -->
+<div id="input_modal" class="modal fade" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Authenticate Secrets</h4>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group">
+                        <p class="form-control-static modal-msg"></p>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" class="form-control" val="" placeholder="enter your confirmation code">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <a href="#" class="cancel text-danger">Cancel</a>
+                <button type="button" class="btn btn-default submit">Submit Code</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- UNDERSCORE TEMPLATES -->
+
+<script type="text/template" id="error_alert_template">
+    <div class="alert alert-danger" role="alert">
+        <i class="fa fa-exclamation-circle"></i> <%= message %>
+    </div>
+</script>
+
+<script type="text/template" id="success_alert_template">
+    <div class="alert alert-success alert-dismissible" role="alert">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <%= message %>
+    </div>
+</script>
+
+<script type="text/template" id="google_msg_template">
+    <a href="<%= url %>" target="_blank">Click here</a> to authorize this application to create and access Google spreadsheets to use with Tarbell projects. After authenticating, you will receive a confirmation code. Enter it below.
+</script>
+
+<script type="text/template" id="add_bucket_template">
+    <div class="form-group bucket-group row">
+        <div class="col-xs-12">
+            <input type="text" class="form-control bucket-url" value="<%= name %>" placeholder="bucket.myorg.com">
+        </div>
+        <div class="col-xs-6">
+            <input type="text" class="form-control bucket-key" value="<%= access_key_id %>" placeholder="access key id">
+        </div>
+        <div class="col-xs-6">
+            <input type="text" class="form-control bucket-secret" value="<%= secret_access_key %>" placeholder="secret access key">
+        </div>
+        <div class="col-xs-12 col-sm-5 col-sm-offset-7">
+            <a class="text-danger bucket-remove" href="#">Remove this bucket</a>
+        </div>
+    </div>
+</script>
+
+
+<script type="text/javascript" src="/static/js/admin-util.js"></script>
+<script type="text/javascript" src="/static/js/admin-modal.js"></script>
+<script type="text/javascript" src="/static/js/admin.js"></script>
+
+<script type="text/javascript">
+
+var _defaults = {{ defaults|tojson }};
+
+var _settings = {{ settings|tojson }};
+
+var _config = _settings.config;
+
+</script>
+
+</body>
+</html>
