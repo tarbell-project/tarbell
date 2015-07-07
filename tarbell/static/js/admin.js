@@ -65,11 +65,11 @@ function input_hide() {
 //
 
 function alert_hide() {
-    $('div.tab-pane').find('div[role="alert"].alert-danger, div[role="alert"].alert-success').remove(); 
+    $('body').find('div[role="alert"].alert-danger, div[role="alert"].alert-success').remove();
 }
 
 function error_hide() {
-    $('div.tab-pane').find('div[role="alert"].alert-danger').remove();
+    $('body').find('.alert-danger').remove();
 }
 
 function error_alert(target, message) {
@@ -78,12 +78,17 @@ function error_alert(target, message) {
 }
 
 function success_hide() {
-    $('div.tab-pane').find('div[role="alert"].alert-success').remove();
+    $('body').find('div[role="alert"].alert-success').remove();
 }
 
-function success_alert(message) {
-    success_hide();
-    $('div.tab-pane.active').prepend(_success_alert_template({message: message}));
+function success_alert(message, target) {
+  console.log("success!");
+    alert_hide();
+    if ($(target).hasClass('btn')) {
+      $(target).disable().text(message);
+    } else {
+      $(target).prepend(_success_alert_template({message: message}));
+    }
 }
 
 //
@@ -91,7 +96,7 @@ function success_alert(message) {
 //
 
 function settings_dirty() {
-    $('#settings_save').enable();
+    $('#settings_save').enable().text('Save settings');
 }
 
 // Enable row of S3 bucket controls
@@ -161,9 +166,9 @@ function get_s3_credentials(cfg) {
                 };
             } else if(key || secret) {  // entered only one
                 if(has_defaults) {
-                    error = 'You must enter an access key ID and a secret access key for each bucket (or leave both blank to use defaults)';
+                    error = 'You must enter an access key ID and a secret access key for each bucket (or leave both blank to use defaults).';
                 } else {
-                    error = 'You must enter an access key ID and a secret access key for each bucket';                
+                    error = 'You must enter an access key ID and a secret access key for each bucket.';                
                 }
             } else {                    // entered neither
                 if(has_defaults) {
@@ -172,11 +177,11 @@ function get_s3_credentials(cfg) {
                         secret_access_key: settings.default_s3_secret_access_key
                     };
                 } else {
-                    error = 'You must enter an access key ID and a secret access key for each bucket';
+                    error = 'You must enter an access key ID and a secret access key for each bucket.';
                 }
             }
         } else if(key || secret) {
-            error = 'You must enter a name for each S3 bucket';
+            error = 'You must enter a name for each S3 bucket.';
         }
         if(error) {
             return false;
@@ -247,16 +252,16 @@ function handle_google_auth_code($context, code) {
 
     ajax_get('/google/auth/code/', {code: code},
         function(error) {
-          console.log("error");
             $context.trigger('error_show', error);
         },
         function(data) {
-            console.log("data");
-            $context.trigger('success_show', 'Authentication successful');
             show_settings();
+            console.log($context);
+            // TODO: actually make this work
+            //$context.trigger('success_show', 'Authenticated', '.google_authenticate');
+            $('.google_authenticate').disable().text('Authenticated!');
         },
         function() {
-          console.log("hiding progress");
             $context.trigger('progress_hide');
         });
 }
@@ -327,8 +332,8 @@ $(function() {
         .on('progress_show', function(event, msg) {
             progress_show(msg);
         })
-        .on('success_show', function(event, msg) {
-            success_alert(msg);
+        .on('success_show', function(event, msg, target) {
+            success_alert(msg, target);
         })
         .on('change', 'input[type="text"]', settings_dirty)
         .on('change', 'textarea', settings_dirty)
@@ -357,8 +362,8 @@ $(function() {
             data.google_account = $('#google_emails').trimmed();
         }
 
+        // Display an error message instead of saving if there are missing S3 creds
         try {
-          // Display an error message instead of saving if there are missing S3 creds
           error = get_s3_defaults(data) || get_s3_credentials(data);
             if(error) {
                 error_alert($('#default-error-container'), error);
@@ -366,8 +371,8 @@ $(function() {
                 return;
             }
         }
-        catch(e) {
-          console.log(e);
+        catch(error) {
+          console.log(error);
         }
         data.projects_path = $('#projects_path').val();
 
@@ -383,8 +388,7 @@ $(function() {
                 _settings.config = data;
                 _config = _settings.config;
 
-                $('#settings_save').disable()
-                success_alert('Settings saved!');
+                $('#settings_save').disable().text('Settings saved!');
 
                 show_s3_credentials();
             },

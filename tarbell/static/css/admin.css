@@ -165,13 +165,20 @@ textarea.form-control {
     left: 0;
 }
 .btn[disabled="disabled"] { color: #666; background-color: #e7e7e7; }
+.btn-success.btn[disabled="disabled"] { color: #e7e7e7; background-color: #5cb85c; }
 
-#settings_save { float: right; width: 100%; padding: 12px; font-size: 18px; }
+#settings_save { width: 100%; padding: 12px; font-size: 18px; }
 
 .alert-danger {
     text-align: center;
     background-color: transparent;
     border: none;
+    font-family: "Tahoma", Arial, sans-serif;
+    font-size: 16px;
+}
+
+.alert-success {
+    text-align: center;
     font-family: "Tahoma", Arial, sans-serif;
     font-size: 16px;
 }
