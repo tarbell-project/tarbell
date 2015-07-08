@@ -229,7 +229,6 @@ def tarbell_install_blueprint(command, args):
             name = blueprint.NAME
             puts("\n- Name specified in blueprint.py: {0}".format(colored.yellow(name)))
             settings.config["project_templates"].append({"name": name, "url": template_url})
-            print settings.config
             settings.save()
 
         except AttributeError:
