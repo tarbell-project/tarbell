@@ -9,7 +9,6 @@ This module provides the CLI interface to tarbell.
 
 import codecs
 import glob
-import gnureadline
 import imp
 import jinja2
 import os
@@ -19,6 +18,12 @@ import shutil
 import socket
 import sys
 import tempfile
+
+# Import readline without breaking process backgrounding on some OS X versions
+# See https://github.com/tarbell-project/tarbell/issues/291
+import signal
+signal.signal(signal.SIGTTOU, signal.SIG_IGN)
+import gnureadline
 
 from apiclient import errors
 from apiclient.http import MediaFileUpload as _MediaFileUpload
