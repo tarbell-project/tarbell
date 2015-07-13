@@ -189,7 +189,7 @@ Similarly, a Javascript file could include:
 
 .. code-block:: javascript
 
-  var data = {{ photos|tojson }}
+  var data = {{ photos|tojson|safe }}
   console.log(photos.intro.url);
 
 Use this feature with care! Missing variables could easily break your CSS or Javascript.
@@ -268,3 +268,98 @@ index.html
   This is a fallback version of the project's front page, in case the ``index.html`` file in the root
   directory is removed or renamed. It begins life as an exact copy of the root directory's 
   ``index.html``.
+
+Adding custom routes
+--------------------
+
+Sometimes, you'll find that you need create pages programatically, instead of simply adding template files. Or you may need to output data in a format other than HTML (like JSON, for example).
+
+For example, here's a hook from a project's `tarbell_config.py` that publishes special social media stub
+pages for each row in a worksheet. This allows individual items to be shared from a single-page 
+listicle app:
+
+.. code-block:: python
+
+  from itertools import ifilter
+  from flask import Blueprint, render_template
+  from tarbell.hooks import register_hook
+
+  # create a blueprint for this project
+  # tarbell will consume this when the project loads
+  blueprint = Blueprint('myproject', __name__)
+
+  @blueprint.route('/rows/<id>.html')
+  def social_stub(id):
+      "Build a social stub for in-page permalinks"
+      site = g.current_site
+
+      # get our production bucket for URL building
+      bucket = site.project.S3_BUCKETS.get('production', '')
+      data = site.get_context()
+      rows = data.get('list_items', [])
+
+      # get the row we want, defaulting to an empty dictionary
+      row = next(ifilter(lambda r: r['id'] == id, rows), {})
+
+      # render a template, using the same template environment as everywhere else
+      return render_template('_fb_template.html', bucket=bucket, **row)
+
+Here's the `_fb_template` referenced above:
+
+.. code-block:: django
+  
+  <html>
+
+  <head>
+    <script>
+      document.location = "http://{{ bucket }}/#{{ row.id }}";
+    </script>
+
+    <meta property="og:url" content="http://{{ bucket }}/rows/{{ row.id }}.html" />
+    <meta property="og:title" content="Great moments in history: {{ row.heading }}" />
+    <meta property="og:description" content="{{ row.og }}" />
+    <meta property="og:image" content="http://{{ bucket }}/img/{{ row.img }}" />
+  </head>
+
+  <body></body>
+
+  </html>
+
+
+Since this is a custom route, we need to tell Tarbell to build it as an HTML file when we call `tarbell generate` or `tarbell publish`. There are two ways to do this: `url_for` tags, or URL generators.
+
+.. note::
+    
+  Under the hood, Tarbell uses `Frozen-Flask <http://pythonhosted.org/Frozen-Flask/>`_ to generate static pages, so you can consult that project's documentation for more details and further customization.
+
+Auto-linking:
+
+In your main `index.html` template, generate a link for each stub:
+
+.. code-block:: django
+
+  {% for row in list_items %}
+  <a href="{{ url_for('myproject.social_stub', id=id) }}">Stub</a>
+  {% endfor %}
+
+Frozen-Flask will automatically track every call to `url_for` and build out those URLs. If that doesn't make sense for your project, you can also write a generator function, and use a `Tarbell hook <hooks.html>`_ to register it at build-time.
+
+.. code-block:: python
+
+  # in tarbell_config.py
+
+  def social_stub_urls():
+      "Generate a URL for every social stub"
+      site = g.current_site
+      data = site.get_context()
+      rows = data.get('list_items', [])
+
+      for row in rows:
+          yield ('myproject.social_stub', row['id'])
+
+  @register_hook('generate')
+  def register_social_stubs(site, output_root, extra_context):
+      "This runs before tarbell builds the static site"
+      site.freezer.register_generator(social_stub_urls)
+  
+
