@@ -635,8 +635,8 @@ class TarbellSite:
 
     def generate_static_site(self, output_root=None, extra_context=None):
         # use this hook for registering URLs to freeze
-        self.call_hook("generate", self, output_root, extra_context)
         self.app.config['BUILD_PATH'] = output_root
+        self.call_hook("generate", self, output_root, extra_context)
 
         if output_root is not None:
             # realpath or this gets generated relative to the tarbell package
