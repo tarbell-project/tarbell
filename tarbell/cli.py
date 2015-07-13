@@ -119,8 +119,10 @@ def tarbell_generate(command, args, skip_args=False, extra_context=None, quiet=F
 
     output_root = None
     with ensure_settings(command, args) as settings, ensure_project(command, args) as site:
+
         if not skip_args:
             output_root = list_get(args, 0, False)
+
             if output_root:
                 is_folder = os.path.exists(output_root)
             else:
@@ -128,8 +130,10 @@ def tarbell_generate(command, args, skip_args=False, extra_context=None, quiet=F
                     colored.cyan("tarbell generate _out")
                 ))
                 sys.exit()
+
         if quiet:
             site.quiet = True
+        
         if not output_root:
             output_root = tempfile.mkdtemp(prefix="{0}-".format(site.project.__name__))
             is_folder = False
@@ -158,7 +162,6 @@ def tarbell_generate(command, args, skip_args=False, extra_context=None, quiet=F
         if not quiet:
             puts("\nCreated site in {0}".format(colored.cyan(output_root)))
 
-        site.call_hook("generate", site, output_root, quiet)
         return output_root
 
 
