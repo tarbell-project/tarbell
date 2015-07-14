@@ -16,7 +16,7 @@ import traceback
 import xlrd
 
 from httplib import BadStatusLine
-from flask import Flask, render_template, send_from_directory, Response, g, jsonify
+from flask import Flask, Blueprint, render_template, send_from_directory, Response, g, jsonify
 from flask_frozen import Freezer, walk_directory
 from jinja2 import contextfunction, Markup
 from jinja2.loaders import BaseLoader
@@ -399,11 +399,6 @@ class TarbellSite:
             "SITE": self,
         })
 
-        try:
-            self.app.register_blueprint(project.blueprint)
-        except AttributeError:
-            pass
-
         # Set up template loaders
         template_dirs = [path]
         if base:
@@ -412,6 +407,10 @@ class TarbellSite:
         template_dirs.append(error_path)
 
         self.app.jinja_loader = TarbellFileSystemLoader(template_dirs)
+
+        # load the project blueprint, if it exists
+        if hasattr(project, 'blueprint') and isinstance(project.blueprint, Blueprint):
+            self.app.register_blueprint(project.blueprint)
 
         return project, base
 
