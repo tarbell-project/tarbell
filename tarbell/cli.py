@@ -411,7 +411,7 @@ def tarbell_serve(command, args):
             if not is_werkzeug_process():
                 site.call_hook("server_start", site)
 
-            site.app.run(ip, port=port)
+            site.app.run(ip, port=port, threaded=True)
 
             if not is_werkzeug_process():
                 site.call_hook("server_stop", site)
