@@ -22,7 +22,9 @@ flags = parser.parse_args(['--noauth_local_webserver'])
 
 
 def get_drive_api():
-    """Get drive API client based on settings"""
+    """
+    Get drive API client based on settings.
+    """
     settings = Settings()
 
     if settings.credentials:
@@ -52,13 +54,18 @@ def get_drive_api_from_client_secrets(path, reset_creds=False):
 
 
 def get_drive_api_from_file(path):
+    """
+    Open file with OAuth tokens.
+    """
     f = open(path)
     credentials = client.OAuth2Credentials.from_json(f.read())
     return _get_drive_api(credentials)
 
 
 def _get_drive_api(credentials):
-    """For a given set of credentials, return a drive API object"""
+    """
+    For a given set of credentials, return a drive API object.
+    """
     http = httplib2.Http()
     http = credentials.authorize(http)
     service = discovery.build('drive', 'v2', http=http)

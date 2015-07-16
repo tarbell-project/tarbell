@@ -14,12 +14,16 @@ from clint.textui import colored, puts as _puts
 STDOUT = sys.stdout.write
 
 def is_werkzeug_process():
-    """Is the current process the werkzeug reloader thread? Return True if so."""
+    """
+    Is the current process the werkzeug reloader thread? Return True if so.
+    """
     return os.environ.get('WERKZEUG_RUN_MAIN') == 'true'
 
 
 def puts(s='', newline=True, stream=STDOUT):
-    """Wrap puts to avoid getting called twice by Werkzeug reloader"""
+    """
+    Wrap puts to avoid getting called twice by Werkzeug reloader.
+    """
     if not is_werkzeug_process():
         try:
             return _puts(s, newline, stream)
@@ -28,7 +32,9 @@ def puts(s='', newline=True, stream=STDOUT):
 
 
 def list_get(l, idx, default=None):
-    """Get from a list with an optional default value."""
+    """
+    Get from a list with an optional default value.
+    """
     try:
         if l[idx]:
             return l[idx]
@@ -39,7 +45,9 @@ def list_get(l, idx, default=None):
 
 
 def split_sentences(s, pad=0):
-    """Split sentences for formatting."""
+    """
+    Split sentences for formatting.
+    """
     sentences = []
     for index, sentence in enumerate(s.split('. ')):
         padding = ''
@@ -52,13 +60,17 @@ def split_sentences(s, pad=0):
 
 
 def ensure_directory(path):
-    """Ensure directory exists for a given file path"""
+    """
+    Ensure directory exists for a given file path.
+    """
     dirname = os.path.dirname(path)
     if not os.path.exists(dirname):
         os.makedirs(dirname)
 
 
 def show_error(msg):
-    """Displays error message."""
+    """
+    Displays error message.
+    """
     sys.stdout.flush()
     sys.stderr.write("\n{0}: {1}".format(colored.red("Error"), msg + '\n'))

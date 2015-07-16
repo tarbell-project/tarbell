@@ -17,7 +17,9 @@ from .settings import Settings
 from .utils import show_error
 
 class EnsureSettings():
-    """Ensure the user has a Tarbell configuration."""
+    """
+    Ensure the user has a Tarbell configuration.
+    """
     def __init__(self, command, args):
         self.command = command
         self.args = args
@@ -44,7 +46,9 @@ class EnsureSettings():
 
 
 class EnsureProject():
-    """Context manager to ensure the user is in a Tarbell site environment."""
+    """
+    Context manager to ensure the user is in a Tarbell site environment.
+    """
     def __init__(self, command, args, path=None):
         self.command = command
         self.args = args

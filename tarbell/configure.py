@@ -23,7 +23,9 @@ from .utils import show_error
 
 
 def tarbell_configure(command, args):
-    """Tarbell configuration routine"""
+    """
+    Tarbell configuration routine.
+    """
     puts("Configuring Tarbell. Press ctrl-c to bail out!")
 
     # Check if there's settings configured
@@ -66,7 +68,9 @@ def tarbell_configure(command, args):
 
 
 def _get_or_create_config(path, prompt=True):
-    """Get or create a Tarbell configuration directory."""
+    """
+    Get or create a Tarbell configuration directory.
+    """
     dirname = os.path.dirname(path)
     filename = os.path.basename(path)
 
@@ -86,7 +90,9 @@ def _get_or_create_config(path, prompt=True):
 
 
 def _setup_google_spreadsheets(settings, path, prompt=True):
-    """Set up a Google spreadsheet"""
+    """
+    Set up a Google spreadsheet.
+    """
     ret = {}
     if prompt:
         use = raw_input("\nWould you like to use Google spreadsheets [Y/n]? ")
@@ -152,7 +158,9 @@ def _setup_google_spreadsheets(settings, path, prompt=True):
 
 
 def _setup_s3(settings, path, prompt=True):
-    """Prompt user to set up Amazon S3"""
+    """
+    Prompt user to set up Amazon S3.
+    """
     ret = {'default_s3_buckets': {}, 's3_credentials': settings.get('s3_credentials', {})}
 
     if prompt:
@@ -165,8 +173,6 @@ def _setup_s3(settings, path, prompt=True):
                           os.environ.get('AWS_ACCESS_KEY_ID', None)
     existing_secret_key = settings.get('default_s3_secret_access_key', None) or \
                           os.environ.get('AWS_SECRET_ACCESS_KEY', None)
-
-    #import ipdb; ipdb.set_trace();
 
     access_key_prompt = "\nPlease enter your default Amazon Access Key ID:"
     if existing_access_key:
@@ -283,7 +289,9 @@ def _setup_s3(settings, path, prompt=True):
 
 
 def _setup_tarbell_project_path(settings, path, prompt=True):
-    """Prompt user to set up project path."""
+    """
+    Prompt user to set up project path.
+    """
     default_path = os.path.expanduser(os.path.join("~", "tarbell"))
     projects_path = raw_input("\nWhat is your Tarbell projects path? [Default: {0}, 'none' to skip] ".format(default_path))
     if projects_path == "":
@@ -305,7 +313,9 @@ def _setup_tarbell_project_path(settings, path, prompt=True):
 
 
 def _setup_default_templates(settings, path, prompt=True):
-    """Add some (hardcoded) default templates."""
+    """
+    Add some (hardcoded) default templates.
+    """
     project_templates = [{
         "name": "Basic Bootstrap 3 template",
         "url": "https://github.com/tarbell-project/tarbell-template",
@@ -324,7 +334,9 @@ def _setup_default_templates(settings, path, prompt=True):
 
 
 def _backup(path, filename):
-    """Backup a file."""
+    """
+    Backup a file.
+    """
     target = os.path.join(path, filename)
     if os.path.isfile(target):
         dt = datetime.now()

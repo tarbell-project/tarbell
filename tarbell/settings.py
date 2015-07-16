@@ -9,7 +9,9 @@ from .utils import show_error
 EMPTY_BLUEPRINT = {"name": "Empty project (no blueprint)"}
 
 class Settings:
-    """Simple object representation of Tarbell settings."""
+    """
+    Simple object representation of Tarbell settings.
+    """
     def __init__(self):
         self.path = os.path.expanduser(
             os.path.join("~", ".tarbell", "settings.yaml")
@@ -45,6 +47,9 @@ class Settings:
             self.credentials = False
 
     def save(self):
+        """
+        Save settings.
+        """
         with open(self.path, "w") as f:
             self.config["project_templates"] = filter(lambda template: template.get("url"), self.config["project_templates"])
             yaml.dump(self.config, f, default_flow_style=False)

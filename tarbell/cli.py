@@ -54,7 +54,9 @@ args = arguments.Args()
 # Dispatch
 # --------
 def main():
-    """Primary Tarbell command dispatch."""
+    """
+    Primary Tarbell command dispatch.
+    """
     command = Command.lookup(args.get(0))
 
     if len(args) == 0 or args.contains(('-h', '--help', 'help')):
@@ -79,7 +81,9 @@ def main():
 
 
 def display_info(args):
-    """Displays Tarbell info."""
+    """
+    Displays Tarbell info.
+    """
     puts('\nTarbell: Simple web publishing\n')
 
     puts('Usage: {0}\n'.format(colored.cyan('tarbell <command>')))
@@ -108,14 +112,18 @@ def display_info(args):
 
 
 def display_version():
-    """Displays Tarbell version/release."""
+    """
+    Displays Tarbell version/release.
+    """
     puts('You are using Tarbell v{0}'.format(
         colored.green(VERSION)
     ))
 
 
 def tarbell_generate(command, args, skip_args=False, extra_context=None, quiet=False):
-    """Generate static files."""
+    """
+    Generate static files.
+    """
 
     output_root = None
     with ensure_settings(command, args) as settings, ensure_project(command, args) as site:
@@ -166,7 +174,9 @@ def tarbell_generate(command, args, skip_args=False, extra_context=None, quiet=F
 
 
 def tarbell_install(command, args):
-    """Install a project."""
+    """
+    Install a project.
+    """
     with ensure_settings(command, args) as settings:
         project_url = args.get(0)
         puts("\n- Getting project information for {0}".format(project_url))
@@ -207,7 +217,9 @@ def tarbell_install(command, args):
 
 
 def tarbell_install_blueprint(command, args):
-    """Install a project template."""
+    """
+    Install a project template.
+    """
     with ensure_settings(command, args) as settings:
         name = None
         error = None
@@ -260,7 +272,9 @@ def tarbell_install_blueprint(command, args):
 
 
 def tarbell_list(command, args):
-    """List tarbell projects."""
+    """
+    List tarbell projects.
+    """
     with ensure_settings(command, args) as settings:
         projects_path = settings.config.get("projects_path")
         if not projects_path:
@@ -305,6 +319,9 @@ def tarbell_list(command, args):
             puts("No projects found")
 
 def tarbell_list_templates(command, args):
+    """
+    List available Tarbell blueprints.
+    """
     with ensure_settings(command, args) as settings:
         puts("\nAvailable project templates\n")
         _list_templates(settings)
@@ -312,7 +329,9 @@ def tarbell_list_templates(command, args):
 
 
 def tarbell_publish(command, args):
-    """Publish a site by calling s3cmd"""
+    """
+    Publish to s3.
+    """
     with ensure_settings(command, args) as settings, ensure_project(command, args) as site:
         bucket_name = list_get(args, 0, "staging")
 
@@ -378,7 +397,9 @@ def tarbell_publish(command, args):
 
 
 def tarbell_newproject(command, args):
-    """Create new Tarbell project."""
+    """
+    Create new Tarbell project.
+    """
     with ensure_settings(command, args) as settings:
         # Set it up and make the directory
         name = _get_project_name(args)
@@ -398,7 +419,9 @@ def tarbell_newproject(command, args):
 
 
 def tarbell_serve(command, args):
-    """Serve the current Tarbell project."""
+    """
+    Serve the current Tarbell project.
+    """
     with ensure_project(command, args) as site:
         with ensure_settings(command, args) as settings:
             address = list_get(args, 0, "").split(":")
@@ -422,7 +445,9 @@ def tarbell_serve(command, args):
 
 
 def tarbell_switch(command, args):
-    """Switch to a project"""
+    """
+    Switch to a project.
+    """
     with ensure_settings(command, args) as settings:
         projects_path = settings.config.get("projects_path")
         if not projects_path:
@@ -440,13 +465,17 @@ def tarbell_switch(command, args):
 
 
 def tarbell_credentials(command, args):
-    """Print current OAuth access token"""
+    """
+    Print current OAuth access token.
+    """
     api = get_drive_api()
     puts(api.credentials.to_json())
 
 
 def tarbell_update(command, args):
-    """Update the current tarbell project."""
+    """
+    Update the current tarbell project.
+    """
     with ensure_settings(command, args) as settings, ensure_project(command, args) as site:
         puts("Updating to latest blueprint\n")
 
@@ -462,14 +491,18 @@ def tarbell_update(command, args):
 
 
 def tarbell_unpublish(command, args):
+    """
+    Delete a project.
+    """
     with ensure_settings(command, args) as settings, ensure_project(command, args) as site:
-        """Delete a project."""
         show_error("Not implemented!")
 
 
 
 def _newproject(command, path, name, settings):
-    """Actual heavy lifting for project creation."""
+    """
+    Helper to create new project.
+    """
     key = None
     title = _get_project_title()
     template = _get_template(settings)
@@ -532,7 +565,9 @@ def _newproject(command, path, name, settings):
 
 
 def _install_requirements(path):
-    """Install requirements.txt"""
+    """
+    Install a blueprint's requirements.txt
+    """
     locations = [os.path.join(path, "_blueprint"), os.path.join(path, "_base"), path] 
     success = True
 
@@ -555,7 +590,9 @@ def _install_requirements(path):
 
 
 def _get_project_name(args):
-    """Get project name"""
+    """
+    Get project name.
+    """
     name = args.get(0)
     puts("")
     while not name:
@@ -564,7 +601,9 @@ def _get_project_name(args):
 
 
 def _get_project_title():
-    """Get project title"""
+    """
+    Get project title.
+    """
     title = None
     puts("")
     while not title:
@@ -574,7 +613,9 @@ def _get_project_title():
 
 
 def _clean_suffix(string, suffix):
-    """If string endswith the suffix, remove it. Else leave it alone"""
+    """
+    If string endswith the suffix, remove it. Else leave it alone.
+    """
     suffix_len = len(suffix)
 
     if len(string) < suffix_len:
@@ -591,7 +632,9 @@ def _clean_suffix(string, suffix):
 
 
 def _get_path(name, settings, mkdir=True):
-    """Generate a project path."""
+    """
+    Generate a project path.
+    """
     default_projects_path = settings.config.get("projects_path")
     path = None
 
@@ -607,7 +650,9 @@ def _get_path(name, settings, mkdir=True):
 
 
 def _mkdir(path):
-    """Make a directory or bail."""
+    """
+    Make a directory or bail.
+    """
     try:
         os.mkdir(path)
     except OSError, e:
@@ -619,7 +664,9 @@ def _mkdir(path):
 
 
 def _get_template(settings):
-    """Prompt user to pick template from a list."""
+    """
+    Prompt user to pick template from a list.
+    """
     puts("\nPick a template\n")
     template = None
     while not template:
@@ -636,7 +683,9 @@ def _get_template(settings):
 
 
 def _list_templates(settings):
-    """List templates from settings."""
+    """
+    List templates from settings.
+    """
     for idx, option in enumerate(settings.config.get("project_templates"), start=1):
         puts("  {0:5} {1:36}".format(
             colored.yellow("[{0}]".format(idx)),
@@ -647,7 +696,9 @@ def _list_templates(settings):
 
 
 def _create_spreadsheet(name, title, path, settings):
-    """Create Google spreadsheet"""
+    """
+    Create Google spreadsheet.
+    """
     if not settings.client_secrets:
         return None
 
@@ -721,7 +772,9 @@ def _add_user_to_file(file_id, service, user_email,
 
 
 def _copy_config_template(name, title, template, path, key, settings):
-        """Get and render tarbell_config.py.template from Tarbell default"""
+        """
+        Get and render tarbell_config.py.template from Tarbell default.
+        """
         puts("\nCopying configuration file")
         context = settings.config
         context.update({
@@ -770,7 +823,9 @@ def _copy_config_template(name, title, template, path, key, settings):
 
 
 def _delete_dir(dir):
-    """Delete tempdir"""
+    """
+    Delete a directory.
+    """
     try:
         shutil.rmtree(dir)  # delete directory
     except OSError as exc:
@@ -781,6 +836,9 @@ def _delete_dir(dir):
 
 
 class Command(object):
+    """
+    Class that encapsulates a tarbell command.
+    """
     COMMANDS = {}
     SHORT_MAP = {}
 
@@ -817,7 +875,9 @@ class Command(object):
 
 
 def def_cmd(name=None, short=None, fn=None, usage=None, help=None):
-    """Define a command."""
+    """
+    Define a command.
+    """
     command = Command(name=name, short=short, fn=fn, usage=usage, help=help)
     Command.register(command)
 
