@@ -633,13 +633,15 @@ class TarbellSite:
         return content
 
     def generate_static_site(self, output_root=None, extra_context=None):
-        # use this hook for registering URLs to freeze
         self.app.config['BUILD_PATH'] = output_root
+
+        # use this hook for registering URLs to freeze
         self.call_hook("generate", self, output_root, extra_context)
 
         if output_root is not None:
             # realpath or this gets generated relative to the tarbell package
             self.app.config['FREEZER_DESTINATION'] = os.path.realpath(output_root)
+
         self.freezer.freeze()
 
     def filter_files(self, path):
