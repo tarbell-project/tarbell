@@ -23,7 +23,7 @@ Tarbell ships with a default blueprint called _blueprint. This folder contains b
 
 Here's a simple ``_blueprint/_blueprint.html`` example.
 
-.. code-block:: django
+.. code-block:: html+jinja
 
   <html>
     <head>
@@ -39,7 +39,7 @@ Here's a simple ``_blueprint/_blueprint.html`` example.
 
 To inherit from this template, you use the "extend" syntax in ``index.html`` or other project files you create. All your ``index.html`` needs to contain is:
 
-.. code-block:: django
+.. code-block:: html+jinja
 
   {% extends '_base.html' %}
 
@@ -151,20 +151,20 @@ This simple ``DEFAULT_CONTEXT`` shows many of the key template features:
 
 To print the title in your template, use `{{ title }}`:
 
-.. code-block:: django
+.. code-block:: html+jinja
 
   <h1>{{ title }}</h1>
 
 Address a nested dictionary:
 
-.. code-block:: django
+.. code-block:: html+jinja
 
   <img src="{{ photos.intro.url }}" alt="{{ photos.intro.caption }}" />
   <aside>{{ photos.intro.caption }}</aside>
 
 Access a list of data:
 
-.. code-block:: django
+.. code-block:: html+jinja
 
   <ul>
     {% for year in timeline %}
@@ -306,7 +306,7 @@ listicle app:
 
 Here's the `_fb_template` referenced above:
 
-.. code-block:: django
+.. code-block:: html+jinja
   
   <html>
 
@@ -336,7 +336,7 @@ Auto-linking:
 
 In your main `index.html` template, generate a link for each stub:
 
-.. code-block:: django
+.. code-block:: html+jinja
 
   {% for row in list_items %}
   <a href="{{ url_for('myproject.social_stub', id=id) }}">Stub</a>
@@ -361,5 +361,55 @@ Frozen-Flask will automatically track every call to `url_for` and build out thos
   def register_social_stubs(site, output_root, extra_context):
       "This runs before tarbell builds the static site"
       site.freezer.register_generator(social_stub_urls)
-  
+
+Using Flask Extensions
+----------------------
+
+The Flask ecosystem includes all sorts of useful `extensions <http://flask.pocoo.org/extensions/>`_ for building web applications. 
+
+Every Tarbell site includes a Flask app that handles request routing and template rendering. You can hook into this underlying app to take advantage of Flask extensions to speed up your development process.
+
+1. Define a Tarbell Blueprint in your `tarbell_config.py` file. (Your variable name must be `blueprint` for Tarbell to find it.)
+2. Use the `blueprint.record <http://flask.pocoo.org/docs/0.10/api/#flask.Blueprint.record>`_ decorator to tell Flask to run a function when the blueprint is loaded onto an app. This will happen at the end of your Tarbell site's `__init__` method. The function will be passed a `state` object, with a reference to your Flask app at `state.app`.
+3. Create an instance of the extension you're using. Inside the function you decorated with `blueprint.record`, run the extension's `init_app` method with your site's Flask app. (You can also initialize the extension with the app in one step, if you don't need a reference to the extension outside that function.)
+4. Add any configuration settings the extension needs to `state.app.config`.
+
+Here's how to use `flask-thumbnails <https://github.com/silentsokolov/flask-thumbnails>`_ with Tarbell:
+
+.. code-block:: python
+
+  # tarbell_config.py
+
+  from flask import Blueprint
+  from flask.ext.thumbnails import Thumbnail
+
+  # initialize a blueprint and thumbnails extension
+  blueprint = Blueprint('project', __name__)
+  thumbnails = Thumbnail()
+
+  # media settings, note that these are relative paths
+  MEDIA_FOLDER = "img/uploads"
+  MEDIA_THUMBNAIL_FOLDER = "img/thumbnails"
+
+  # this function will run when Tarbell's underlying Flask app
+  # adds this blueprint
+  @blueprint.record
+  def app_setup(state):
+      "Configure thumbnails"
+
+      # configure thumbnails with the active app
+      state.app.config['MEDIA_FOLDER'] = MEDIA_FOLDER
+      state.app.config['MEDIA_THUMBNAIL_URL'] = MEDIA_FOLDER
+      thumbnails.init_app(state.app)
+
+Now, in your templates, you can use the `thumbnail` filter:
+
+.. code-block:: html+jinja
+
+  <img src="{{ 'image.jpg'|thumbnail('200x200') }}" alt="A cropped image">
+  <img src="{{ 'image.jpg'|thumbnail('200x200', crop='fit', quality=100) }}" alt="A cropped image">
+
+
+
+
 
