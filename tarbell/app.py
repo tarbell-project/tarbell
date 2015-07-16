@@ -271,6 +271,7 @@ class TarbellSite:
 
         # centralized freezer setup
         self.app.config.setdefault('FREEZER_RELATIVE_URLS', True)
+        self.app.config.setdefault('FREEZER_REMOVE_EXTRA_FILES', False)
         self.app.config.setdefault('FREEZER_DESTINATION', 
             os.path.join(os.path.realpath(self.path), '_site'))
 
