@@ -547,7 +547,6 @@ class TarbellSite:
             try:
                 # Find template with name of error
                 cls = e.__class__
-                error_path = '{0}.{1}.html'.format(cls.__module__, cls.__name__)
                 ex_type, ex, tb = sys.exc_info()
 
                 context = self.project.DEFAULT_CONTEXT
@@ -558,7 +557,15 @@ class TarbellSite:
                 })
                 if extra_context:
                     context.update(extra_context)
-                rendered = render_template(error_path, **context)
+
+                try:
+                    error_path = '_{0}.{1}.html'.format(cls.__module__, cls.__name__)
+                    rendered = render_template(error_path, **context)
+                except TemplateNotFound:
+                    # Find template without underscore prefix, @TODO remove in v1.1
+                    error_path = '{0}.{1}.html'.format(cls.__module__, cls.__name__)
+                    rendered = render_template(error_path, **context)
+
                 return Response(rendered, mimetype="text/html")
             except TemplateNotFound:
                 # Otherwise raise old error
