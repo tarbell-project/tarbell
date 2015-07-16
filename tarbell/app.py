@@ -46,8 +46,10 @@ TEMPLATE_TYPES = [
 
 EXCLUDES = ['.git/*', '.git', '.gitignore', '.*', '*.pyc', '*.py', '_*']
 
+
 def split_template_path(template):
-    """Split a path into segments and perform a sanity check.  If it detects
+    """
+    Split a path into segments and perform a sanity check.  If it detects
     '..' in the path it will raise a `TemplateNotFound` error.
     """
     pieces = []
@@ -60,7 +62,13 @@ def split_template_path(template):
             pieces.append(piece)
     return pieces
 
+
 class TarbellFileSystemLoader(BaseLoader):
+    """
+    Custom loader for Tarbell templates; searches Tarbell's template directories (first _blueprint,
+    then the project itself) for matching templates.
+    """
+
     def __init__(self, searchpath, encoding='utf-8'):
         if isinstance(searchpath, string_types):
             searchpath = [searchpath]
@@ -91,12 +99,18 @@ class TarbellFileSystemLoader(BaseLoader):
 
 
 def silent_none(value):
+    """
+    Return `None` values as empty strings
+    """
     if value is None:
         return ''
     return value
 
 
 def pprint_lines(value):
+    """
+    Pretty print lines
+    """
     pformatted = pformat(value, width=1, indent=4)
     formatted = "{0}\n {1}\n{2}".format(
         pformatted[0],
@@ -107,7 +121,9 @@ def pprint_lines(value):
 
 
 def process_xlsx(content):
-    """Turn Excel file contents into Tarbell worksheet data"""
+    """
+    Turn Excel file contents into Tarbell worksheet data
+    """
     data = {}
     workbook = xlrd.open_workbook(file_contents=content)
     worksheets = [w for w in workbook.sheet_names() if not w.startswith('_')]
@@ -129,7 +145,9 @@ def process_xlsx(content):
 
 
 def copy_global_values(data):
-    """Copy values worksheet into global namespace."""
+    """
+    Copy values worksheet into global namespace.
+    """
     for k, v in data['values'].items():
         if not data.get(k):
             data[k] = v
@@ -142,7 +160,9 @@ def copy_global_values(data):
 
 
 def make_headers(worksheet):
-    """Make headers"""
+    """
+    Make headers from worksheet
+    """
     headers = {}
     cell_idx = 0
     while cell_idx < worksheet.ncols:
@@ -156,7 +176,9 @@ def make_headers(worksheet):
 
 
 def make_worksheet_data(headers, worksheet):
-    # Make data
+    """
+    Make data from worksheet
+    """
     data = []
     row_idx = 1
     while row_idx < worksheet.nrows:
@@ -210,12 +232,16 @@ def make_worksheet_data(headers, worksheet):
 
 
 def markdown(value):
-    """Run text through markdown process"""
+    """
+    Run text through markdown process
+    """
     return Markup(md.markdown(value))
 
 
 def process_text(text):
-    """Return markup or empty string"""
+    """
+    Return markup or empty string
+    """
     try:
         return Markup(text)
     except TypeError:
@@ -223,7 +249,9 @@ def process_text(text):
 
 
 def format_date(value, format='%b. %d, %Y', convert_tz=None):
-    """Format an Excel date."""
+    """
+    Format an Excel date.
+    """
     if isinstance(value, float) or isinstance(value, int):
         seconds = (value - 25569) * 86400.0
         parsed = datetime.datetime.utcfromtimestamp(seconds)
@@ -279,9 +307,15 @@ class TarbellSite:
         self.freezer.register_generator(self.find_files)
 
     def add_site_to_context(self):
+        """
+        Add current Tarbell object to Flask's `g`
+        """
         g.current_site = self
 
     def never_cache_preview(self, response):
+        """
+        Ensure preview is never cached
+        """
         response.cache_control.max_age = 0
         response.cache_control.no_cache = True
         response.cache_control.must_revalidate = True
@@ -309,17 +343,25 @@ class TarbellSite:
         return render_template(path, **context)
 
     def process_hooks(self, hooks):
+        """
+        Process all project hooks
+        """
         try:
             enabled_hooks = self.project.HOOKS
         except AttributeError:
             return hooks
 
     def call_hook(self, hook, *args, **kwargs):
+        """
+        Calls each registered hook
+        """
         for function in self.hooks[hook]:
             function.__call__(*args, **kwargs)
 
     def _get_base(self, path):
-        """Get base"""
+        """
+        Get project blueprint
+        """
         base = None
 
         # Slightly ugly DRY violation for backwards compatibility with old
@@ -350,7 +392,9 @@ class TarbellSite:
         return base
 
     def load_project(self, path):
-        """Load a Tarbell project"""
+        """
+        Load a Tarbell project
+        """
         base = self._get_base(path)
 
         filename, pathname, description = imp.find_module('tarbell_config', [path])
@@ -416,7 +460,9 @@ class TarbellSite:
         return project, base
 
     def _resolve_path(self, path):
-        """Resolve the correct file path"""
+        """
+        Resolve static file paths
+        """
         filepath = None
         mimetype = None
 
@@ -466,7 +512,9 @@ class TarbellSite:
         return jsonify(self.data)
 
     def preview(self, path=None, extra_context=None, publish=False):
-        """ Preview a project path """
+        """
+        Serve up a project path
+        """
         try:
             self.call_hook("preview", self)
 
@@ -551,6 +599,9 @@ class TarbellSite:
         return context
 
     def get_context_from_xlsx(self):
+        """
+        Get context from an Excel file
+        """
         if re.search('^(http|https)://', self.project.CONTEXT_SOURCE_FILE):
             resp = requests.get(self.project.CONTEXT_SOURCE_FILE)
             content = resp.content
@@ -598,7 +649,9 @@ class TarbellSite:
         return ret
 
     def get_context_from_gdoc(self):
-        """Wrap getting context in a simple caching mechanism."""
+        """
+        Wrap getting context from Google sheets in a simple caching mechanism.
+        """
         try:
             start = int(time.time())
             if not self.data or start > self.expires:
@@ -612,7 +665,9 @@ class TarbellSite:
             return {}
 
     def _get_context_from_gdoc(self, key):
-        """Create a Jinja2 context from a Google spreadsheet."""
+        """
+        Create a Jinja2 context from a Google spreadsheet.
+        """
         try:
             content = self.export_xlsx(key)
             data = process_xlsx(content)
@@ -626,7 +681,9 @@ class TarbellSite:
             return self._get_context_from_gdoc(key)
 
     def export_xlsx(self, key):
-        """Download xlsx version of spreadsheet"""
+        """
+        Download xlsx version of spreadsheet.
+        """
         spreadsheet_file = self.client.files().get(fileId=key).execute()
         links = spreadsheet_file.get('exportLinks')
         downloadurl = links.get('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
@@ -634,6 +691,9 @@ class TarbellSite:
         return content
 
     def generate_static_site(self, output_root=None, extra_context=None):
+        """
+        Bake out static site
+        """
         self.app.config['BUILD_PATH'] = output_root
 
         # use this hook for registering URLs to freeze
@@ -646,6 +706,9 @@ class TarbellSite:
         self.freezer.freeze()
 
     def filter_files(self, path):
+        """
+        Exclude files based on blueprint and project configuration as well as hidden files.
+        """
         excludes = r'|'.join([fnmatch.translate(x) for x in self.project.EXCLUDES]) or r'$.'
         for root, dirs, files in os.walk(path, topdown=True):
             dirs[:] = [d for d in dirs if not re.match(excludes, d)]
@@ -675,4 +738,3 @@ class TarbellSite:
         # then yield project paths
         for path in walk_directory(self.path, ignore=self.project.EXCLUDES):
             yield 'preview', {'path': path}
-

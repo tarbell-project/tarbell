@@ -11,7 +11,9 @@ hooks = {
 
 
 class register_hook(object):
-    """Register hook with @register_hook("EVENT") where EVENT is "newproject" etc"""
+    """
+    Register hook with @register_hook("EVENT") where EVENT is "newproject" etc.
+    """
     def __init__(self, event):
         self.event = event
 

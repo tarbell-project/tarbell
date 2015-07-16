@@ -17,6 +17,9 @@ from .utils import show_error
 GZIP_TIMESTAMP = 326073600 # Timestamp of Eads' birthday
 
 class S3Url(str):
+    """
+    Encapsulates an S3 URL
+    """
     def __new__(self, content):
         # Parse
         if not content.endswith("/"):
@@ -28,6 +31,9 @@ class S3Url(str):
 
 
 class S3Sync:
+    """
+    Encapsulate syncing a directory with S3
+    """
     def __init__(self, directory, bucket, access_key_id, secret_access_key, force=False):
         if '.' in bucket:
             connection = S3Connection(access_key_id, secret_access_key, calling_format=OrdinaryCallingFormat())

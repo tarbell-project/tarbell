@@ -12,7 +12,9 @@ import string
 
 class MergedCellError(Exception):
     def __init__(self, sheetname, ranges):
-        """Translate merged cells to human readable ranges."""
+        """
+        Translate merged cells to human readable ranges.
+        """
 
         self.sheetname = sheetname
         self.ranges = ranges
