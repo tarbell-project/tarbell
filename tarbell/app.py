@@ -569,7 +569,8 @@ class TarbellSite:
                 return Response(rendered, mimetype="text/html")
             except TemplateNotFound:
                 # Otherwise raise old error
-                raise e
+                ex_type, ex, tb = sys.exc_info()
+                raise ex_type, ex, tb
 
         # Last ditch effort -- see if path has "index.html" underneath it
         if not path.endswith("index.html"):
