@@ -7,7 +7,7 @@ from setuptools import setup, find_packages
 
 
 APP_NAME = 'tarbell'
-VERSION = '1.0.2'
+VERSION = '1.0.3'
 
 settings = dict()
 
