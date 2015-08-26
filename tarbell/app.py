@@ -740,7 +740,6 @@ class TarbellSite:
         Find all file paths for publishing, yield (urlname, kwargs)
         """
         # yield blueprint paths first
-
         if getattr(self, 'blueprint_name', None):
             for path in walk_directory(os.path.join(self.path, self.blueprint_name), ignore=self.project.EXCLUDES):
                 yield 'preview', {'path': path}
