@@ -544,6 +544,7 @@ class TarbellSite:
                 return send_from_directory(dir, filename)
 
         except Exception as e:
+            ex_type, ex, tb = sys.exc_info()
             try:
                 # Find template with name of error
                 cls = e.__class__
@@ -569,7 +570,6 @@ class TarbellSite:
                 return Response(rendered, mimetype="text/html")
             except TemplateNotFound:
                 # Otherwise raise old error
-                ex_type, ex, tb = sys.exc_info()
                 raise ex_type, ex, tb
 
         # Last ditch effort -- see if path has "index.html" underneath it
