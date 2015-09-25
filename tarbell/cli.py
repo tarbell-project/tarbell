@@ -18,6 +18,7 @@ import shutil
 import socket
 import sys
 import tempfile
+import webbrowser
 
 # Import readline without breaking process backgrounding on some OS X versions
 # See https://github.com/tarbell-project/tarbell/issues/291
@@ -496,6 +497,62 @@ def tarbell_unpublish(command, args):
     """
     with ensure_settings(command, args) as settings, ensure_project(command, args) as site:
         show_error("Not implemented!")
+
+
+
+def tarbell_spreadsheet(command, args):
+    """
+    Open context spreadsheet
+    """
+    with ensure_settings(command, args) as settings, ensure_project(command, args) as site:
+        try:
+            # First, try to get the Google Spreadsheet URL
+            spreadsheet_url = _google_spreadsheet_url(site.project.SPREADSHEET_KEY)
+        except AttributeError:
+            # The project doesn't seem to be using a Google Spreadsheet.
+            # Try the URL or path specified in the CONTEXT_SOURCE_FILE setting
+            try:
+                spreadsheet_url = _context_source_file_url(
+                    site.project.CONTEXT_SOURCE_FILE)
+                print(spreadsheet_url)
+            except AttributeError:
+                puts(colored.red("No Google spreadsheet or context source file "
+                                 "has been configured.\n"))
+                return
+
+        # Use the webbrowser package to try to open the file whether it's a
+        # remote URL on the web, or a local file.  On some platforms it will
+        # successfully open local files in the default application.
+        # This seems preferable to trying to do os detection and calling
+        # the system-specific command for opening files in default
+        # applications.
+        # See
+        # http://stackoverflow.com/questions/434597/open-document-with-default-application-in-python
+        webbrowser.open(spreadsheet_url)
+
+
+
+def _google_spreadsheet_url(key):
+    """
+    Returns full editing URL for a Google Spreadsheet given its key
+    """
+    return "https://docs.google.com/spreadsheets/d/{key}/edit".format(key=key)
+
+
+
+def _context_source_file_url(path_or_url):
+    """
+    Returns a URL for a remote or local context CSV file
+    """
+    if path_or_url.startswith('http'):
+        # Remote CSV. Just return the URL
+        return path_or_url
+
+    if path_or_url.startswith('/'):
+        # Absolute path
+        return "file://" + path_or_url
+
+    return "file://" + os.path.join(os.path.realpath(os.getcwd()), path_or_url)
 
 
 
@@ -984,3 +1041,11 @@ def_cmd(
     fn=tarbell_unpublish,
     usage='unpublish <target (default: staging)>',
     help='Remove the current project from <target>.')
+
+
+def_cmd(
+    name='spreadsheet',
+    fn=tarbell_spreadsheet,
+    usage='spreadsheet',
+    help='Open context spreadsheet in your browser or default application')
+
