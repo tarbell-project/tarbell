@@ -85,8 +85,15 @@ Install a Tarbell project from the Git repository url specified.
 Install a Tarbell blueprint from the given repository url.
 
 ``tarbell credentials``
------------------
+-----------------------
 
 **Usage:** ``tarbell credentials``
 
 Print JSON with the current OAuth credentials.
+
+``tarbell spreadsheet``
+-----------------------
+
+**Usage:** ``tarbell spreadsheet``
+
+Open context spreadsheet in your browser or default application.
