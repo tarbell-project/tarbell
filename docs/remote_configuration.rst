@@ -5,7 +5,7 @@ Remote configuration
 
     Improving remote use is significant goal for `Tarbell 1.2 <https://github.com/newsapps/flask-tarbell/milestones/1.2>`_.
 
-To use run Tarbell on a remote server, you'll want to generate a credentials file locally and transfer
+To run Tarbell on a remote server, you'll want to generate a credentials file locally and transfer
 your Tarbell configuration directory to the server.
 
 Assuming you have Tarbell properly configured, create a credentials file::
