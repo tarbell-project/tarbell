@@ -439,7 +439,7 @@ We'll need to set a height and width for this map in the ``style.css`` CSS file 
 Include map assets on the index page
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-On the ``index.html`` page, include the partial like so:::
+On the ``index.html`` page, include the partial like so::
 
   {% include "_map.html" %}
 
