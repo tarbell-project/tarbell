@@ -4,7 +4,7 @@ Create and install projects
 
 .. note::
 
-    Tarbell requires Git to install project and blueprints. does not support interactive Git sessions. If Git attempts to open an interactive prompt when accessing a private repository via HTTPS, Tarbell will exit with a warning.
+    Tarbell requires Git to install project and blueprints and does not support interactive Git sessions. If Git attempts to open an interactive prompt when accessing a private repository via HTTPS, Tarbell will exit with a warning.
 
 
 Create a new project with `tarbell newproject <projectname>`
