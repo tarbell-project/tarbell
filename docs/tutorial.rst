@@ -494,7 +494,7 @@ We can reference our city data in the rest of our Javascript now. So let's make 
 
 When we include ``leaflet.js`` on the page, it will create a Javascript object named ``L`` that allows us to access
 all the Leaflet functionality we need. We need to store that object in a variable that references the div
-in ``_map.html`` with the ID ``map``, which will contain out map. Note that we refernce the div ID by wrapping the ID
+in ``_map.html`` with the ID ``map``, which will contain out map. Note that we reference the div ID by wrapping the ID
 name, ``map``, in quotes. We'll set the latitude and longitude to that of the first city (from the ``map_data`` variable),
 and then the zoom level of the tile (the lower the number, the farther out the map will be zoomed to start)::
 
