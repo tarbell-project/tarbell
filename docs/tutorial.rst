@@ -111,7 +111,7 @@ Now visit http://127.0.0.1:5000/ in a browser.
 
 You can also run your project by changing to the proejct directory and running the command:: 
   
-    tarbell serve.
+    tarbell serve
   
 You're ready to start editing your template.
 
