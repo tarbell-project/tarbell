@@ -21,7 +21,7 @@ Blueprints are exactly what they sound like –– a basic structure for buildin
 Tarbell ships with a default blueprint called _blueprint. This folder contains boilerplate code like advertising, analytics, and common page elements. Tarbell projects should inherit from blueprints.
 
 
-Here's a simple ``_blueprint/_blueprint.html`` example.
+Here's a simple ``_blueprint/_base.html`` example.
 
 .. code-block:: html+jinja
 
