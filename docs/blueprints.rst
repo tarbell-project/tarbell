@@ -6,8 +6,7 @@ Tarbell blueprints are starting points for your projects. They allow you
 and your collaborators to take the tedium out of creating similar projects
 over and over.
 
-For example, your organization could use a Tarbell blueprint for
-all mapping projects that includes all the common libraries, your organization's
+For example, your organization could use a Tarbell blueprint for mapping all projects that includes all the common libraries, your organization's
 branding, and default data to get started.
 
 ---------------------------
