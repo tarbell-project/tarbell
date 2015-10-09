@@ -18,7 +18,7 @@ Once Tarbell is configured, create a new project by typing this command into you
 
   tarbell newproject
 
-You'll need to answer a few questions. What will its name be, where on your computer will it live? And a few others about its data sources and management. Anytme you see something in brackets, you are being prompted with a default answer, and can just hit enter if you wish to accept it. The process will go something like this::
+You'll need to answer a few questions. What will its name be, where on your computer will it live? And a few others about its data sources and management. Anytime you see something in brackets, you are being prompted with a default answer, and can just hit enter if you wish to accept it. The process will go something like this::
 
   tarbell newproject
 
