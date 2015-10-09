@@ -7,7 +7,7 @@ and your collaborators to take the tedium out of creating similar projects
 over and over.
 
 For example, your organization could use a Tarbell blueprint for
-all mapping projects that includes all the common libraries, your organization's
+all mapping projects that include all the common libraries, your organization's
 branding, and default data to get started.
 
 ---------------------------
