@@ -50,7 +50,7 @@ You can access these variables in your spreadsheet with a loop:
     {% endfor %}
 
 
-If a column named `key` does exist, elements may be accessed by key. Imagine a spreadsheet named `companies` with these values:
+If a column named `key` does exist, elements may be accessed by key. Imagine a spreadsheet named `manufacturers` with these values:
 
 =====  ======  =======
 key    name    country
