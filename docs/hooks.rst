@@ -2,7 +2,7 @@
 Hooks
 =====
 
-Tarbell hooks allow project and blueprint developers to take actions during Tarbell project creation, projection installation, generation, and publishing.
+Tarbell hooks allow project and blueprint developers to take actions during Tarbell project creation, project installation, generation, and publishing.
 
 To define a hook, edit ``tarbell_config.py`` or ``blueprint.py``:
 
