@@ -109,7 +109,7 @@ Well, you heard the machine, you got this. Run the switch command to fire up a p
 
 Now visit http://127.0.0.1:5000/ in a browser.
 
-You can also run your project by changing to the proejct directory and running the command:: 
+You can also run your project by changing to the project directory and running the command:: 
   
     tarbell serve
   
