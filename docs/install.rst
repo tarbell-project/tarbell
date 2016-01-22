@@ -51,44 +51,60 @@ within your organization, but do not share this file anywhere public.
 
 Log in to the `Google API Developer Console <https://cloud.google.com/console/project>`_ and create a new project:
 
-.. image:: /img/create_1_new.png
-
-.. image:: /img/create_1-5_new.png
+.. image:: /img/install__new_project_button.png
    :width: 700px
 
+Enter a project name in the pop-up dialog and click the "Create" button:
 
-Now click the "APIs & auth" tab. (Click on the "APIs" tab below that if it 
-doesn't open automatically.) Enable Google Drive API.
-
-.. image:: /img/create_2_new.png
+.. image:: /img/install__new_project_dialog.png
    :width: 700px
 
+The project will be created and you'll be taken to the project dashboard.
 
-Click the "Credentials" tab (right below "APIs") to create a client ID:
+Click the "Google APIs" tab and then click on the "Drive API" link:
 
-.. image:: /img/create_3_new.png
+.. image:: /img/install__click_drive_api.png
    :width: 700px
 
+Click the "Enable API" button:
 
-Select "installed app":
-
-.. image:: /img/create_5_new.png
+.. image:: /img/install__click_enable_api.png
    :width: 700px
 
-Now, go to the "consent screen" settings and give your project a name:
+Click the "Credentials" item in the sidebar:
 
-.. image:: /img/consent-screen.png
-
-Whew! Now you can download the ``client_secrets.json`` file:
-
-.. image:: /img/create_6_new.png
+.. image:: /img/install__click_credentials.png
    :width: 700px
 
+Click the "New credentials" button and select the "OAuth client ID" item from the drop-down menu:
+
+.. image:: /img/install__click_new_credentials.png
+   :width: 700px
+
+You'll need to configure the consent screen before you can create the credentials.  Click the "Configure consent screen" button to configure the consent screen:
+
+.. image:: /img/install__click_configure_consent_screen.png
+   :width: 700px
+
+Fill out the required fields of the consent screen form and then click the "Save" button:
+
+.. image:: /img/install__configure_consent_screen.png
+   :width: 700px
+
+Once the consent screne is configured, you'll be asked to create the client ID.  Select the "Other" for "Application type", specify a name for the client and click the "Create" button:
+
+.. image:: /img/install__create_client_id.png
+   :width: 700px
+
+You will be shown the client ID and client secret in a popup window.  Click the OK button, and you will be shown a list of client IDs.  Click the download icon next to the client ID you just created to download the ``client_secrets.json`` file: 
+
+.. image:: /img/install__download_credentials.png
+   :width: 700px
 
 The file you download will be called something like 
 ``client_secret_longstringofrandomlettersandnumbers.apps.googleusercontent.json``.
 
-Rename it to `client_secrets.json`.
+Rename it to ``client_secrets.json``.
 
 Now, you do one of the following:
 
