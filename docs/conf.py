@@ -36,10 +36,10 @@ project = u'Tarbell'
 copyright = u'2013-2014, MIT-licensed, created by the Chicago Tribune New Applications Team'
 
 # The short X.Y version.
-version = '0.9'
+version = '1.0.5'
 
 # The full version, including alpha/beta/rc tags.
-release = '0.9-beta7'
+release = '1.0.5'
 
 exclude_patterns = ['_build']
 
