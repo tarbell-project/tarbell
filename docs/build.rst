@@ -190,22 +190,25 @@ When you run `tarbell publish`, Tarbell again sets additional context variables,
 Where can context variables be used?
 ------------------------------------
 
-Context variables can be used in HTML, CSS, and Javascript files. If the text file causes a Jinja
-template error (which can happen if the file has Jinja-like markers), the file will be served as static
-and the preview server will log an error.
+Context variables only work in HTML files. If rendering the file causes a Jinja
+template error (which can happen if the file has Jinja-like markers), you'll see an error page with debugging information.
 
-This means that CSS and Javascript files may include variables. ``style.css`` might include:
+While CSS and Javascript files can't include variables, it is possible (and common) to use template variables inside `script` and `style` tags on HTML pages. For example:
 
-.. code-block:: css
+.. code-block:: html
 
+  <style type="text/css">
   #content { font-size: {{ font_size }}; }
+  </style>
 
-Similarly, a Javascript file could include:
+Similarly, a script tag could be included like so:
 
-.. code-block:: javascript
-
+.. code-block:: html
+  
+  <script type="text/javascript">
   var data = {{ photos|tojson|safe }}
   console.log(photos.intro.url);
+  </script>
 
 Use this feature with care! Missing variables could easily break your CSS or Javascript.
 
