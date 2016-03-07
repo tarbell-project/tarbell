@@ -51,10 +51,9 @@ Updates blueprint with git submodule update.
 
 *Requires current directory to be a Tarbell project.*
 
-**Usage:** ``tarbell generate <optional: output directory>``
+**Usage:** ``tarbell generate <output directory>``
 
-Make HTML on the file system. If output directory is not specified, a temporary directory will be
-used.
+Make HTML on the file system. If output directory is not specified, Tarbell will raise an error asking for one.
 
 ``tarbell switch``
 ------------------

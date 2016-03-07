@@ -355,7 +355,7 @@ Frozen-Flask will automatically track every call to `url_for` and build out thos
       rows = data.get('list_items', [])
 
       for row in rows:
-          yield ('myproject.social_stub', row['id'])
+          yield ('myproject.social_stub', {'id': row['id']})
 
   @register_hook('generate')
   def register_social_stubs(site, output_root, extra_context):
