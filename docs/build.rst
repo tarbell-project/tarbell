@@ -172,6 +172,21 @@ Access a list of data:
     {% endfor %}
   </ul>
 
+In addition to `DEFAULT_CONTEXT`, Tarbell sets the following variables:
+
+ - `PROJECT_PATH`: the filesystem path to the directory containing your `tarbell_config.py` file
+ - `ROOT_URL`: the hostname for your site, initially `127.0.0.1:5000` (this changes when publishing)
+ - `SPREADSHEET_KEY`: the `SPREADSHEET_KEY` variable in your `tarbell_config.py` (or `None` if not set)
+ - `BUCKETS`: the `S3_BUCKETS` variable in your `tarbell_config.py`
+ - `SITE`: the current Tarbell site object
+
+When you run `tarbell publish`, Tarbell again sets additional context variables, based on your S3 settings. For example, if your `production` bucket is named `apps.example.com` in a project named `my-story`, these variables would be added to your site context when you run `tarbell publish production` (or `tarbell publish`):
+
+ - `ROOT_URL`: the host and path you're publishing to (for example, `apps.example.com/my-story`)
+ - `S3_BUCKET`: the name of the bucket you're publishing to (`apps.example.com`)
+ - `BUCKET_NAME`: the name of the publishing target, `production` or `staging` (this is the first argument after `tarbell publish`)
+
+
 Where can context variables be used?
 ------------------------------------
 
