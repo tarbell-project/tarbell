@@ -2,5 +2,5 @@
 Contributing
 ============
 
-* Github repository: https://github.com/newsapps/flask-tarbell
+* Github repository: https://github.com/tarbell-project/tarbell
 
