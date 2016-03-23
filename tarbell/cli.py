@@ -239,8 +239,6 @@ def tarbell_install_blueprint(command, args):
             puts("\n- Cloning repo")
             git = sh.git.bake(_cwd=tempdir, _tty_in=True, _tty_out=False, _err_to_out=True)
             puts(git.clone(template_url, '.'))
-            #puts(git.fetch())
-            #puts(git.checkout(MAJOR_VERSION))
 
             _install_requirements(tempdir)
 
