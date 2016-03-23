@@ -239,8 +239,8 @@ def tarbell_install_blueprint(command, args):
             puts("\n- Cloning repo")
             git = sh.git.bake(_cwd=tempdir, _tty_in=True, _tty_out=False, _err_to_out=True)
             puts(git.clone(template_url, '.'))
-            puts(git.fetch())
-            puts(git.checkout(MAJOR_VERSION))
+            #puts(git.fetch())
+            #puts(git.checkout(MAJOR_VERSION))
 
             _install_requirements(tempdir)
 
@@ -481,14 +481,18 @@ def tarbell_update(command, args):
         puts("Updating to latest blueprint\n")
 
         git = sh.git.bake(_cwd=site.base.base_dir)
-        git.fetch()
-        puts(colored.yellow("Checking out {0}".format(MAJOR_VERSION)))
-        puts(git.checkout(MAJOR_VERSION))
+
+        # stash then pull
         puts(colored.yellow("Stashing local changes"))
         puts(git.stash())
-        puts(colored.yellow("Pull latest changes"))
-        puts(git.pull('origin', MAJOR_VERSION))
 
+        puts(colored.yellow("Pull latest changes"))
+        puts(git.pull())
+        
+        # need to pop any local changes back to get back on the original branch
+        # this may behave oddly if you have old changes stashed
+        if git.stash.list():
+            puts(git.stash.pop())
 
 
 def tarbell_unpublish(command, args):
