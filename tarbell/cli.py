@@ -575,11 +575,6 @@ def _newproject(command, path, name, settings):
         puts(git.submodule.add(template['url'], '_blueprint'))
         puts(git.submodule.update(*['--init']))
 
-        # Get submodule branches, switch to current major version
-        submodule = sh.git.bake(_cwd=os.path.join(path, '_blueprint'))
-        puts(submodule.fetch())
-        puts(submodule.checkout(MAJOR_VERSION))
-
         # Create spreadsheet
         key = _create_spreadsheet(name, title, path, settings)
 
