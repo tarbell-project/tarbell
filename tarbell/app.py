@@ -40,9 +40,9 @@ SPREADSHEET_CACHE_TTL = 4
 VALID_CELL_TYPES = range(1, 5)
 
 # pass template variables to files with these mimetypes
-TEMPLATE_TYPES = [
+TEMPLATE_TYPES = (
     "text/html",
-]
+)
 
 EXCLUDES = ['.git/*', '.git', '.gitignore', '.*', '*.pyc', '*.py', '_*']
 
@@ -431,6 +431,9 @@ class TarbellSite:
             # Merge excludes
             project.EXCLUDES = EXCLUDES + base.EXCLUDES + list(set(project.EXCLUDES) - set(base.EXCLUDES))
 
+        # merge project template types with defaults
+        project.TEMPLATE_TYPES = set(getattr(project, 'TEMPLATE_TYPES', [])) | set(TEMPLATE_TYPES)
+
         try:
             project.DEFAULT_CONTEXT
         except AttributeError:
@@ -525,7 +528,7 @@ class TarbellSite:
             filepath, mimetype = self._resolve_path(path)
 
             # Serve dynamic
-            if filepath and mimetype and mimetype in TEMPLATE_TYPES:
+            if filepath and mimetype and mimetype in self.project.TEMPLATE_TYPES:
                 context = self.get_context(publish)
                 context.update({
                     "PATH": path,
