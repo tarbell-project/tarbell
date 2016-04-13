@@ -239,8 +239,6 @@ def tarbell_install_blueprint(command, args):
             puts("\n- Cloning repo")
             git = sh.git.bake(_cwd=tempdir, _tty_in=True, _tty_out=False, _err_to_out=True)
             puts(git.clone(template_url, '.'))
-            puts(git.fetch())
-            puts(git.checkout(MAJOR_VERSION))
 
             _install_requirements(tempdir)
 
@@ -481,14 +479,18 @@ def tarbell_update(command, args):
         puts("Updating to latest blueprint\n")
 
         git = sh.git.bake(_cwd=site.base.base_dir)
-        git.fetch()
-        puts(colored.yellow("Checking out {0}".format(MAJOR_VERSION)))
-        puts(git.checkout(MAJOR_VERSION))
+
+        # stash then pull
         puts(colored.yellow("Stashing local changes"))
         puts(git.stash())
-        puts(colored.yellow("Pull latest changes"))
-        puts(git.pull('origin', MAJOR_VERSION))
 
+        puts(colored.yellow("Pull latest changes"))
+        puts(git.pull())
+        
+        # need to pop any local changes back to get back on the original branch
+        # this may behave oddly if you have old changes stashed
+        if git.stash.list():
+            puts(git.stash.pop())
 
 
 def tarbell_unpublish(command, args):
@@ -572,11 +574,6 @@ def _newproject(command, path, name, settings):
         # Create submodule
         puts(git.submodule.add(template['url'], '_blueprint'))
         puts(git.submodule.update(*['--init']))
-
-        # Get submodule branches, switch to current major version
-        submodule = sh.git.bake(_cwd=os.path.join(path, '_blueprint'))
-        puts(submodule.fetch())
-        puts(submodule.checkout(MAJOR_VERSION))
 
         # Create spreadsheet
         key = _create_spreadsheet(name, title, path, settings)
