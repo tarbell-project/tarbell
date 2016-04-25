@@ -5,14 +5,11 @@ Publishing
 Generate static sites with ``tarbell generate``
 ----------------------------------------------------------------
 
-Generate HTML in a temporary directory::
-
-  tarbell generate
-
 Generate HTML in a specific directory::
 
   tarbell generate ~/output/myproject
 
+If output directory is not specified, Tarbell will raise an error asking for one.
 
 .. note::
 
@@ -75,7 +72,7 @@ http://archive.tribapps.com, run::
 
   tarbell publish archive
 
-.. note:: 
+.. note::
 
     The preferred format for S3 buckets is demonstrated above, without an ``s3://`` protocol
     indicator or trailing slash. However, ``s3://foo.com/bar/`` will work as well.
@@ -84,9 +81,9 @@ http://archive.tribapps.com, run::
 Handling buckets with differing credentials
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-What if ``archive.tribapps.com`` uses different Amazon S3 credentials? 
+What if ``archive.tribapps.com`` uses different Amazon S3 credentials?
 
-To handle buckets with non-default credentials, run ``tarbell configure`` and configure 
+To handle buckets with non-default credentials, run ``tarbell configure`` and configure
 a new bucket::
 
   Please specify an additional bucket (e.g. additional.bucket.myorg.com/, leave blank to skip adding bucket) archive.tribapps.com
@@ -97,7 +94,7 @@ a new bucket::
 
 Or add some lines to ``~/.tarbell/settings.yaml``::
 
-  # ... 
+  # ...
   s3_credentials:
     foo.bar.com:
       access_key_id: XXXXXXXX
@@ -111,4 +108,4 @@ Tarbell does not delete files on S3
 Because altering Amazon S3 buckets has some inherent dangers, Tarbell 1.0 does not include
 a delete feature. You can manually delete files on Amazon through the
 `web interface <https://console.aws.amazon.com/>`_ or with a client like
-`Cyberduck <https://cyberduck.io/?l=en>`_. 
+`Cyberduck <https://cyberduck.io/?l=en>`_.
