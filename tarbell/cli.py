@@ -625,7 +625,7 @@ def _install_requirements(path):
     """
     Install a blueprint's requirements.txt
     """
-    locations = [os.path.join(path, "_blueprint"), os.path.join(path, "_base"), path] 
+    locations = [os.path.join(path, "_blueprint"), os.path.join(path, "_base"), path]
     success = True
 
     for location in locations:
@@ -682,7 +682,7 @@ def _clean_suffix(string, suffix):
         # return from the beginning up to
         # but not including the first letter
         # in the suffix
-        return string[0:-suffix_len]   
+        return string[0:-suffix_len]
     else:
         # leave unharmed
         return string
@@ -850,7 +850,7 @@ def _copy_config_template(name, title, template, path, key, settings):
             spreadsheet_path = os.path.join(path, '_blueprint/', '_spreadsheet.xlsx')
             try:
                 with open(spreadsheet_path, "rb") as f:
-                    puts("Copying _blueprint/_spreadsheet.xlsx to tarbell_config.py's DEFAULT_CONTEXT") 
+                    puts("Copying _blueprint/_spreadsheet.xlsx to tarbell_config.py's DEFAULT_CONTEXT")
                     data = process_xlsx(f.read())
                     if 'values' in data:
                         data = copy_global_values(data)
@@ -950,9 +950,9 @@ def_cmd(
 def_cmd(
     name='generate',
     fn=tarbell_generate,
-    usage='generate <output dir (optional)>',
+    usage='generate <output dir>',
     help=('Generate static files for the current project. If no output '
-          'directory is specified, create a temporary directory'))
+          'directory specified, Tarbell will raise an error asking for one.'))
 
 
 def_cmd(
@@ -1048,4 +1048,3 @@ def_cmd(
     fn=tarbell_spreadsheet,
     usage='spreadsheet',
     help='Open context spreadsheet in your browser or default application')
-
