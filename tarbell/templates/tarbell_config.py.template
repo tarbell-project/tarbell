@@ -4,28 +4,38 @@
 Tarbell project configuration
 """
 
-# Short project name
-NAME = "{{ name }}"
-
-# Descriptive title of project
-TITLE = "{{ title|escape }}"
-
 # Google spreadsheet key
 {% if not key %}#{% endif %}SPREADSHEET_KEY = "{{ key }}"
+
+# Exclude these files from publication
+EXCLUDES = ["*.md", "requirements.txt"]
+
+# Spreadsheet cache lifetime in seconds. (Default: 4)
+# SPREADSHEET_CACHE_TTL = 4
 
 # Create JSON data at ./data.json, disabled by default
 # CREATE_JSON = True
 
-# S3 bucket configuration
-{% if not s3_buckets %}#{% endif %}S3_BUCKETS = {
-    # Provide target -> s3 url pairs, such as:
-    # "mytarget": "s3://mys3url.bucket.url/some/path"{% if s3_buckets %}
-{% if not s3_buckets.staging %}#{% endif %}    "staging": "{% if s3_buckets.staging %}{{ s3_buckets.staging }}{{ name }}/{% endif %}",
-{% if not s3_buckets.production %}#{% endif %}    "production": "{% if s3_buckets.production %}{{ s3_buckets.production }}{{ name }}/{% endif %}",{% endif %}
-{% if not s3_buckets %}#{% endif %}}
+# Get context from a local file or URL. This file can be a CSV or Excel
+# spreadsheet file. Relative, absolute, and remote (http/https) paths can be 
+# used.
+# CONTEXT_SOURCE_FILE = ""
 
-# Repository this project is based on (used for updates)
-TEMPLATE_REPO_URL = "{{ template_repo_url }}"
+# EXPERIMENTAL: Path to a credentials file to authenticate with Google Drive.
+# This is useful for for automated deployment. This option may be replaced by
+# command line flag or environment variable. Take care not to commit or publish
+# your credentials file.
+# CREDENTIALS_PATH = ""
+
+# S3 bucket configuration
+{% if not default_s3_buckets %}#{% endif %}S3_BUCKETS = {
+    # Provide target -> s3 url pairs, such as:
+    #     "mytarget": "mys3url.bucket.url/some/path"
+    # then use tarbell publish mytarget to publish to it
+    {% if default_s3_buckets %}{%- for bucket_name, uri in default_s3_buckets.iteritems() %}
+    "{{ bucket_name }}": "{{ uri }}/{{ name }}",
+    {%- endfor %}{% endif %}
+{% if not default_s3_buckets %}#{% endif %}}
 
 # Default template variables
 DEFAULT_CONTEXT = {{ default_context|pprint_lines }}

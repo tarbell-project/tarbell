@@ -1,11 +1,13 @@
 # Tarbell is a very simple content management system
 
-Visit [tarbell.tribapps.com](http://tarbell.tribapps.com) for more information.
-
-Tarbell is a Chicago Tribune News Applications Team project.
+Visit [tarbell.io](http://tarbell.io) for more information.
 
 To install Tarbell run:
 
-    pip install tarbell==0.9b2
+    pip install tarbell
 
-Check out the [tutorial](http://tarbell.readthedocs.org/en/latest/tutorial.html) to get started.
+Check out the [tutorial](http://tarbell.readthedocs.org/en/1.0/tutorial.html) to get started.
+
+--
+
+[![Stories in Ready](https://badge.waffle.io/tarbell-project/tarbell.png?label=ready&title=Ready)](http://waffle.io/tarbell-project/tarbell)

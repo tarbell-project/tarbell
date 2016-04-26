@@ -10,3 +10,6 @@
 * Ryan Mark
 * Wilberto Morales
 * Ryan Nagle
+* Chris Amico
+* Geoff Hing
+

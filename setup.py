@@ -7,7 +7,7 @@ from setuptools import setup, find_packages
 
 
 APP_NAME = 'tarbell'
-VERSION = '0.9b2'
+VERSION = '1.0.5'
 
 settings = dict()
 
@@ -19,44 +19,44 @@ if sys.argv[-1] == 'publish':
 settings.update(
     name=APP_NAME,
     version=VERSION,
-    author=u'Chicago Tribune News Applications Team',
-    author_email='newsapps@tribune.com',
-    url='http://github.com/newsapps/flask-tarbell',
+    author=u'Tarbell Project',
+    author_email='davideads@gmail.com',
+    url='http://github.com/tarbell-project/tarbell',
     license='MIT',
     description='A very simple content management system',
-    long_description='',
+    long_description="""Read the docs at http://tarbell.readthedocs.org
+
+Tarbell makes it simple to put your work on the web, whether you’re a team of one or a dozen. With Tarbell, you can collaboratively build beautiful websites and publish them with ease.
+
+Tarbell makes use of familiar, flexible tools to take the magic (and frustration) out of publishing to the web. Google spreadsheets handle content management, so changes to your stories are easy to make without touching a line of code. Step-by-step prompts help you set up and configure your project, so that publishing it is a breeze.""",
     zip_safe=False,
     packages=find_packages(),
     include_package_data=True,
     install_requires=[
         "Flask==0.10.1",
-        "GitPython==0.3.2.RC1",
-        "Jinja2==2.7.1",
-        "MarkupSafe==0.18",
-        "PyYAML==3.10",
-        "Werkzeug==0.9.4",
-        "async==0.6.1",
-        "clint==0.3.1",
-        "gitdb==0.5.4",
-        "itsdangerous==0.23",
-        "ordereddict==1.1",
-        "requests==1.2.3",
-        "smmap==0.8.2",
-        "unicodecsv==0.9.4",
-        "wsgiref==0.1.2",
-        "google-api-python-client==1.2",
-        "keyring==3.0.2",
-        "xlrd==0.9.2",
-        "python-dateutil==2.2",
-        "docutils==0.11",
+        "Frozen-Flask==0.11",
+        "Jinja2==2.7.3",
+        "Markdown==2.4.1",
+        "MarkupSafe==0.23",
+        "PyYAML==3.11",
+        "boto==2.38.0",
+        "clint==0.4.1",
+        "gnureadline==6.3.3",
+        "google-api-python-client==1.3.1",
+        "keyring==5.3",
+        "oauth2client==1.5.2",
+        "python-dateutil>=2.2",
+        "requests==2.3.0",
         "sh==1.09",
-        "Markdown==2.3.1"],
+        "wsgiref==0.1.2",
+        "xlrd==0.9.3",
+    ],
     entry_points={
         'console_scripts': [
             'tarbell = tarbell.cli:main',
         ],
     },
-    keywords=['Development Status :: 3 - alpha',
+    keywords=['Development Status :: 5 - Production/Stable',
           'License :: OSI Approved :: MIT License',
           'Operating System :: OS Independent',
           'Programming Language :: Python',
