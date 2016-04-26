@@ -190,10 +190,10 @@ When you run `tarbell publish`, Tarbell again sets additional context variables,
 Where can context variables be used?
 ------------------------------------
 
-Context variables only work in HTML files. If rendering the file causes a Jinja
+By default, context variables only work in HTML files. If rendering the file causes a Jinja
 template error (which can happen if the file has Jinja-like markers), you'll see an error page with debugging information.
 
-While CSS and Javascript files can't include variables, it is possible (and common) to use template variables inside `script` and `style` tags on HTML pages. For example:
+It is possible (and common) to use template variables inside `script` and `style` tags on HTML pages. For example:
 
 .. code-block:: html
 
@@ -211,6 +211,23 @@ Similarly, a script tag could be included like so:
   </script>
 
 Use this feature with care! Missing variables could easily break your CSS or Javascript.
+
+Adding custom template types
+----------------------------
+
+By default, Tarbell will treat any file with a mimetype other than `text/html` as a static file as serve it as-is. This is by design, for both speed (all your Javascript files don't need to run through Jinja templating) and safety (it's easy to break your Javascript with a misplaced tag). But you may decide you need more than HTML rendered.
+
+In that case, add the `TEMPLATE_TYPES` variable to your `tarbell_config.py` file with a list of additional mimetypes to render. For example:
+
+
+.. code-block:: python
+
+  # tarbell_config.py
+
+  TEMPLATE_TYPES = ['text/plain', 'application/xml', 'text/css']
+
+This would add support for rendering plain text, XML and CSS files as templates. 
+
 
 Anatomy of a project directory
 ------------------------------
