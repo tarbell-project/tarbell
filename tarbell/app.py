@@ -32,6 +32,7 @@ from clint.textui import puts
 from .errors import MergedCellError
 from .oauth import get_drive_api
 from .hooks import hooks
+from .template import filters, silent_none
 
 # in seconds
 SPREADSHEET_CACHE_TTL = 4
@@ -98,26 +99,6 @@ class TarbellFileSystemLoader(BaseLoader):
         raise TemplateNotFound(template)
 
 
-def silent_none(value):
-    """
-    Return `None` values as empty strings
-    """
-    if value is None:
-        return ''
-    return value
-
-
-def pprint_lines(value):
-    """
-    Pretty print lines
-    """
-    pformatted = pformat(value, width=1, indent=4)
-    formatted = "{0}\n {1}\n{2}".format(
-        pformatted[0],
-        pformatted[1:-1],
-        pformatted[-1]
-    )
-    return Markup(formatted)
 
 
 def process_xlsx(content):
@@ -231,38 +212,6 @@ def make_worksheet_data(headers, worksheet):
     return data
 
 
-def markdown(value):
-    """
-    Run text through markdown process
-    """
-    return Markup(md.markdown(value))
-
-
-def process_text(text):
-    """
-    Return markup or empty string
-    """
-    try:
-        return Markup(text)
-    except TypeError:
-        return u''
-
-
-def format_date(value, format='%b. %d, %Y', convert_tz=None):
-    """
-    Format an Excel date.
-    """
-    if isinstance(value, float) or isinstance(value, int):
-        seconds = (value - 25569) * 86400.0
-        parsed = datetime.datetime.utcfromtimestamp(seconds)
-    else:
-        parsed = dateutil.parser.parse(value)
-    if convert_tz:
-        local_zone = dateutil.tz.gettz(convert_tz)
-        parsed = parsed.astimezone(tz=local_zone)
-
-    return parsed.strftime(format)
-
 
 class TarbellSite:
     def __init__(self, path, client_secrets_path=None, quiet=False):
@@ -285,14 +234,7 @@ class TarbellSite:
         self.app.add_url_rule('/<path:path>', view_func=self.preview)
         self.app.add_url_rule('/data.json', view_func=self.data_json)
 
-        self.app.add_template_filter(format_date, 'format_date')
-        self.app.add_template_filter(markdown, 'markdown')
-        self.app.add_template_filter(slughifi, 'slugify')
-        self.app.add_template_filter(pprint_lines, 'pprint_lines')
-        self.app.add_template_filter(process_text, 'process_text')
-        self.app.add_template_filter(process_text, 'markup')
-        self.app.jinja_env.globals.update(render_file=self.render_file)
-        self.app.jinja_env.globals.update(read_file=self.read_file)
+        self.app.register_blueprint(filters)
 
         self.app.before_request(self.add_site_to_context)
         self.app.after_request(self.never_cache_preview)
@@ -322,25 +264,6 @@ class TarbellSite:
         response.cache_control.no_store = True
         return response
 
-    def read_file(self, path, absolute=False, encoding='utf-8'):
-        """
-        Read the file at `path`. If `absolute` is True, use absolute path,
-        otherwise path is assumed to be relative to Tarbell template root dir.
-        """
-        if not absolute:
-            path = os.path.join(self.path, path)
-
-        try:
-            return codecs.open(path, 'r', encoding).read()
-        except IOError:
-            return None
-
-    @contextfunction
-    def render_file(self, context, path, absolute=False):
-        """
-        Render a file with the current context
-        """
-        return render_template(path, **context)
 
     def process_hooks(self, hooks):
         """
