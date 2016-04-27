@@ -1,11 +1,8 @@
 # -*- coding: utf-8 -*-
-import codecs
 import csv
 import datetime
-import dateutil
 import fnmatch
 import imp
-import markdown as md
 import mimetypes
 import os
 import re
@@ -18,20 +15,17 @@ import xlrd
 from httplib import BadStatusLine
 from flask import Flask, Blueprint, render_template, send_from_directory, Response, g, jsonify
 from flask_frozen import Freezer, walk_directory
-from jinja2 import contextfunction, Markup
 from jinja2.loaders import BaseLoader
 from jinja2.utils import open_if_exists
 from jinja2.exceptions import TemplateNotFound
 from jinja2._compat import string_types
-from pprint import pformat
-from slughifi import slughifi
 from string import uppercase
-from werkzeug.wsgi import FileWrapper
 from clint.textui import puts
 
 from .errors import MergedCellError
 from .oauth import get_drive_api
 from .hooks import hooks
+from .slughifi import slughifi
 from .template import filters, silent_none
 
 # in seconds

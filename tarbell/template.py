@@ -3,14 +3,13 @@
 All template code lives here, including Jinja filters and loaders.
 
 Filters are added to a blueprint, which can be registered on the Tarbell app.
-
-self.app.add_template_filter(format_date, 'format_date')
-self.app.add_template_filter(markdown, 'markdown')
-self.app.add_template_filter(slughifi, 'slugify')
-self.app.add_template_filter(pprint_lines, 'pprint_lines')
 """
+import codecs
+import datetime
+import dateutil
+import os
 from pprint import pformat
-from flask import Blueprint, render_template
+from flask import Blueprint, g, render_template
 from jinja2 import contextfunction, Markup
 from markdown import markdown as md
 
@@ -61,14 +60,20 @@ def render_file(path, absolute=False):
 def markdown(value):
     """
     Run text through markdown process
+
+    >>> markdown('*test*')
+    Markup(u'<p><em>test</em></p>')
     """
-    return Markup(md.markdown(value))
+    return Markup(md(value))
 
 
 @filters.app_template_filter('format_date')
 def format_date(value, format='%b. %d, %Y', convert_tz=None):
     """
     Format an Excel date.
+
+    >>> format_date(42419.82163)
+    'Feb. 19, 2016'
     """
     if isinstance(value, float) or isinstance(value, int):
         seconds = (value - 25569) * 86400.0

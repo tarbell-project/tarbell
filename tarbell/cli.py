@@ -38,7 +38,8 @@ MAJOR_VERSION = '.'.join(VERSION.split('.')[:2])
 if __name__ == "__main__" and __package__ is None:
     __package__ = "tarbell.cli"
 
-from .app import pprint_lines, process_xlsx, copy_global_values
+from .app import process_xlsx, copy_global_values
+from .template import pprint_lines
 from .oauth import get_drive_api
 from .contextmanagers import ensure_settings, ensure_project
 from .configure import tarbell_configure
