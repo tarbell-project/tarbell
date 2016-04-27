@@ -15,10 +15,6 @@ import xlrd
 from httplib import BadStatusLine
 from flask import Flask, Blueprint, render_template, send_from_directory, Response, g, jsonify
 from flask_frozen import Freezer, walk_directory
-from jinja2.loaders import BaseLoader
-from jinja2.utils import open_if_exists
-from jinja2.exceptions import TemplateNotFound
-from jinja2._compat import string_types
 from string import uppercase
 from clint.textui import puts
 
@@ -26,7 +22,7 @@ from .errors import MergedCellError
 from .oauth import get_drive_api
 from .hooks import hooks
 from .slughifi import slughifi
-from .template import filters, silent_none
+from .template import TarbellFileSystemLoader, filters, silent_none
 
 # in seconds
 SPREADSHEET_CACHE_TTL = 4
@@ -40,59 +36,6 @@ TEMPLATE_TYPES = (
 )
 
 EXCLUDES = ['.git/*', '.git', '.gitignore', '.*', '*.pyc', '*.py', '_*']
-
-
-def split_template_path(template):
-    """
-    Split a path into segments and perform a sanity check.  If it detects
-    '..' in the path it will raise a `TemplateNotFound` error.
-    """
-    pieces = []
-    for piece in template.split('/'):
-        if os.path.sep in piece \
-           or (os.path.altsep and os.path.altsep in piece) or \
-           piece == os.path.pardir:
-            raise TemplateNotFound(template)
-        elif piece and piece != '.':
-            pieces.append(piece)
-    return pieces
-
-
-class TarbellFileSystemLoader(BaseLoader):
-    """
-    Custom loader for Tarbell templates; searches Tarbell's template directories (first _blueprint,
-    then the project itself) for matching templates.
-    """
-
-    def __init__(self, searchpath, encoding='utf-8'):
-        if isinstance(searchpath, string_types):
-            searchpath = [searchpath]
-        self.searchpath = list(searchpath)
-        self.encoding = encoding
-
-    def get_source(self, environment, template):
-        pieces = split_template_path(template)
-        for searchpath in self.searchpath:
-            filename = os.path.join(searchpath, *pieces)
-            f = open_if_exists(filename)
-            if f is None:
-                continue
-            try:
-                contents = f.read().decode(self.encoding)
-            finally:
-                f.close()
-
-            mtime = os.path.getmtime(filename)
-
-            def uptodate():
-                try:
-                    return os.path.getmtime(filename) == mtime
-                except OSError:
-                    return False
-            return contents, filename, uptodate
-        raise TemplateNotFound(template)
-
-
 
 
 def process_xlsx(content):

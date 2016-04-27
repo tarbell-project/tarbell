@@ -11,12 +11,68 @@ import os
 from pprint import pformat
 from flask import Blueprint, g, render_template
 from jinja2 import contextfunction, Markup
+from jinja2.exceptions import TemplateNotFound
+from jinja2.loaders import BaseLoader
+from jinja2.utils import open_if_exists
+from jinja2._compat import string_types
+
 from markdown import markdown as md
 
 from .slughifi import slughifi
 
 
 filters = Blueprint('filters', __name__)
+
+
+class TarbellFileSystemLoader(BaseLoader):
+    """
+    Custom loader for Tarbell templates; searches Tarbell's template directories (first _blueprint,
+    then the project itself) for matching templates.
+    """
+
+    def __init__(self, searchpath, encoding='utf-8'):
+        if isinstance(searchpath, string_types):
+            searchpath = [searchpath]
+        self.searchpath = list(searchpath)
+        self.encoding = encoding
+
+    def get_source(self, environment, template):
+        pieces = split_template_path(template)
+        for searchpath in self.searchpath:
+            filename = os.path.join(searchpath, *pieces)
+            f = open_if_exists(filename)
+            if f is None:
+                continue
+            try:
+                contents = f.read().decode(self.encoding)
+            finally:
+                f.close()
+
+            mtime = os.path.getmtime(filename)
+
+            def uptodate():
+                try:
+                    return os.path.getmtime(filename) == mtime
+                except OSError:
+                    return False
+            return contents, filename, uptodate
+        raise TemplateNotFound(template)
+
+
+def split_template_path(template):
+    """
+    Split a path into segments and perform a sanity check.  If it detects
+    '..' in the path it will raise a `TemplateNotFound` error.
+    """
+    pieces = []
+    for piece in template.split('/'):
+        if os.path.sep in piece \
+           or (os.path.altsep and os.path.altsep in piece) or \
+           piece == os.path.pardir:
+            raise TemplateNotFound(template)
+        elif piece and piece != '.':
+            pieces.append(piece)
+    return pieces
 
 
 def silent_none(value):
