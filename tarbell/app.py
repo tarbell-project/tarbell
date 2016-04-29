@@ -248,7 +248,7 @@ def process_text(text):
         return u''
 
 
-def format_date(value, format='%b. %d, %Y', convert_tz=None, return_date_obj=False):
+def format_date(value, format='%b. %d, %Y', convert_tz=None):
     """
     Format an Excel date.
     """
@@ -261,11 +261,10 @@ def format_date(value, format='%b. %d, %Y', convert_tz=None, return_date_obj=Fal
         local_zone = dateutil.tz.gettz(convert_tz)
         parsed = parsed.astimezone(tz=local_zone)
 
-    if return_date_obj:
-        return parsed
-    else:
+    if format:
         return parsed.strftime(format)
-
+    else:
+        return parsed
 
 class TarbellSite:
     def __init__(self, path, client_secrets_path=None, quiet=False):
