@@ -149,7 +149,6 @@ def make_worksheet_data(headers, worksheet):
     return data
 
 
-
 class TarbellSite:
     def __init__(self, path, client_secrets_path=None, quiet=False):
         self.app = Flask(__name__)

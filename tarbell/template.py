@@ -140,7 +140,10 @@ def format_date(value, format='%b. %d, %Y', convert_tz=None):
         local_zone = dateutil.tz.gettz(convert_tz)
         parsed = parsed.astimezone(tz=local_zone)
 
-    return parsed.strftime(format)
+    if format:
+        return parsed.strftime(format)
+    else:
+        return parsed
 
 
 @filters.app_template_filter('pprint_lines')
