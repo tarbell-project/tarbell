@@ -11,6 +11,7 @@ If you create a file in your project directory called ``chapter1.html``, you'll 
 
 Files and directories that start with an underscore (``_``) or a dot (``.``), like the ``_blueprint`` directory containing the Tarbell blueprint files, will not be rendered by the preview server or included in the generated static HTML.
 
+
 Understanding Tarbell Blueprints
 --------------------------------
 
@@ -212,6 +213,8 @@ Similarly, a script tag could be included like so:
 
 Use this feature with care! Missing variables could easily break your CSS or Javascript.
 
+
+
 Adding custom template types
 ----------------------------
 
@@ -303,6 +306,20 @@ index.html
   This is a fallback version of the project's front page, in case the ``index.html`` file in the root
   directory is removed or renamed. It begins life as an exact copy of the root directory's 
   ``index.html``.
+
+
+
+Using and extending template filters and functions
+---------------------------------------------------
+
+Flask and Tarbell each extend the default set of Jinja2 template filters to handle common needs when building projects. All of the filters and configuration detaled in the `Flask documentation on templates <http://flask.pocoo.org/docs/0.10/templating/>`_ applies to Tarbell, too.
+
+Tarbell provides the following filters by default:
+
+.. automodule:: tarbell.template
+   :members: read_file, render_file, markdown, format_date, pprint_lines
+
+
 
 Adding custom routes
 --------------------

@@ -89,6 +89,14 @@ def read_file(path, absolute=False, encoding='utf-8'):
     """
     Read the file at `path`. If `absolute` is True, use absolute path,
     otherwise path is assumed to be relative to Tarbell template root dir.
+    
+    For example:
+
+    .. code-block:: html+jinja
+    
+        <div class="chapter">
+            {{ read_file('_chapters/one.txt')|linebreaks }}
+        </div>
     """
     site = g.current_site
     if not absolute:
@@ -103,7 +111,17 @@ def read_file(path, absolute=False, encoding='utf-8'):
 @filters.app_template_global('render_file')
 def render_file(path, absolute=False):
     """
-    Render a file with the current context
+    Like :py:func:`read_file`, except that the file is rendered as a Jinja template 
+    using the current context. If `absolute` is True, use absolute path, otherwise 
+    path is assumed to be relative to Tarbell template root dir.
+        
+    For example:
+
+    .. code-block:: html+jinja
+    
+        <div class="chapter">
+            {{ render_file('_chapters/one.txt') }}
+        </div>
     """
     site = g.current_site
     if not absolute:
@@ -126,10 +144,16 @@ def markdown(value):
 @filters.app_template_filter('format_date')
 def format_date(value, format='%b. %d, %Y', convert_tz=None):
     """
-    Format an Excel date.
+    Format an Excel date or date string, returning a formatted date.
+    To return a Python :py:class:`datetime.datetime` object, pass ``None``
+    as a ``format`` argument.
 
     >>> format_date(42419.82163)
     'Feb. 19, 2016'
+
+    .. code-block:: html+jinja
+
+        {{ row.date|format_date('%Y-%m-%d') }}
     """
     if isinstance(value, float) or isinstance(value, int):
         seconds = (value - 25569) * 86400.0
