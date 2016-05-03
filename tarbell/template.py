@@ -159,3 +159,6 @@ def pprint_lines(value):
     )
     return Markup(formatted)
 
+# add slughifi
+filters.add_app_template_filter(slughifi)
+
