@@ -12,11 +12,12 @@ import time
 import traceback
 import xlrd
 
-from httplib import BadStatusLine
+from clint.textui import puts
 from flask import Flask, Blueprint, render_template, send_from_directory, Response, g, jsonify
 from flask_frozen import Freezer, walk_directory
+from httplib import BadStatusLine
+from jinja2.exceptions import TemplateNotFound
 from string import uppercase
-from clint.textui import puts
 
 from .errors import MergedCellError
 from .oauth import get_drive_api
