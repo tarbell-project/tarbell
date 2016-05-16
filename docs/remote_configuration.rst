@@ -5,14 +5,16 @@ Remote configuration
 
     Improving remote use is significant goal for `Tarbell 1.2 <https://github.com/newsapps/flask-tarbell/milestones/1.2>`_.
 
-To run Tarbell on a remote server, you'll want to generate a credentials file locally and transfer
-your Tarbell configuration directory to the server.
+To run Tarbell on a remote server or to `tarbell publish` via cron on any
+server — local or remote — you'll want to generate a credentials file. For remote
+use, you'll then need to transfer your Tarbell configuration directory to the
+remote server.
 
 Assuming you have Tarbell properly configured, create a credentials file::
 
     tarbell credentials > ~/.tarbell/credentials.json
 
-Now copy the ``~/.tarbell`` directory to your server. You could use ``scp``, ``rsync``. A preferred 
+Now copy the ``~/.tarbell`` directory to your server. You could use ``scp``, ``rsync``. A preferred
 way of doing it is to use a private git repository::
 
     ssh myuser@myserver.tld
@@ -50,7 +52,3 @@ And a little bash script like this.
     workon myproject
     cd /home/myuser/projects/myproject
     tarbell publish production
-
-
-
-
