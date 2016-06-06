@@ -32,9 +32,9 @@ SPREADSHEET_CACHE_TTL = 4
 VALID_CELL_TYPES = range(1, 5)
 
 # pass template variables to files with these mimetypes
-TEMPLATE_TYPES = (
+TEMPLATE_TYPES = [
     "text/html",
-)
+]
 
 EXCLUDES = ['.git/*', '.git', '.gitignore', '.*', '*.pyc', '*.py', '_*']
 
