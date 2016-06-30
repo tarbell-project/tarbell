@@ -109,7 +109,8 @@ def read_file(path, absolute=False, encoding='utf-8'):
 
 
 @filters.app_template_global('render_file')
-def render_file(path, absolute=False):
+@contextfunction
+def render_file(context, path, absolute=False):
     """
     Like :py:func:`read_file`, except that the file is rendered as a Jinja template 
     using the current context. If `absolute` is True, use absolute path, otherwise 
