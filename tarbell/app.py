@@ -247,7 +247,7 @@ class TarbellSite:
 
         if base:
             base.base_dir = base_dir
-            self.app.register_blueprint(base.blueprint)
+            self.app.register_blueprint(base.blueprint, site=self)
 
         return base
 
@@ -318,7 +318,7 @@ class TarbellSite:
 
         # load the project blueprint, if it exists
         if hasattr(project, 'blueprint') and isinstance(project.blueprint, Blueprint):
-            self.app.register_blueprint(project.blueprint)
+            self.app.register_blueprint(project.blueprint, site=self)
 
         return project, base
 
