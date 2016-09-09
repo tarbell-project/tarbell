@@ -51,6 +51,9 @@ Tarbell makes use of familiar, flexible tools to take the magic (and frustration
         "wsgiref==0.1.2",
         "xlrd==0.9.3",
     ],
+
+    setup_requires=['pytest-runner'],
+    tests_require=['pytest'],
     entry_points={
         'console_scripts': [
             'tarbell = tarbell.cli:main',
