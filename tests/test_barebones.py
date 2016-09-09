@@ -20,7 +20,7 @@ def test_default_excludes():
     "Ensure a basic set of excluded files"
     site = TarbellSite(PATH)
 
-    assert site.project.EXCLUDES == EXCLUDES
+    assert set(site.project.EXCLUDES) == set(EXCLUDES)
 
 
 def test_generate_site(tmpdir):
