@@ -7,7 +7,9 @@ import py.path
 
 from tarbell.app import EXCLUDES, TarbellSite
 
-PATH = os.path.realpath('examples/barebones')
+TESTS_DIR = os.path.dirname(__file__)
+PATH = os.path.realpath(os.path.join(TESTS_DIR, 'examples/barebones'))
+
 
 def test_get_site():
     site = TarbellSite(PATH)
