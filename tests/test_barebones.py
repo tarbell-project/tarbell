@@ -4,7 +4,8 @@ Tests for the barebones example project
 """
 import os
 import py.path
-from tarbell.app import TarbellSite
+
+from tarbell.app import EXCLUDES, TarbellSite
 
 PATH = os.path.realpath('examples/barebones')
 
@@ -13,6 +14,13 @@ def test_get_site():
 
     assert os.path.realpath(site.path) == os.path.realpath(PATH)
     assert site.project.name == "barebones"
+
+
+def test_default_excludes():
+    "Ensure a basic set of excluded files"
+    site = TarbellSite(PATH)
+
+    assert site.project.EXCLUDES == EXCLUDES
 
 
 def test_generate_site(tmpdir):
@@ -25,3 +33,4 @@ def test_generate_site(tmpdir):
     files = set(f.basename for f in tmpdir.listdir())
 
     assert files == set(['data.json', 'index.html'])
+
