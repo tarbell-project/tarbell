@@ -277,19 +277,7 @@ class TarbellSite:
         except AttributeError:
             project.S3_BUCKETS = {}
 
-        try:
-            project.EXCLUDES
-        except AttributeError:
-            project.EXCLUDES = []
-
-        if base:
-            try:
-                base.EXCLUDES
-            except AttributeError:
-                base.EXCLUDES = []
-
-            # Merge excludes
-            project.EXCLUDES = EXCLUDES + base.EXCLUDES + list(set(project.EXCLUDES) - set(base.EXCLUDES))
+        project.EXCLUDES = list(set(EXCLUDES + getattr(project, 'EXCLUDES', []) + getattr(base, 'EXCLUDES', [])))
 
         # merge project template types with defaults
         project.TEMPLATE_TYPES = set(getattr(project, 'TEMPLATE_TYPES', [])) | set(TEMPLATE_TYPES)
