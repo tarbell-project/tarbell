@@ -6,16 +6,17 @@ Filters are added to a blueprint, which can be registered on the Tarbell app.
 """
 import codecs
 import datetime
-import dateutil
 import os
 from pprint import pformat
+
+import dateutil.tz
+import dateutil.parser
 from flask import Blueprint, g, render_template
 from jinja2 import contextfunction, Markup
 from jinja2.exceptions import TemplateNotFound
 from jinja2.loaders import BaseLoader
 from jinja2.utils import open_if_exists
 from jinja2._compat import string_types
-
 from markdown import markdown as md
 
 from .slughifi import slughifi
@@ -143,7 +144,7 @@ def markdown(value):
 
 
 @filters.app_template_filter('format_date')
-def format_date(value, format='%b. %d, %Y', convert_tz=None):
+def format_date(value, format='%b %d, %Y', convert_tz=None):
     """
     Format an Excel date or date string, returning a formatted date.
     To return a Python :py:class:`datetime.datetime` object, pass ``None``
