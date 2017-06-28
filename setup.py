@@ -4,10 +4,9 @@ import os
 import sys
 
 from setuptools import setup, find_packages
-
+from tarbell import __VERSION__ as VERSION
 
 APP_NAME = 'tarbell'
-VERSION = '1.0.7'
 
 settings = dict()
 
