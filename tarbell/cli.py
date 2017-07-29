@@ -743,7 +743,7 @@ def _list_templates(settings):
     List templates from settings.
     """
     for idx, option in enumerate(settings.config.get("project_templates"), start=1):
-        puts("  {0:5} {1:36}".format(
+        puts("  {0!s:5} {1!s:36}".format(
             colored.yellow("[{0}]".format(idx)),
             colored.cyan(option.get("name"))
         ))
@@ -797,7 +797,7 @@ def _create_spreadsheet(name, title, path, settings):
             .insert(body=body, media_body=media_body, convert=True).execute()
         for email in emails.split(","):
             _add_user_to_file(newfile['id'], service, user_email=email.strip())
-        puts("\n{0}! View the spreadsheet at {1}".format(
+        puts("\n{0!s}! View the spreadsheet at {1!s}".format(
             colored.green("Success"),
             colored.yellow("https://docs.google.com/spreadsheet/ccc?key={0}"
                            .format(newfile['id']))
@@ -861,12 +861,12 @@ def _copy_config_template(name, title, template, path, key, settings):
         if s3_buckets:
             puts("")
             for bucket, bucket_conf in s3_buckets.items():
-                puts("Configuring {0} bucket at {1}\n".format(
+                puts("Configuring {0!s} bucket at {1!s}\n".format(
                     colored.green(bucket),
                     colored.yellow("{0}/{1}".format(bucket_conf['uri'], name))
                 ))
 
-        puts("\n- Creating {0} project configuration file".format(
+        puts("\n- Creating {0!s} project configuration file".format(
             colored.cyan("tarbell_config.py")
         ))
         template_dir = os.path.dirname(pkg_resources.resource_filename("tarbell", "templates/tarbell_config.py.template"))
