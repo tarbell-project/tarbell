@@ -46,7 +46,7 @@ class S3Sync:
 
         try:
             self.connection = connection.get_bucket(bucket.root)
-        except S3ResponseError, e:
+        except S3ResponseError as e:
             show_error("S3 error! See below:\n")
             puts("{0}\n".format(str(e)))
             sys.exit()
