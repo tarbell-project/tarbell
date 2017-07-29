@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import re
-from types import UnicodeType
+from six import text_type
 import unicodedata
 
 
@@ -10,7 +10,7 @@ def slugify(value):
     and spaces to underscores.
     """
     value = unicodedata.normalize('NFKD', value).encode('ascii', 'ignore')
-    value = unicode(re.sub('[^\w\s-]', '', value).strip())
+    value = re.sub('[^\w\s-]', '', text_type(value)).strip()
     return re.sub('[-\s]+', '_', value)
 
 # default unicode character mapping ( you may not see some chars, leave as is )
@@ -50,8 +50,8 @@ def slughifi(value, overwrite_char_map={}):
     """
 
     # unicodification
-    if type(value) != UnicodeType:
-        value = unicode(value, 'utf-8', 'ignore')
+    if type(value) != text_type:
+        value = text_type(value, 'utf-8', 'ignore')
 
     # overwrite chararcter mapping
     char_map.update(overwrite_char_map)

@@ -18,7 +18,7 @@ from flask_frozen import Freezer, walk_directory
 from six.moves.http_client import BadStatusLine
 from six import reraise
 from jinja2.exceptions import TemplateNotFound
-from string import uppercase
+from string import ascii_uppercase
 
 from .errors import MergedCellError
 from .oauth import get_drive_api
@@ -114,7 +114,7 @@ def make_worksheet_data(headers, worksheet):
                     row_dict[headers[cell_idx]] = cell_value
                 except KeyError:
                     try:
-                        column = uppercase[cell_idx]
+                        column = ascii_uppercase[cell_idx]
                     except IndexError:
                         column = cell_idx
                         puts("There is no header for cell with value '{0}' in column '{1}' of '{2}'" .format(

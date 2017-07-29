@@ -15,6 +15,7 @@ import shutil
 from subprocess import call
 from datetime import datetime
 from clint.textui import colored, puts
+from six.moves import input as raw_input
 from tarbell import LONG_VERSION
 
 from .settings import Settings
