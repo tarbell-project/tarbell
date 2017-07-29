@@ -30,6 +30,7 @@ from apiclient import errors
 from apiclient.http import MediaFileUpload as _MediaFileUpload
 from clint import arguments
 from clint.textui import colored
+from six.moves import input as raw_input
 
 from tarbell import __VERSION__ as VERSION
 MAJOR_VERSION = '.'.join(VERSION.split('.')[:2])
