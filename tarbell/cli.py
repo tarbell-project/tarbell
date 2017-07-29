@@ -205,7 +205,7 @@ def tarbell_install(command, args):
             with ensure_project(command, args, path) as site:
                 site.call_hook("install", site, git)
 
-        except sh.ErrorReturnCode_128, e:
+        except sh.ErrorReturnCode_128 as e:
             if e.message.endswith('Device not configured\n'):
                 error = 'Git tried to prompt for a username or password.\n\nTarbell doesn\'t support interactive sessions. Please configure ssh key access to your Git repository. (See https://help.github.com/articles/generating-ssh-keys/)'
             else:
@@ -258,7 +258,7 @@ def tarbell_install_blueprint(command, args):
         except ImportError:
             error = 'No blueprint.py found'
 
-        except sh.ErrorReturnCode_128, e:
+        except sh.ErrorReturnCode_128 as e:
             if e.stdout.strip('\n').endswith('Device not configured'):
                 error = 'Git tried to prompt for a username or password.\n\nTarbell doesn\'t support interactive sessions. Please configure ssh key access to your Git repository. (See https://help.github.com/articles/generating-ssh-keys/)'
             else:
@@ -710,7 +710,7 @@ def _mkdir(path):
     """
     try:
         os.mkdir(path)
-    except OSError, e:
+    except OSError as e:
         if e.errno == 17:
             show_error("ABORTING: Directory {0} already exists.".format(path))
         else:
@@ -802,7 +802,7 @@ def _create_spreadsheet(name, title, path, settings):
                            .format(newfile['id']))
             ))
         return newfile['id']
-    except errors.HttpError, error:
+    except errors.HttpError as error:
         show_error('An error occurred creating spreadsheet: {0}'.format(error))
         return None
 
@@ -822,7 +822,7 @@ def _add_user_to_file(file_id, service, user_email,
         service.permissions()\
             .insert(fileId=file_id, body=new_permission)\
             .execute()
-    except errors.HttpError, error:
+    except errors.HttpError as error:
         show_error('An error adding users to spreadsheet: {0}'.format(error))
 
 

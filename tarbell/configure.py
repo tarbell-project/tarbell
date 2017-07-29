@@ -134,7 +134,7 @@ def _setup_google_spreadsheets(settings, path, prompt=True):
         _backup(dirname, "client_secrets.json")
         try:
             shutil.copy(secrets_path, os.path.join(dirname, 'client_secrets.json'))
-        except shutil.Error, e:
+        except shutil.Error as e:
             show_error(str(e))
 
     # Now, try and obtain the API for the first time

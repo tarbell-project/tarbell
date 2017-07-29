@@ -15,7 +15,8 @@ import xlrd
 from clint.textui import puts
 from flask import Flask, Blueprint, render_template, send_from_directory, Response, g, jsonify
 from flask_frozen import Freezer, walk_directory
-from httplib import BadStatusLine
+from six.moves.http_client import BadStatusLine
+from six import reraise
 from jinja2.exceptions import TemplateNotFound
 from string import uppercase
 
@@ -423,7 +424,7 @@ class TarbellSite:
                 return Response(rendered, mimetype="text/html")
             except TemplateNotFound:
                 # Otherwise raise old error
-                raise ex_type, ex, tb
+                reraise(ex_type, ex, tb)
 
         # Last ditch effort -- see if path has "index.html" underneath it
         if not path.endswith("index.html"):
