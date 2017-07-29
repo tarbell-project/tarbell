@@ -51,5 +51,5 @@ class Settings:
         Save settings.
         """
         with open(self.path, "w") as f:
-            self.config["project_templates"] = filter(lambda template: template.get("url"), self.config["project_templates"])
+            self.config["project_templates"] = list(filter(lambda template: template.get("url"), self.config["project_templates"]))
             yaml.dump(self.config, f, default_flow_style=False)
