@@ -10,7 +10,7 @@ def slugify(value):
     and spaces to underscores.
     """
     value = unicodedata.normalize('NFKD', value).encode('ascii', 'ignore')
-    value = re.sub('[^\w\s-]', '', text_type(value)).strip()
+    value = re.sub('[^\w\s-]', '', value.decode('ascii')).strip()
     return re.sub('[-\s]+', '_', value)
 
 # default unicode character mapping ( you may not see some chars, leave as is )
@@ -51,7 +51,7 @@ def slughifi(value, overwrite_char_map={}):
 
     # unicodification
     if type(value) != text_type:
-        value = text_type(value, 'utf-8', 'ignore')
+        value = value.decode('utf-8', 'ignore')
 
     # overwrite chararcter mapping
     char_map.update(overwrite_char_map)
@@ -61,4 +61,4 @@ def slughifi(value, overwrite_char_map={}):
 
     value = slugify(value)
 
-    return value.encode('ascii', 'ignore')
+    return value.encode('ascii', 'ignore').decode('ascii')
