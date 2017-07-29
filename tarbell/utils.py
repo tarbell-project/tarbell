@@ -73,4 +73,4 @@ def show_error(msg):
     Displays error message.
     """
     sys.stdout.flush()
-    sys.stderr.write("\n{0}: {1}".format(colored.red("Error"), msg + '\n'))
+    sys.stderr.write("\n{0!s}: {1}".format(colored.red("Error"), msg + '\n'))
