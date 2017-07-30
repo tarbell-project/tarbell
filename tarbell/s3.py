@@ -71,7 +71,7 @@ class S3Sync:
         options = {'Content-Type': mimetype[0]}
 
         if mimetype[0] is not None and mimetype[0].startswith('text/'):
-            upload = open(absolute_path)
+            upload = open(absolute_path, 'rb')
             options['Content-Encoding'] = 'gzip'
             key_parts = keyname.split('/')
             filename = key_parts.pop()
