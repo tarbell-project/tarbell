@@ -6,7 +6,6 @@ build the site and make sure it matches the pre-built version.
 """
 import filecmp
 import os
-from glob import iglob
 
 import pytest
 
