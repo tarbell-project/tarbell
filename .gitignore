@@ -76,6 +76,7 @@ target/
 # celery beat schedule file
 celerybeat-schedule
 
+=======
 # SageMath parsed files
 *.sage.py
 
@@ -92,3 +93,6 @@ ENV/
 
 # Rope project settings
 .ropeproject
+
+# OSX
+.DS_Store

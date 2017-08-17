@@ -247,6 +247,8 @@ class TarbellSite:
 
         if base:
             base.base_dir = base_dir
+
+        if hasattr(base, 'blueprint') and isinstance(base.blueprint, Blueprint):
             self.app.register_blueprint(base.blueprint, site=self)
 
         return base
