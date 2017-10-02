@@ -30,6 +30,7 @@ from apiclient import errors
 from apiclient.http import MediaFileUpload as _MediaFileUpload
 from clint import arguments
 from clint.textui import colored
+from six.moves import input as raw_input
 
 from tarbell import __VERSION__ as VERSION
 MAJOR_VERSION = '.'.join(VERSION.split('.')[:2])
@@ -205,7 +206,7 @@ def tarbell_install(command, args):
             with ensure_project(command, args, path) as site:
                 site.call_hook("install", site, git)
 
-        except sh.ErrorReturnCode_128, e:
+        except sh.ErrorReturnCode_128 as e:
             if e.message.endswith('Device not configured\n'):
                 error = 'Git tried to prompt for a username or password.\n\nTarbell doesn\'t support interactive sessions. Please configure ssh key access to your Git repository. (See https://help.github.com/articles/generating-ssh-keys/)'
             else:
@@ -258,7 +259,7 @@ def tarbell_install_blueprint(command, args):
         except ImportError:
             error = 'No blueprint.py found'
 
-        except sh.ErrorReturnCode_128, e:
+        except sh.ErrorReturnCode_128 as e:
             if e.stdout.strip('\n').endswith('Device not configured'):
                 error = 'Git tried to prompt for a username or password.\n\nTarbell doesn\'t support interactive sessions. Please configure ssh key access to your Git repository. (See https://help.github.com/articles/generating-ssh-keys/)'
             else:
@@ -710,7 +711,7 @@ def _mkdir(path):
     """
     try:
         os.mkdir(path)
-    except OSError, e:
+    except OSError as e:
         if e.errno == 17:
             show_error("ABORTING: Directory {0} already exists.".format(path))
         else:
@@ -742,7 +743,7 @@ def _list_templates(settings):
     List templates from settings.
     """
     for idx, option in enumerate(settings.config.get("project_templates"), start=1):
-        puts("  {0:5} {1:36}".format(
+        puts("  {0!s:5} {1!s:36}".format(
             colored.yellow("[{0}]".format(idx)),
             colored.cyan(option.get("name"))
         ))
@@ -796,13 +797,13 @@ def _create_spreadsheet(name, title, path, settings):
             .insert(body=body, media_body=media_body, convert=True).execute()
         for email in emails.split(","):
             _add_user_to_file(newfile['id'], service, user_email=email.strip())
-        puts("\n{0}! View the spreadsheet at {1}".format(
+        puts("\n{0!s}! View the spreadsheet at {1!s}".format(
             colored.green("Success"),
             colored.yellow("https://docs.google.com/spreadsheet/ccc?key={0}"
                            .format(newfile['id']))
             ))
         return newfile['id']
-    except errors.HttpError, error:
+    except errors.HttpError as error:
         show_error('An error occurred creating spreadsheet: {0}'.format(error))
         return None
 
@@ -822,7 +823,7 @@ def _add_user_to_file(file_id, service, user_email,
         service.permissions()\
             .insert(fileId=file_id, body=new_permission)\
             .execute()
-    except errors.HttpError, error:
+    except errors.HttpError as error:
         show_error('An error adding users to spreadsheet: {0}'.format(error))
 
 
@@ -860,12 +861,12 @@ def _copy_config_template(name, title, template, path, key, settings):
         if s3_buckets:
             puts("")
             for bucket, bucket_conf in s3_buckets.items():
-                puts("Configuring {0} bucket at {1}\n".format(
+                puts("Configuring {0!s} bucket at {1!s}\n".format(
                     colored.green(bucket),
                     colored.yellow("{0}/{1}".format(bucket_conf['uri'], name))
                 ))
 
-        puts("\n- Creating {0} project configuration file".format(
+        puts("\n- Creating {0!s} project configuration file".format(
             colored.cyan("tarbell_config.py")
         ))
         template_dir = os.path.dirname(pkg_resources.resource_filename("tarbell", "templates/tarbell_config.py.template"))
