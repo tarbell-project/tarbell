@@ -11,9 +11,9 @@ Install Tarbell with `pip install tarbell`
 
 .. note::
 
-  Tarbell requires Python 2.7 and Git (v1.5.2+). Tarbell does not currently support Python 3.
+  Tarbell requires Python 2.7 or 3.4+ and Git (v1.5.2+).
 
-  Tarbell does not work on Windows machines.
+  Tarbell does not (yet) work on Windows machines.
 
   To install on Ubuntu (tested with Ubuntu 14.04 LTS), install these dependencies first:
 
