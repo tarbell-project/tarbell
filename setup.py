@@ -47,7 +47,7 @@ Tarbell makes use of familiar, flexible tools to take the magic (and frustration
         "python-dateutil>=2.2",
         "requests==2.3.0",
         "sh==1.09",
-        "six==1.10.0",
+        "six>=1.10.0",
         "xlrd==0.9.3",
     ],
 
