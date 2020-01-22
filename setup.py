@@ -45,7 +45,7 @@ Tarbell makes use of familiar, flexible tools to take the magic (and frustration
         "keyring==5.3",
         "oauth2client==1.5.2",
         "python-dateutil>=2.2",
-        "requests==2.3.0",
+        "requests==2.6.0",
         "sh==1.09",
         "six>=1.10.0",
         "xlrd==0.9.3",
