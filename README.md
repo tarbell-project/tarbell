@@ -1,7 +1,5 @@
 # Tarbell is a very simple content management system
 
-Visit [tarbell.io](http://tarbell.io) for more information.
-
 To install Tarbell run:
 
     pip install tarbell
