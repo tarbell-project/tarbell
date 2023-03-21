@@ -32,7 +32,7 @@ Tarbell makes use of familiar, flexible tools to take the magic (and frustration
     packages=find_packages(),
     include_package_data=True,
     install_requires=[
-        "Flask==0.10.1",
+        "Flask==0.12.3",
         "Frozen-Flask==0.11",
         "Jinja2==2.7.3",
         "Markdown==2.4.1",
